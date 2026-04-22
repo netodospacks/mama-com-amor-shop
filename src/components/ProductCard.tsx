@@ -20,7 +20,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div 
-      className="bg-white rounded-2xl shadow-sm border border-store-light overflow-hidden flex flex-col h-full cursor-pointer hover:shadow-md transition-all active:scale-95"
+      className={`bg-white rounded-xl overflow-hidden flex flex-col h-full cursor-pointer transition-all active:scale-95 ${
+        product.isBestSeller 
+          ? 'shadow-elegant border-2 border-store-pink relative z-10 scale-[1.03]' 
+          : 'shadow-sm border border-store-light hover:shadow-md'
+      }`}
       onClick={() => navigate(`/product/${product.id}`)}
     >
       <div className="relative aspect-square overflow-hidden bg-gray-50">
@@ -30,24 +34,34 @@ export function ProductCard({ product }: ProductCardProps) {
           className="w-full h-full object-cover"
         />
         {product.isBestSeller && (
-          <div className="absolute top-2 left-2 bg-store-dark text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
-            ⭐ Mais Vendido
+          <div className="absolute top-1 left-1 right-1 flex justify-center">
+            <span className="bg-store-dark text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm text-center">
+              🔥 Mais vendido
+            </span>
           </div>
         )}
       </div>
-      <div className="p-3 flex flex-col flex-grow">
-        <h3 className="text-sm font-semibold text-gray-800 leading-tight mb-1 line-clamp-2">
+      <div className="p-2 flex flex-col flex-grow">
+        <h3 className="text-[11px] font-semibold text-gray-800 leading-tight mb-1 line-clamp-2">
           {product.name}
         </h3>
-        <p className="text-store-dark font-bold text-sm mb-3 mt-auto">
+        
+        {product.isBestSeller && (
+          <p className="text-[9px] text-store-pink font-bold mb-1 leading-tight">
+            👉 Oferta que mais sai hoje
+          </p>
+        )}
+        
+        <p className="text-store-dark font-bold text-xs mb-2 mt-auto">
           R$ {product.price.toFixed(2).replace('.', ',')}
         </p>
         <Button 
           onClick={handleAdd}
-          className="w-full bg-store-pink hover:bg-store-dark text-white rounded-xl h-8 text-xs font-medium"
+          className="w-full bg-store-pink hover:bg-store-dark text-white rounded-lg h-7 text-[10px] font-medium px-0"
         >
-          <ShoppingCart className="w-3 h-3 mr-1" />
-          Adicionar
+          <ShoppingCart className="w-3 h-3 sm:mr-1" />
+          <span className="hidden sm:inline">Adicionar</span>
+          <span className="sm:hidden ml-1">Add</span>
         </Button>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, MessageCircle } from "lucide-react";
@@ -8,22 +8,46 @@ import { LocationPicker } from "@/components/LocationPicker";
 import { generateWhatsAppLink } from "@/lib/whatsapp";
 import { toast } from "sonner";
 
+const BAIRROS_POR_CIDADE: Record<string, string[]> = {
+  "Santa Rita": [
+    "Tibiri", "Marcos Moura", "Várzea Nova", "Alto das Populares", 
+    "Centro", "Jardim Planalto", "Popular", "Livramento"
+  ],
+  "Bayeux": [
+    "Centro", "Imaculada", "SESI", "Sesi Industrial", 
+    "Alto da Boa Vista", "Mário Andreazza", "São Bento", "Jardim Aeroporto"
+  ],
+  "João Pessoa": [
+    "Mangabeira", "Valentina", "Bancários", "Geisel", "Cristo", 
+    "Torre", "Tambaú", "Manaíra", "Bessa", "Jaguaribe", 
+    "Cruz das Armas", "Altiplano"
+  ]
+};
+
 export default function Checkout() {
   const { items, totalPrice, clearCart } = useCart();
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
     nome: "",
-    endereco: "",
     cidade: "Santa Rita",
-    pagamento: "PIX",
+    bairro: "Tibiri",
     tipoEntrega: "Retirada",
     linkMaps: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === "cidade") {
+      setFormData(prev => ({
+        ...prev,
+        cidade: value,
+        bairro: BAIRROS_POR_CIDADE[value][0] // Auto-select first bairro
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleLocationChange = (link: string) => {
@@ -33,23 +57,22 @@ export default function Checkout() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.nome || !formData.endereco) {
-      toast.error("Por favor, preencha seu nome e endereço.");
+    if (!formData.nome) {
+      toast.error("Por favor, preencha seu nome.");
       return;
     }
 
     if (formData.tipoEntrega === "Delivery" && !formData.linkMaps) {
-      toast.error("Por favor, informe sua localização para a entrega.");
+      toast.error("Por favor, informe sua localização exata para a entrega.");
       return;
     }
 
     const whatsappLink = generateWhatsAppLink(formData, items, totalPrice);
     
-    // Clear cart and redirect
     window.open(whatsappLink, "_blank");
     clearCart();
     navigate("/");
-    toast.success("Pedido enviado! 🎉");
+    toast.success("Pedido gerado! Conclua o envio no WhatsApp. 🎉");
   };
 
   if (items.length === 0) {
@@ -72,8 +95,8 @@ export default function Checkout() {
       <main className="container max-w-lg mx-auto pt-20 px-4">
         
         <div className="bg-store-pink/10 border border-store-pink/20 rounded-2xl p-4 mb-6 text-center">
-          <p className="font-bold text-store-dark text-sm">🎁 Seu presente está quase pronto!</p>
-          <p className="text-xs text-gray-600 mt-1">Falta só um passo pra surpreender alguém especial ✨</p>
+          <p className="font-bold text-store-dark text-[15px]">💖 Rapidinho! Só precisamos dessas infos pra garantir sua entrega certinha</p>
+          <p className="text-xs text-gray-600 mt-2">Dica: Me manda o número da casa e forma de pagamento lá no WhatsApp 😊</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -93,18 +116,6 @@ export default function Checkout() {
               />
             </div>
             
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Endereço completo</label>
-              <Input 
-                name="endereco"
-                value={formData.endereco}
-                onChange={handleChange}
-                placeholder="Rua, número, bairro..."
-                className="bg-gray-50 rounded-xl"
-                required
-              />
-            </div>
-
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">Cidade</label>
@@ -114,23 +125,23 @@ export default function Checkout() {
                   onChange={handleChange}
                   className="w-full h-10 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-store-pink/50"
                 >
-                  <option value="Santa Rita">Santa Rita</option>
-                  <option value="João Pessoa">João Pessoa</option>
-                  <option value="Outros">Outros</option>
+                  {Object.keys(BAIRROS_POR_CIDADE).map(cidade => (
+                    <option key={cidade} value={cidade}>{cidade}</option>
+                  ))}
                 </select>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Pagamento</label>
+                <label className="text-sm font-medium text-gray-700">Bairro</label>
                 <select 
-                  name="pagamento"
-                  value={formData.pagamento}
+                  name="bairro"
+                  value={formData.bairro}
                   onChange={handleChange}
                   className="w-full h-10 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-store-pink/50"
                 >
-                  <option value="PIX">PIX</option>
-                  <option value="Cartão de Crédito">Cartão de Crédito</option>
-                  <option value="Dinheiro">Dinheiro</option>
+                  {BAIRROS_POR_CIDADE[formData.cidade]?.map(bairro => (
+                    <option key={bairro} value={bairro}>{bairro}</option>
+                  ))}
                 </select>
               </div>
             </div>

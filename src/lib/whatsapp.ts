@@ -1,10 +1,9 @@
 import { CartItem } from "@/context/CartContext";
 
-interface CheckoutData {
+export interface CheckoutData {
   nome: string;
-  endereco: string;
   cidade: string;
-  pagamento: string;
+  bairro: string;
   tipoEntrega: string;
   linkMaps?: string;
 }
@@ -17,15 +16,15 @@ export function generateWhatsAppLink(
 ) {
   let message = `Pedido Virtual Store 🛍️\n\n`;
   message += `*Nome:* ${data.nome}\n`;
-  message += `*Endereço:* ${data.endereco}\n`;
   message += `*Cidade:* ${data.cidade}\n`;
-  if (data.linkMaps) {
+  message += `*Bairro:* ${data.bairro}\n`;
+  message += `*Entrega:* ${data.tipoEntrega}\n`;
+  
+  if (data.linkMaps && data.tipoEntrega === "Delivery") {
     message += `*Localização:* ${data.linkMaps}\n`;
   }
-  message += `\n*Pagamento:* ${data.pagamento}\n`;
-  message += `*Entrega:* ${data.tipoEntrega}\n\n`;
-
-  message += `*Itens do pedido:*\n`;
+  
+  message += `\n*Itens do pedido:*\n`;
   cartItems.forEach((item) => {
     message += `- ${item.quantity}x ${item.product.name} (R$ ${item.product.price.toFixed(2).replace('.', ',')})\n`;
   });
