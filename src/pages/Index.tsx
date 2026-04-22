@@ -10,14 +10,18 @@ const Index = () => {
       
       <main className="container max-w-lg mx-auto px-4 py-6 space-y-8">
         
-        {/* Top delicate phrase */}
-        <div className="text-center mt-2 mb-6">
-          <p className="font-cursive text-3xl sm:text-4xl text-store-pink">
-            💖 feito pra emocionar quem você ama
+        {/* Hero Section */}
+        <section className="bg-gradient-to-b from-rose-50/50 to-transparent py-8 sm:py-12 rounded-3xl mb-8 flex flex-col items-center text-center px-4 border border-rose-50/80">
+          <p className="text-store-pink font-semibold tracking-[0.2em] text-[10px] sm:text-xs mb-3 uppercase">
+            Especial Dia das Mães
           </p>
-        </div>
-
-        {/* Kits Section */}
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 font-display leading-[1.1] tracking-tight max-w-[280px] sm:max-w-md">
+            O PRESENTE PERFEITO PARA SURPREENDER SUA MÃE
+          </h2>
+          <p className="mt-4 text-gray-500 font-medium text-xs sm:text-sm max-w-[250px] sm:max-w-xs leading-relaxed">
+            PRODUTOS 100% PERSONALIZADOS DO SEU JEITINHO
+          </p>
+        </section>
         <section>
           <div className="flex flex-col mb-4">
             <h2 className="text-xl font-bold text-store-dark font-display flex items-center gap-2 mb-1">
