@@ -23,11 +23,6 @@ const Index = () => {
         </section>
         {/* Main Catalog Section */}
         <section>
-          <div className="flex flex-col mb-4">
-            <p className="text-sm font-medium text-store-pink bg-store-pink/10 px-3 py-1.5 rounded-lg self-start">
-              🎁 Os favoritos de quem compra pra presentear 💖
-            </p>
-          </div>
           
           <div className="grid grid-cols-3 gap-2 sm:gap-4">
             {[...kits, ...products].map((item) => (
