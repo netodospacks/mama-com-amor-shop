@@ -1,4 +1,4 @@
-import { ShoppingCart, CreditCard, Banknote, Wallet, Smartphone } from "lucide-react";
+import { ShoppingCart, CreditCard, Banknote, Wallet, Smartphone, Instagram } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Link } from "react-router-dom";
 
@@ -26,17 +26,28 @@ export function Header() {
             </p>
           </div>
           
-          <Link 
-            to="/cart" 
-            className="relative p-2.5 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors shrink-0"
-          >
-            <ShoppingCart className="w-5 h-5 text-gray-800" />
-            {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-store-pink text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-sm">
-                {totalItems}
-              </span>
-            )}
-          </Link>
+          <div className="flex items-center gap-2">
+            <a 
+              href="https://instagram.com/virtualstore_3" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="p-2.5 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors shrink-0"
+            >
+              <Instagram className="w-5 h-5 text-gray-800" />
+            </a>
+
+            <Link 
+              to="/cart" 
+              className="relative p-2.5 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors shrink-0"
+            >
+              <ShoppingCart className="w-5 h-5 text-gray-800" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-store-pink text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-sm">
+                  {totalItems}
+                </span>
+              )}
+            </Link>
+          </div>
         </div>
       </header>
 
