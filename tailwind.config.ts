@@ -23,9 +23,6 @@ export default {
           foreground: "hsl(var(--gold-foreground))",
           soft: "hsl(var(--gold-soft))",
         },
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
@@ -56,6 +53,14 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        store: {
+          pink: "#ff8da1",
+          light: "#fff0f3",
+          dark: "#d15b70"
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
