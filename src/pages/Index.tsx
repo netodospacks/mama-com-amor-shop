@@ -1,6 +1,7 @@
 import { products, kits } from "@/data/products";
 import { ProductCard } from "@/components/ProductCard";
 import { Header } from "@/components/Header";
+import { InstagramSection } from "@/components/InstagramSection";
 
 const Index = () => {
   return (
@@ -9,14 +10,11 @@ const Index = () => {
       
       <main className="container max-w-lg mx-auto px-4 py-6 space-y-8">
         
-        {/* Banner/Hero area optional */}
-        <div className="bg-gradient-to-r from-store-pink to-store-dark rounded-2xl p-6 text-white shadow-soft relative overflow-hidden">
-          <div className="relative z-10">
-            <h2 className="text-2xl font-display font-bold mb-2">Presentes com Amor</h2>
-            <p className="text-sm opacity-90">Personalize do seu jeito e surpreenda quem você ama! ✨</p>
-          </div>
-          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
-          <div className="absolute right-8 -top-8 w-16 h-16 bg-white opacity-10 rounded-full blur-md"></div>
+        {/* Top delicate phrase */}
+        <div className="text-center mt-2 mb-6">
+          <p className="font-cursive text-3xl sm:text-4xl text-store-pink">
+            💖 feito pra emocionar quem você ama
+          </p>
         </div>
 
         {/* Kits Section */}
@@ -36,6 +34,9 @@ const Index = () => {
             ))}
           </div>
         </section>
+
+        {/* Instagram CTA Section */}
+        <InstagramSection />
 
         {/* Products Section */}
         <section>
