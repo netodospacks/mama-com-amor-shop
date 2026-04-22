@@ -21,34 +21,17 @@ const Index = () => {
             PRODUTOS 100% PERSONALIZADOS DO SEU JEITINHO
           </p>
         </section>
+        {/* Main Catalog Section */}
         <section>
           <div className="flex flex-col mb-4">
-            <h2 className="text-xl font-bold text-store-dark font-display flex items-center gap-2 mb-1">
-              🎁 Kits Especiais
-            </h2>
             <p className="text-sm font-medium text-store-pink bg-store-pink/10 px-3 py-1.5 rounded-lg self-start">
               🎁 Os favoritos de quem compra pra presentear 💖
             </p>
           </div>
           
           <div className="grid grid-cols-3 gap-2 sm:gap-4">
-            {kits.map((kit) => (
-              <ProductCard key={kit.id} product={kit} />
-            ))}
-          </div>
-        </section>
-
-        {/* Products Section */}
-        <section>
-          <div className="flex items-center justify-between mb-4 mt-8">
-            <h2 className="text-xl font-bold text-store-dark font-display flex items-center gap-2">
-              🛍️ Catálogo
-            </h2>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-2 sm:gap-4">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {[...kits, ...products].map((item) => (
+              <ProductCard key={item.id} product={item} />
             ))}
           </div>
         </section>
