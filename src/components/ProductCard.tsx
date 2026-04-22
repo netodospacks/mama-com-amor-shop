@@ -60,8 +60,8 @@ export function ProductCard({ product }: ProductCardProps) {
           className="w-full bg-store-pink hover:bg-store-dark text-white rounded-lg h-7 text-[10px] font-medium px-0"
         >
           <ShoppingCart className="w-3 h-3 sm:mr-1" />
-          <span className="hidden sm:inline">Adicionar</span>
-          <span className="sm:hidden ml-1">Add</span>
+          <span className="hidden sm:inline">Personalizar</span>
+          <span className="sm:hidden ml-1">Personalizar</span>
         </Button>
       </div>
     </div>

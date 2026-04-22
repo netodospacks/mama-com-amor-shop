@@ -57,20 +57,22 @@ export default function Product() {
               {product.description}
             </p>
 
-            <div className="bg-store-light rounded-2xl p-4 mb-6">
-              <h3 className="font-bold text-sm text-store-dark flex items-center gap-2 mb-3">
-                <Info className="w-4 h-4" />
-                O que acompanha:
-              </h3>
-              <ul className="space-y-2">
-                {product.includes.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-                    <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {product.includes && product.includes.length > 0 && (
+              <div className="bg-store-light rounded-2xl p-4 mb-6">
+                <h3 className="font-bold text-sm text-store-dark flex items-center gap-2 mb-3">
+                  <Info className="w-4 h-4" />
+                  O que acompanha:
+                </h3>
+                <ul className="space-y-2">
+                  {product.includes.map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                      <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl mb-4">
               <p className="text-xs text-yellow-800">
@@ -92,7 +94,7 @@ export default function Product() {
             className="flex-1 bg-store-pink hover:bg-store-dark text-white h-14 rounded-xl font-bold shadow-soft text-lg"
           >
             <ShoppingCart className="w-5 h-5 mr-2" />
-            Adicionar ao carrinho
+            Personalizar pelo WhatsApp
           </Button>
         </div>
       </div>
