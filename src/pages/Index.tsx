@@ -1,7 +1,6 @@
 import { products, kits } from "@/data/products";
 import { ProductCard } from "@/components/ProductCard";
 import { Header } from "@/components/Header";
-import { InstagramSection } from "@/components/InstagramSection";
 
 const Index = () => {
   return (
@@ -38,9 +37,6 @@ const Index = () => {
             ))}
           </div>
         </section>
-
-        {/* Instagram CTA Section */}
-        <InstagramSection />
 
         {/* Products Section */}
         <section>
