@@ -1,7 +1,9 @@
-import { motion } from "framer-motion";
-import { Instagram, MoreHorizontal } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Instagram, MoreHorizontal, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { CATEGORIES, Product } from "@/data/catalog";
+import heroBg from "@/assets/hero-bg.jpg";
 
 const MiniCard = ({ product }: { product: Product }) => {
   return (
@@ -48,12 +50,25 @@ const MiniCard = ({ product }: { product: Product }) => {
   );
 };
 
+const MENU_ITEMS = [
+  { label: "Dia dos Namorados", id: "dia-dos-namorados" },
+  { label: "Produtos", id: "produtos" },
+  { label: "Quadros A4", id: "quadros-a4" },
+  { label: "Quadros 10x15", id: "quadros-10x15" },
+  { label: "Quadros e Placas", id: "quadros" },
+  { label: "Kits", id: "kits" },
+  { label: "Combos Promocionais", id: "combos" },
+];
+
 export default function Index() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const scrollToSection = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    setMenuOpen(false);
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
   };
 
   return (
@@ -61,16 +76,78 @@ export default function Index() {
       
       {/* Header Premium */}
       <header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between bg-white/70 dark:bg-black/70 backdrop-blur-xl border-b border-black/5 dark:border-white/5 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.02)]">
-        <button className="p-1.5 text-neutral-800 dark:text-neutral-200 hover:opacity-60 transition-opacity">
+        <button
+          onClick={() => setMenuOpen(true)}
+          className="p-1.5 text-neutral-800 dark:text-neutral-200 hover:opacity-60 transition-opacity"
+        >
           <MoreHorizontal size={22} strokeWidth={1.5} />
         </button>
         <span className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] text-neutral-900 dark:text-white uppercase ml-3">
           Virtual Store
         </span>
-        <a href="#" className="p-1.5 text-neutral-800 dark:text-neutral-200 hover:opacity-60 transition-opacity">
+        <a
+          href="https://instagram.com/larissagouveiaaa"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-1.5 text-neutral-800 dark:text-neutral-200 hover:opacity-60 transition-opacity"
+        >
           <Instagram size={20} strokeWidth={1.5} />
         </a>
       </header>
+
+      {/* Menu Lateral */}
+      <AnimatePresence>
+        {menuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMenuOpen(false)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200]"
+            />
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 220 }}
+              className="fixed top-0 left-0 h-full w-72 bg-white dark:bg-[#0A0A0A] z-[210] shadow-2xl flex flex-col"
+            >
+              <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100 dark:border-neutral-800">
+                <span className="text-xs font-semibold tracking-[0.25em] uppercase">Menu</span>
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <nav className="flex-1 overflow-y-auto py-4">
+                {MENU_ITEMS.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollToSection(item.id)}
+                    className="w-full text-left px-6 py-4 text-sm font-medium tracking-widest uppercase text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:text-black dark:hover:text-white transition-all border-b border-neutral-50 dark:border-neutral-900"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
+              <div className="px-6 py-5 border-t border-neutral-100 dark:border-neutral-800">
+                <a
+                  href="https://instagram.com/larissagouveiaaa"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 text-sm text-neutral-500 hover:text-black dark:hover:text-white transition-colors"
+                >
+                  <Instagram size={18} strokeWidth={1.5} />
+                  <span className="tracking-wider">@larissagouveiaaa</span>
+                </a>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Hero Section Cinematográfica */}
       <section className="relative w-full h-[70vh] sm:h-[80vh] min-h-[500px] flex flex-col items-center justify-center pt-16 overflow-hidden bg-black">
@@ -82,11 +159,11 @@ export default function Index() {
           className="absolute inset-0"
         >
           <img 
-            src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=2000&auto=format&fit=crop" 
+            src={heroBg} 
             alt="Hero Background" 
-            className="w-full h-full object-cover opacity-80"
+            className="w-full h-full object-cover opacity-90"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/20" />
         </motion.div>
 
         <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 w-full h-full pb-10">

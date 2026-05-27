@@ -59,7 +59,7 @@ export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: (
     message += "_Taxa de entrega a combinar._";
 
     const encodedMessage = encodeURIComponent(message);
-    const whatsappNumber = "5511999999999"; // FÁCIL DE ALTERAR FUTURAMENTE
+    const whatsappNumber = "5583993032780"; // WhatsApp da loja
     
     window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, "_blank");
     
