@@ -2,7 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Mães &amp; Flores — Catálogo Dia das Mães</title>
     <meta name="description" content="Catálogo especial de Dia das Mães: perfumes, kits presente e cuidados. Pedido rápido pelo WhatsApp.">
     
@@ -20,5 +20,55 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Bloquear clique direito
+      document.addEventListener('contextmenu', event => event.preventDefault());
+      
+      // Bloquear atalhos de inspeção
+      document.addEventListener('keydown', function(e) {
+        if (
+          e.key === 'F12' || 
+          (e.ctrlKey && e.shiftKey && e.key === 'I') || 
+          (e.ctrlKey && e.shiftKey && e.key === 'C') || 
+          (e.ctrlKey && e.key === 'U') ||
+          (e.ctrlKey && e.key === 'u')
+        ) {
+          e.preventDefault();
+        }
+      });
+
+      // Forçar bloqueio de Pinch Zoom no iOS / Safari
+      document.addEventListener('touchstart', function(event) {
+        if (event.touches && event.touches.length > 1) {
+          event.preventDefault();
+        }
+      }, { passive: false });
+
+      document.addEventListener('touchmove', function(event) {
+        if (event.touches && event.touches.length > 1) {
+          event.preventDefault();
+        }
+      }, { passive: false });
+
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', function(event) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+          event.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, { passive: false });
+
+      // Bloquear Gesture Zoom (Safari / MacOS)
+      document.addEventListener('gesturestart', function(event) {
+        event.preventDefault();
+      });
+      document.addEventListener('gesturechange', function(event) {
+        event.preventDefault();
+      });
+      document.addEventListener('gestureend', function(event) {
+        event.preventDefault();
+      });
+    </script>
   </body>
 </html>

@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "./context/CartContext";
+import { CartDrawer, FloatingCart } from "@/components/CartComponents";
 
 import Index from "./pages/Index.tsx";
 import Product from "./pages/Product.tsx";
@@ -19,6 +20,8 @@ const App = () => (
       <CartProvider>
         <Toaster />
         <Sonner />
+        <CartDrawer />
+        <FloatingCart />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
