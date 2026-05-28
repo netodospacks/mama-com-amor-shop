@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { X, MapPin } from "lucide-react";
+import { CATEGORIES } from "@/data/catalog";
 
 const CIDADES = ["Santa Rita", "Bayeux", "João Pessoa"] as const;
 type Cidade = typeof CIDADES[number];
@@ -17,6 +18,26 @@ const BAIRROS: Record<Cidade, string[]> = {
     "Manaíra", "Bessa", "Bancários", "Mangabeira", "Tambaú", "Cabo Branco", "Altiplano", "Castelo Branco", "Torre", "Cristo Redentor", "Geisel"
   ]
 };
+
+const CATEGORY_LABELS: Record<string, string> = {
+  DIA_DOS_NAMORADOS: "Dia dos Namorados",
+  PRODUTOS: "Produtos",
+  QUADROS_A4: "Quadros A4",
+  QUADROS_10x15: "Quadros 10x15",
+  QUADROS_PLACAS: "Quadros e Placas",
+  KITS: "Kits",
+  COMBOS: "Combos Promocionais",
+  MAES: "Dia das Mães",
+};
+
+function getCategoryForProduct(productId: string): string {
+  for (const [key, products] of Object.entries(CATEGORIES)) {
+    if (products.some((p) => p.id === productId)) {
+      return CATEGORY_LABELS[key] ?? key;
+    }
+  }
+  return "Outros";
+}
 
 export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { items, totalPriceFormatted, clearCart } = useCart();
@@ -43,8 +64,11 @@ export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: (
     
     message += "*PRODUTOS:*\n\n";
     items.forEach(item => {
+      const categoria = getCategoryForProduct(item.product.id);
       message += `*${item.product.name}*\n`;
-      message += `Quantidade: ${item.quantity}\n\n`;
+      message += `Categoria: ${categoria}\n`;
+      message += `Quantidade: ${item.quantity}\n`;
+      message += `Preço: ${item.product.price}\n\n`;
     });
     
     message += `*Total: ${totalPriceFormatted}*\n\n`;

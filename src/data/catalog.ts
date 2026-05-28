@@ -77,7 +77,50 @@ export const CATEGORIES = {
     { id: "dn-13", name: "KIT 13", price: "R$ 109,90", image: "/namorados/kit13_valor109,90.jpeg", isNew: true, ...defaultDescription },
     { id: "dn-14", name: "KIT 14", price: "R$ 134,90", image: "/namorados/kit14_valor134,90.jpeg", isNew: true, ...defaultDescription },
     { id: "dn-15", name: "KIT 15", price: "R$ 39,90", image: "/namorados/kit15_39,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-16", name: "KIT 16", price: "R$ 79,90", image: "/namorados/kit16_valor79,90.jpeg", isNew: true, ...defaultDescription }
+    { id: "dn-16", name: "KIT 16", price: "R$ 79,90", image: "/namorados/kit16_valor79,90.jpeg", isNew: true, ...defaultDescription },
+    { 
+      id: "dn-17", 
+      name: "KIT 17", 
+      price: "R$ 79,90", 
+      image: "/namorados/kit 17_valor79,90.jpeg", 
+      isNew: true, 
+      gallery: [
+        "/namorados/kit 17_valor79,90.jpeg",
+        "/namorados/kit17_foto2_valor79,90.jpeg"
+      ],
+      ...defaultDescription 
+    },
+    { 
+      id: "dn-18", 
+      name: "KIT 18", 
+      price: "R$ 79,90", 
+      image: "/namorados/kit18_valor79,90.jpeg", 
+      isNew: true, 
+      gallery: [
+        "/namorados/kit18_valor79,90.jpeg",
+        "/namorados/kit18_foto2_valor79,90.jpeg"
+      ],
+      ...defaultDescription 
+    },
+    { id: "dn-19", name: "KIT 19", price: "R$ 79,90", image: "/namorados/kit19_valor79,90.jpeg", isNew: true, ...defaultDescription },
+    { 
+      id: "dn-20", 
+      name: "KIT 20", 
+      price: "R$ 59,90", 
+      image: "/namorados/kit20_foto1_valor59,90.jpeg", 
+      isNew: true, 
+      gallery: [
+        "/namorados/kit20_foto1_valor59,90.jpeg",
+        "/namorados/kit20_foto2_valor59,90.jpeg"
+      ],
+      ...defaultDescription 
+    },
+    { id: "dn-21", name: "KIT 21", price: "R$ 59,90", image: "/namorados/kit21_valor59,90.jpeg", isNew: true, ...defaultDescription },
+    { id: "dn-22", name: "KIT 22", price: "R$ 89,90", image: "/namorados/kit22_valor89,90.jpeg", isNew: true, ...defaultDescription },
+    { id: "dn-23", name: "KIT 23", price: "R$ 99,90", image: "/namorados/kit23_valor99,90.jpeg", isNew: true, ...defaultDescription },
+    { id: "dn-24", name: "KIT 24", price: "R$ 89,90", image: "/namorados/kit24_valor89,90.jpeg", isNew: true, ...defaultDescription },
+    { id: "dn-25", name: "KIT 25", price: "R$ 89,90", image: "/namorados/kit25_valor89,90.jpeg", isNew: true, ...defaultDescription },
+    { id: "dn-26", name: "KIT 26", price: "R$ 89,90", image: "/namorados/kit26_valor89,90.jpeg", isNew: true, ...defaultDescription }
   ],
   PRODUTOS: [
     { id: "prod-1", name: "Caixa MDF 10x10 Vazia", price: "R$ 15,90", image: "/produtos/Caixamdf_10x10_vazia_valor15,90.jpeg", ...defaultDescription },
@@ -90,7 +133,8 @@ export const CATEGORIES = {
     { id: "prod-8", name: "Cubo Memórias", price: "R$ 34,90", image: "/produtos/cubo_memorias_valor34,90.jpeg", ...defaultDescription },
     { id: "prod-9", name: "Mini Garrafinha", price: "R$ 9,90", image: "/produtos/mini_garrafinha_valor9,90.jpeg", ...defaultDescription },
     { id: "prod-10", name: "Polaroid", price: "R$ 1,90", image: "/produtos/polaroid_valor1,90.jpeg", ...defaultDescription },
-    { id: "prod-11", name: "Xícara Acrílica Personalizada", price: "R$ 44,90", image: "/produtos/xicaraacrilica_personalizada_valor44,90.jpeg", ...defaultDescription }
+    { id: "prod-11", name: "Xícara Acrílica Personalizada", price: "R$ 44,90", image: "/produtos/xicaraacrilica_personalizada_valor44,90.jpeg", ...defaultDescription },
+    { id: "prod-12", name: "Caixa 20x20 Vazia Premium", price: "R$ 32,90", image: "/produtos/caixa_20x20_vazia_valor32,90.jpeg", ...defaultDescription }
   ],
   QUADROS_A4: [
     { id: "qa4-1", name: "QUADRO 01", price: "R$ 49,90", image: "/QUADROSA4/WhatsApp Image 2026-05-27 at 02.30.47.jpeg", ...defaultDescription },
@@ -143,6 +187,107 @@ export const CATEGORIES = {
     { id: "combo-14", name: "Quadro A4 + Caixa Buquê", price: "R$ 109,90", image: "/produtos_combos/quadro_a4_mais_caixa_buque_valor109,90.jpeg", isPromo: true, ...defaultDescription },
     { id: "combo-15", name: "Quadro 10x15 + Caixa Doce", price: "R$ 79,90", image: "/produtos_combos/quandro10x15_mais_caixadoce_valor79,90.jpeg", isPromo: true, ...defaultDescription }
   ],
+  MAES: [
+    {
+      id: "mae-1",
+      name: "Agenda Especial Dia das Mães",
+      price: "R$ 39,90",
+      image: "/produtos_maes/agenda-maes.jpeg",
+      gallery: [
+        "/produtos_maes/agenda-maes.jpeg",
+        "/produtos_maes/agenda-maes-2.jpeg"
+      ],
+      ...defaultDescription
+    },
+    {
+      id: "mae-2",
+      name: "Caixa Café da Manhã Mamãe",
+      price: "R$ 129,90",
+      image: "/produtos_maes/caixa-cafe-mamae.jpeg",
+      ...defaultDescription
+    },
+    {
+      id: "mae-3",
+      name: "Caixa Envelope com Flores",
+      price: "R$ 59,90",
+      image: "/produtos_maes/caixa-envelope.jpeg",
+      ...defaultDescription
+    },
+    {
+      id: "mae-4",
+      name: "Caixa Feliz Dia das Mães",
+      price: "R$ 79,90",
+      image: "/produtos_maes/caixa-feliz-maes.jpeg",
+      ...defaultDescription
+    },
+    {
+      id: "mae-5",
+      name: "Caixinha Eu Te Amo",
+      price: "R$ 49,90",
+      image: "/produtos_maes/caixinha-eu-te-amo.jpeg",
+      ...defaultDescription
+    },
+    {
+      id: "mae-6",
+      name: "Coração de Bombons Especial",
+      price: "R$ 69,90",
+      image: "/produtos_maes/coracao-bombons.jpeg",
+      gallery: [
+        "/produtos_maes/coracao-bombons.jpeg",
+        "/produtos_maes/coracao-bombons-2.jpeg"
+      ],
+      ...defaultDescription
+    },
+    {
+      id: "mae-7",
+      name: "Cubo de Memórias Mães",
+      price: "R$ 34,90",
+      image: "/produtos_maes/cubo-memorias.jpeg",
+      ...defaultDescription
+    },
+    {
+      id: "mae-8",
+      name: "Placa Acrílica Mãe Eu Te Amo",
+      price: "R$ 39,90",
+      image: "/produtos_maes/placa-acrilica-mae-eu-te-amo.jpeg",
+      ...defaultDescription
+    },
+    {
+      id: "mae-9",
+      name: "Placa Acrílica Melhor Mãe do Mundo",
+      price: "R$ 39,90",
+      image: "/produtos_maes/placa-acrilica-melhor-mae.jpeg",
+      ...defaultDescription
+    },
+    {
+      id: "mae-10",
+      name: "Placa Acrílica Mural de Fotos",
+      price: "R$ 44,90",
+      image: "/produtos_maes/placa-acrilica-mural.jpeg",
+      ...defaultDescription
+    },
+    {
+      id: "mae-11",
+      name: "Placa Acrílica Quatro Fotos",
+      price: "R$ 39,90",
+      image: "/produtos_maes/placa-acrilica-quatro-fotos.jpeg",
+      ...defaultDescription
+    },
+    {
+      id: "mae-12",
+      name: "Placa Acrílica Spotify Mãe",
+      price: "R$ 39,90",
+      image: "/produtos_maes/placa-acrilica-spotify.jpeg",
+      ...defaultDescription
+    },
+    {
+      id: "mae-13",
+      name: "Placa Acrílica Vida",
+      price: "R$ 39,90",
+      image: "/produtos_maes/placa-acrilica-vida.jpeg",
+      ...defaultDescription
+    }
+  ]
 };
 
 export const getAllProducts = (): Product[] => {

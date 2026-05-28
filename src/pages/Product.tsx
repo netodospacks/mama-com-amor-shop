@@ -61,7 +61,7 @@ export default function Product() {
           <span className="text-xs uppercase tracking-widest font-medium hidden sm:inline">Voltar</span>
         </button>
         <Link to="/" className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] text-neutral-900 dark:text-white uppercase absolute left-1/2 -translate-x-1/2">
-          Virtual Store
+          Eternizando Momentos
         </Link>
         <div className="flex gap-2 w-8 sm:w-auto">
            <button onClick={() => setIsCartOpen(true)} className="p-2 text-neutral-800 dark:text-neutral-200 hover:opacity-60">
