@@ -50,7 +50,7 @@ const MiniCard = ({ product }: { product: Product }) => {
 };
 
 const MENU_ITEMS = [
-  { label: "Dia dos Namorados", id: "dia-dos-namorados" },
+  { label: "Dia dos Pais", id: "dia-dos-pais" },
   { label: "Produtos", id: "produtos" },
   { label: "Quadros A4", id: "quadros-a4" },
   { label: "Quadros 10x15", id: "quadros-10x15" },
@@ -161,16 +161,12 @@ export default function Index() {
 
       {/* Hero Section com Vídeo */}
       <section className="relative w-full h-screen min-h-[600px] flex flex-col items-center justify-center overflow-hidden bg-black">
-        {/* Background Vídeo */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
+        {/* Background Image */}
+        <img
+          src="/dia-dos-pais-bg.jpg"
+          alt="Dia dos Pais"
           className="absolute inset-0 w-full h-full object-cover opacity-75"
-        >
-          <source src="/video/WhatsApp Video 2026-05-28 at 00.14.42.mp4" type="video/mp4" />
-        </video>
+        />
         {/* Overlay gradiente */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30" />
 
@@ -221,7 +217,7 @@ export default function Index() {
             className="flex flex-col w-full max-w-[260px] sm:max-w-xs gap-2.5"
           >
             {[
-              { label: "Dia dos Namorados", id: "dia-dos-namorados", desc: "Kits e presentes românticos" },
+              { label: "Dia dos Pais", id: "dia-dos-pais", desc: "Presentes inesquecíveis para o seu herói" },
               { label: "Quadros", id: "quadros-a4", desc: "A4, 10x15 e placas decorativas" },
               { label: "Kits", id: "kits", desc: "Composições exclusivas" },
               { label: "Produtos", id: "produtos", desc: "Itens avulsos personalizados" },
@@ -248,14 +244,14 @@ export default function Index() {
 
       <main className="w-full max-w-[1600px] mx-auto px-2 sm:px-6 md:px-8 py-20 sm:py-32 space-y-24 sm:space-y-40">
         
-        {/* Section: Coleção Dia dos Namorados */}
-        <section id="dia-dos-namorados" className="w-full">
+        {/* Section: Coleção Dia dos Pais */}
+        <section id="dia-dos-pais" className="w-full">
           <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Coleção Dia dos Namorados</h2>
-            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Presentes inesquecíveis para quem você ama</p>
+            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Coleção Dia dos Pais</h2>
+            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Presentes inesquecíveis para o seu herói</p>
           </div>
           <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-            {CATEGORIES.DIA_DOS_NAMORADOS.map(product => <MiniCard key={product.id} product={product} />)}
+            {CATEGORIES.DIA_DOS_PAIS.map(product => <MiniCard key={product.id} product={product} />)}
           </div>
         </section>
         

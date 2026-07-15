@@ -35,93 +35,7 @@ const generateProducts = (count: number, prefix: string, prefixName: string, isP
 };
 
 export const CATEGORIES = {
-  DIA_DOS_NAMORADOS: [
-    { 
-      id: "dn-album", 
-      name: "Álbum Memória com 27 fotos Alto Colante", 
-      price: "R$ 59,90", 
-      image: "/namorados/foto1_album_memoria_com27fotos_alto_Colante_valor59,90.jpeg", 
-      isNew: true,
-      gallery: [
-        "/namorados/foto1_album_memoria_com27fotos_alto_Colante_valor59,90.jpeg",
-        "/namorados/foto2_album_memoria_com27fotos_alto_Colante_valor59,90.jpeg.jpeg",
-        "/namorados/foto3_album_memoria_com27fotos_alto_Colante_valor59,90.jpeg.jpeg",
-        "/namorados/foto4_album_memoria_com27fotos_alto_Colante_valor59,90.jpeg.jpeg",
-        "/namorados/foto5_album_memoria_com27fotos_alto_Colante_valor59,90.jpeg.jpeg",
-        "/namorados/foto6_album_memoria_com27fotos_alto_Colante_valor59,90.jpeg.jpeg"
-      ],
-      ...defaultDescription 
-    },
-    { id: "dn-1", name: "KIT 01", price: "R$ 149,90", image: "/namorados/kit_01_valor149,90.jpeg", isNew: true, ...defaultDescription },
-    { 
-      id: "dn-2", 
-      name: "KIT 02", 
-      price: "R$ 64,90", 
-      image: "/namorados/kit 02_valor64,90.jpeg", 
-      isNew: true,
-      gallery: [
-        "/namorados/kit 02_valor64,90.jpeg",
-        "/namorados/segunda_foto_kit 02_valor64,90 .jpeg"
-      ],
-      ...defaultDescription 
-    },
-    { id: "dn-3", name: "KIT 03", price: "R$ 64,90", image: "/namorados/kit 03_valor64,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-5", name: "KIT 05", price: "R$ 139,90", image: "/namorados/kit05_valor139,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-6", name: "KIT 06", price: "R$ 119,90", image: "/namorados/kit06_valor119,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-7", name: "KIT 07", price: "R$ 49,90", image: "/namorados/kit07_valor49,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-8", name: "KIT 08", price: "R$ 49,90", image: "/namorados/kit08_valor49,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-9", name: "KIT 09", price: "R$ 129,90", image: "/namorados/kit09_valor129,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-10", name: "KIT 10", price: "R$ 89,90", image: "/namorados/kit10_valor89,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-11", name: "KIT 11", price: "R$ 49,90", image: "/namorados/kit11_valor49,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-12", name: "KIT 12", price: "R$ 89,90", image: "/namorados/kit12_valor89,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-13", name: "KIT 13", price: "R$ 109,90", image: "/namorados/kit13_valor109,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-14", name: "KIT 14", price: "R$ 134,90", image: "/namorados/kit14_valor134,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-15", name: "KIT 15", price: "R$ 39,90", image: "/namorados/kit15_39,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-16", name: "KIT 16", price: "R$ 79,90", image: "/namorados/kit16_valor79,90.jpeg", isNew: true, ...defaultDescription },
-    { 
-      id: "dn-17", 
-      name: "KIT 17", 
-      price: "R$ 79,90", 
-      image: "/namorados/kit 17_valor79,90.jpeg", 
-      isNew: true, 
-      gallery: [
-        "/namorados/kit 17_valor79,90.jpeg",
-        "/namorados/kit17_foto2_valor79,90.jpeg"
-      ],
-      ...defaultDescription 
-    },
-    { 
-      id: "dn-18", 
-      name: "KIT 18", 
-      price: "R$ 79,90", 
-      image: "/namorados/kit18_valor79,90.jpeg", 
-      isNew: true, 
-      gallery: [
-        "/namorados/kit18_valor79,90.jpeg",
-        "/namorados/kit18_foto2_valor79,90.jpeg"
-      ],
-      ...defaultDescription 
-    },
-    { id: "dn-19", name: "KIT 19", price: "R$ 79,90", image: "/namorados/kit19_valor79,90.jpeg", isNew: true, ...defaultDescription },
-    { 
-      id: "dn-20", 
-      name: "KIT 20", 
-      price: "R$ 59,90", 
-      image: "/namorados/kit20_foto1_valor59,90.jpeg", 
-      isNew: true, 
-      gallery: [
-        "/namorados/kit20_foto1_valor59,90.jpeg",
-        "/namorados/kit20_foto2_valor59,90.jpeg"
-      ],
-      ...defaultDescription 
-    },
-    { id: "dn-21", name: "KIT 21", price: "R$ 59,90", image: "/namorados/kit21_valor59,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-22", name: "KIT 22", price: "R$ 89,90", image: "/namorados/kit22_valor89,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-23", name: "KIT 23", price: "R$ 99,90", image: "/namorados/kit23_valor99,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-24", name: "KIT 24", price: "R$ 89,90", image: "/namorados/kit24_valor89,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-25", name: "KIT 25", price: "R$ 89,90", image: "/namorados/kit25_valor89,90.jpeg", isNew: true, ...defaultDescription },
-    { id: "dn-26", name: "KIT 26", price: "R$ 89,90", image: "/namorados/kit26_valor89,90.jpeg", isNew: true, ...defaultDescription }
-  ],
+  DIA_DOS_PAIS: [],
   PRODUTOS: [
     { id: "prod-1", name: "Caixa MDF 10x10 Vazia", price: "R$ 15,90", image: "/produtos/Caixamdf_10x10_vazia_valor15,90.jpeg", ...defaultDescription },
     { id: "prod-2", name: "Caderninho Folha Preta + 10 Polaroids", price: "R$ 29,90", image: "/produtos/caderninho_folhapreta_mais10polaroids_valor29,90.jpeg", ...defaultDescription },
@@ -168,7 +82,53 @@ export const CATEGORIES = {
     { id: "kit-5", name: "Kit Kat", price: "R$ 99,90", image: "/produtos_kits/kit Kat_valor99,90.jpeg", ...defaultDescription },
     { id: "kit-6", name: "Kit Coração", price: "R$ 119,90", image: "/produtos_kits/kit_coraçao_valor119,90.jpeg", ...defaultDescription },
     { id: "kit-7", name: "Kit Doces Caixa Preta", price: "R$ 79,90", image: "/produtos_kits/kit_doces_caixapreta_valor79,90.jpeg", ...defaultDescription },
-    { id: "kit-8", name: "Kit Te Amo", price: "R$ 104,90", image: "/produtos_kits/kitteamo_valor104,90.jpeg", ...defaultDescription }
+    { id: "kit-8", name: "Kit Te Amo", price: "R$ 104,90", image: "/produtos_kits/kitteamo_valor104,90.jpeg", ...defaultDescription },
+    { 
+      id: "dn-album", 
+      name: "Álbum Memória com 27 fotos Alto Colante", 
+      price: "R$ 59,90", 
+      image: "/namorados/foto1_album_memoria_com27fotos_alto_Colante_valor59,90.jpeg", 
+      gallery: [
+        "/namorados/foto1_album_memoria_com27fotos_alto_Colante_valor59,90.jpeg",
+        "/namorados/foto2_album_memoria_com27fotos_alto_Colante_valor59,90.jpeg.jpeg",
+        "/namorados/foto3_album_memoria_com27fotos_alto_Colante_valor59,90.jpeg.jpeg",
+        "/namorados/foto4_album_memoria_com27fotos_alto_Colante_valor59,90.jpeg.jpeg",
+        "/namorados/foto5_album_memoria_com27fotos_alto_Colante_valor59,90.jpeg.jpeg",
+        "/namorados/foto6_album_memoria_com27fotos_alto_Colante_valor59,90.jpeg.jpeg"
+      ],
+      ...defaultDescription 
+    },
+    { id: "dn-1", name: "KIT 01", price: "R$ 149,90", image: "/namorados/kit_01_valor149,90.jpeg", ...defaultDescription },
+    { 
+      id: "dn-2", 
+      name: "KIT 02", 
+      price: "R$ 64,90", 
+      image: "/namorados/kit 02_valor64,90.jpeg", 
+      gallery: [
+        "/namorados/kit 02_valor64,90.jpeg",
+        "/namorados/segunda_foto_kit 02_valor64,90 .jpeg"
+      ],
+      ...defaultDescription 
+    },
+    { id: "dn-3", name: "KIT 03", price: "R$ 64,90", image: "/namorados/kit 03_valor64,90.jpeg", ...defaultDescription },
+    { id: "dn-5", name: "KIT 05", price: "R$ 139,90", image: "/namorados/kit05_valor139,90.jpeg", ...defaultDescription },
+    { id: "dn-6", name: "KIT 06", price: "R$ 119,90", image: "/namorados/kit06_valor119,90.jpeg", ...defaultDescription },
+    { id: "dn-7", name: "KIT 07", price: "R$ 49,90", image: "/namorados/kit07_valor49,90.jpeg", ...defaultDescription },
+    { id: "dn-8", name: "KIT 08", price: "R$ 79,90", image: "/namorados/kit08_valor49,90.jpeg", ...defaultDescription },
+    { id: "dn-9", name: "KIT 09", price: "R$ 129,90", image: "/namorados/kit09_valor129,90.jpeg", ...defaultDescription },
+    { id: "dn-10", name: "KIT 10", price: "R$ 89,90", image: "/namorados/kit10_valor89,90.jpeg", ...defaultDescription },
+    { id: "dn-11", name: "KIT 11", price: "R$ 49,90", image: "/namorados/kit11_valor49,90.jpeg", ...defaultDescription },
+    { id: "dn-12", name: "KIT 12", price: "R$ 89,90", image: "/namorados/kit12_valor89,90.jpeg", ...defaultDescription },
+    { id: "dn-13", name: "KIT 13", price: "R$ 109,90", image: "/namorados/kit13_valor109,90.jpeg", ...defaultDescription },
+    { id: "dn-14", name: "KIT 14", price: "R$ 134,90", image: "/namorados/kit14_valor134,90.jpeg", ...defaultDescription },
+    { id: "dn-15", name: "KIT 15", price: "R$ 39,90", image: "/namorados/kit15_39,90.jpeg", ...defaultDescription },
+    { id: "dn-16", name: "KIT 16", price: "R$ 79,90", image: "/namorados/kit16_valor79,90.jpeg", ...defaultDescription },
+    { id: "dn-19", name: "KIT 19", price: "R$ 79,90", image: "/namorados/kit19_valor79,90.jpeg", ...defaultDescription },
+    { id: "dn-21", name: "KIT 21", price: "R$ 59,90", image: "/namorados/kit21_valor59,90.jpeg", ...defaultDescription },
+    { id: "dn-22", name: "KIT 22", price: "R$ 89,90", image: "/namorados/kit22_valor89,90.jpeg", ...defaultDescription },
+    { id: "dn-23", name: "KIT 23", price: "R$ 99,90", image: "/namorados/kit23_valor99,90.jpeg", ...defaultDescription },
+    { id: "dn-24", name: "KIT 24", price: "R$ 89,90", image: "/namorados/kit24_valor89,90.jpeg", ...defaultDescription },
+    { id: "dn-26", name: "KIT 26", price: "R$ 89,90", image: "/namorados/kit26_valor89,90.jpeg", ...defaultDescription }
   ],
   COMBOS: [
     { id: "combo-1", name: "Agenda + 10 Polaroids + Caixa Buquê", price: "R$ 99,90", image: "/produtos_combos/agenda10polaroids_mais_caixa_buquer_valor99,90.jpeg", isPromo: true, ...defaultDescription },
