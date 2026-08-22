@@ -51,6 +51,7 @@ const MiniCard = ({ product }: { product: Product }) => {
 
 const MENU_ITEMS = [
   { label: "Mamães / Bebês", id: "mamaes-bebes" },
+  { label: "Cestas", id: "cestas" },
   { label: "Produtos", id: "produtos" },
   { label: "Quadros A4", id: "quadros-a4" },
   { label: "Quadros 10x15", id: "quadros-10x15" },
@@ -218,6 +219,7 @@ export default function Index() {
           >
             {[
               { label: "Mamães / Bebês", id: "mamaes-bebes", desc: "Presentes especiais para mamãe e bebê" },
+              { label: "Cestas", id: "cestas", desc: "Cestas personalizadas com muito carinho" },
               { label: "Quadros", id: "quadros-a4", desc: "A4, 10x15 e placas decorativas" },
               { label: "Kits", id: "kits", desc: "Composições exclusivas" },
               { label: "Produtos", id: "produtos", desc: "Itens avulsos personalizados" },
@@ -252,6 +254,17 @@ export default function Index() {
           </div>
           <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
             {CATEGORIES.MAMAES_BEBES.map(product => <MiniCard key={product.id} product={product} />)}
+          </div>
+        </section>
+
+        {/* Section: Cestas */}
+        <section id="cestas" className="w-full">
+          <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
+            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Cestas</h2>
+            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Cestas personalizadas com muito carinho</p>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+            {CATEGORIES.CESTAS.map(product => <MiniCard key={product.id} product={product} />)}
           </div>
         </section>
         

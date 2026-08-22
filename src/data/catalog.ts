@@ -36,6 +36,7 @@ const generateProducts = (count: number, prefix: string, prefixName: string, isP
 
 export const CATEGORIES = {
   MAMAES_BEBES: [],
+  CESTAS: [],
   PRODUTOS: [
     { id: "prod-1", name: "Caixa MDF 10x10 Vazia", price: "R$ 15,90", image: "/produtos/Caixamdf_10x10_vazia_valor15,90.jpeg", ...defaultDescription },
     { id: "prod-2", name: "Caderninho Folha Preta + 10 Polaroids", price: "R$ 29,90", image: "/produtos/caderninho_folhapreta_mais10polaroids_valor29,90.jpeg", ...defaultDescription },
