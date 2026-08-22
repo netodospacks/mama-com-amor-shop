@@ -63,19 +63,19 @@ export const CATEGORIES = {
     }
   ],
   CESTAS: [
-    { id: "cesta-c1a", name: "Cesta Coluna 1", price: "R$ 129,90", image: "/cestas/cestacoluna1_valor129,90.jpeg", ...defaultDescription },
-    { id: "cesta-c1b", name: "Cesta Coluna 1 Premium", price: "R$ 129,90", image: "/cestas/cestacoluna1valor129,90.jpeg", ...defaultDescription },
-    { id: "cesta-c1c", name: "Cesta Coluna 1 Especial", price: "R$ 139,99", image: "/cestas/cestacoluna1_valor139,99.jpeg", ...defaultDescription },
-    { id: "cesta-c1d", name: "Cesta", price: "R$ 159,90", image: "/cestas/cestavalor159,90.jpeg", ...defaultDescription },
-    { id: "cesta-1", name: "Cesta 1", price: "R$ 119,99", image: "/cestas/CESTA1_valor119,99.jpeg", ...defaultDescription },
-    { id: "cesta-2", name: "Cesta 2", price: "R$ 119,99", image: "/cestas/cesta2_valor119,99.jpeg", ...defaultDescription },
-    { id: "cesta-3", name: "Cesta 3", price: "R$ 119,99", image: "/cestas/cesta3_valor119,99.jpeg", ...defaultDescription },
-    { id: "cesta-4", name: "Cesta 4", price: "R$ 119,99", image: "/cestas/cesta4_valor119,99.jpeg", ...defaultDescription },
-    { id: "cesta-5", name: "Cesta 5", price: "R$ 69,99", image: "/cestas/cesta5_valor69,99.jpeg", ...defaultDescription },
-    { id: "cesta-6", name: "Cesta 6", price: "R$ 124,99", image: "/cestas/cesta6_valor124,99.jpeg", ...defaultDescription },
-    { id: "cesta-7", name: "Cesta 7", price: "R$ 139,99", image: "/cestas/cesta7_valor139,99.jpeg", ...defaultDescription },
-    { id: "cesta-8", name: "Cesta 8", price: "R$ 149,99", image: "/cestas/cesta8_valor149,99.jpeg", ...defaultDescription },
-    { id: "cesta-9", name: "Cesta 9", price: "R$ 49,99", image: "/cestas/cesta9_valor49,99.jpeg", ...defaultDescription }
+    { id: "cesta-1",  name: "CESTA 1",  price: "R$ 129,90", image: "/cestas/cestacoluna1_valor129,90.jpeg",  ...defaultDescription },
+    { id: "cesta-2",  name: "CESTA 2",  price: "R$ 129,90", image: "/cestas/cestacoluna1valor129,90.jpeg",   ...defaultDescription },
+    { id: "cesta-3",  name: "CESTA 3",  price: "R$ 139,99", image: "/cestas/cestacoluna1_valor139,99.jpeg",  ...defaultDescription },
+    { id: "cesta-4",  name: "CESTA 4",  price: "R$ 159,90", image: "/cestas/cestavalor159,90.jpeg",          ...defaultDescription },
+    { id: "cesta-5",  name: "CESTA 5",  price: "R$ 119,99", image: "/cestas/CESTA1_valor119,99.jpeg",        ...defaultDescription },
+    { id: "cesta-6",  name: "CESTA 6",  price: "R$ 119,99", image: "/cestas/cesta2_valor119,99.jpeg",        ...defaultDescription },
+    { id: "cesta-7",  name: "CESTA 7",  price: "R$ 119,99", image: "/cestas/cesta3_valor119,99.jpeg",        ...defaultDescription },
+    { id: "cesta-8",  name: "CESTA 8",  price: "R$ 119,99", image: "/cestas/cesta4_valor119,99.jpeg",        ...defaultDescription },
+    { id: "cesta-9",  name: "CESTA 9",  price: "R$ 69,99",  image: "/cestas/cesta5_valor69,99.jpeg",         ...defaultDescription },
+    { id: "cesta-10", name: "CESTA 10", price: "R$ 124,99", image: "/cestas/cesta6_valor124,99.jpeg",        ...defaultDescription },
+    { id: "cesta-11", name: "CESTA 11", price: "R$ 139,99", image: "/cestas/cesta7_valor139,99.jpeg",        ...defaultDescription },
+    { id: "cesta-12", name: "CESTA 12", price: "R$ 149,99", image: "/cestas/cesta8_valor149,99.jpeg",        ...defaultDescription },
+    { id: "cesta-13", name: "CESTA 13", price: "R$ 49,99",  image: "/cestas/cesta9_valor49,99.jpeg",         ...defaultDescription }
   ],
   PRODUTOS: [
     { id: "prod-1", name: "Caixa MDF 10x10 Vazia", price: "R$ 15,90", image: "/produtos/Caixamdf_10x10_vazia_valor15,90.jpeg", ...defaultDescription },

@@ -50,13 +50,13 @@ const MiniCard = ({ product }: { product: Product }) => {
 };
 
 const MENU_ITEMS = [
-  { label: "Mamães / Bebês", id: "mamaes-bebes" },
   { label: "Cestas", id: "cestas" },
-  { label: "Produtos", id: "produtos" },
   { label: "Quadros A4", id: "quadros-a4" },
   { label: "Quadros 10x15", id: "quadros-10x15" },
   { label: "Quadros e Placas", id: "quadros" },
   { label: "Kits", id: "kits" },
+  { label: "Mamães / Bebês", id: "mamaes-bebes" },
+  { label: "Produtos", id: "produtos" },
   { label: "Combos Promocionais", id: "combos" },
 ];
 
@@ -218,10 +218,10 @@ export default function Index() {
             className="flex flex-col w-full max-w-[260px] sm:max-w-xs gap-2.5"
           >
             {[
-              { label: "Mamães / Bebês", id: "mamaes-bebes", desc: "Presentes especiais para mamãe e bebê" },
               { label: "Cestas", id: "cestas", desc: "Cestas personalizadas com muito carinho" },
               { label: "Quadros", id: "quadros-a4", desc: "A4, 10x15 e placas decorativas" },
               { label: "Kits", id: "kits", desc: "Composições exclusivas" },
+              { label: "Mamães / Bebês", id: "mamaes-bebes", desc: "Presentes especiais para mamãe e bebê" },
               { label: "Produtos", id: "produtos", desc: "Itens avulsos personalizados" },
               { label: "Combos Promocionais", id: "combos", desc: "Ofertas imperdíveis" },
             ].map((btn, i) => (
@@ -246,17 +246,6 @@ export default function Index() {
 
       <main className="w-full max-w-[1600px] mx-auto px-2 sm:px-6 md:px-8 py-20 sm:py-32 space-y-24 sm:space-y-40">
         
-        {/* Section: Mamães / Bebês */}
-        <section id="mamaes-bebes" className="w-full">
-          <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Mamães / Bebês</h2>
-            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Presentes especiais para mamãe e bebê</p>
-          </div>
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-            {CATEGORIES.MAMAES_BEBES.map(product => <MiniCard key={product.id} product={product} />)}
-          </div>
-        </section>
-
         {/* Section: Cestas */}
         <section id="cestas" className="w-full">
           <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
@@ -267,24 +256,8 @@ export default function Index() {
             {CATEGORIES.CESTAS.map(product => <MiniCard key={product.id} product={product} />)}
           </div>
         </section>
-        
-        {/* Section: Produtos (3 items top, 3 items bottom, grid-cols-3) */}
-        <section id="produtos" className="w-full">
-          <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Produtos</h2>
-            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Coleção principal com curadoria especial</p>
-          </div>
-          {/* Grid para Produtos */}
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-            {CATEGORIES.PRODUTOS.map(product => (
-              <div key={product.id} className="scale-[1.02] sm:scale-100">
-                <MiniCard product={product} />
-              </div>
-            ))}
-          </div>
-        </section>
 
-        {/* Section: Quadros A4 (5 cols mobile, 4 tablet, 5 desktop) */}
+        {/* Section: Quadros A4 */}
         <section id="quadros-a4" className="w-full">
           <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
             <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Quadros A4</h2>
@@ -317,7 +290,7 @@ export default function Index() {
           </div>
         </section>
 
-        {/* Section: Kits (4 cols everywhere) */}
+        {/* Section: Kits */}
         <section id="kits" className="w-full">
           <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
             <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Kits</h2>
@@ -325,6 +298,32 @@ export default function Index() {
           </div>
           <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
             {CATEGORIES.KITS.map(product => <MiniCard key={product.id} product={product} />)}
+          </div>
+        </section>
+
+        {/* Section: Mamães / Bebês */}
+        <section id="mamaes-bebes" className="w-full">
+          <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
+            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Mamães / Bebês</h2>
+            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Presentes especiais para mamãe e bebê</p>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+            {CATEGORIES.MAMAES_BEBES.map(product => <MiniCard key={product.id} product={product} />)}
+          </div>
+        </section>
+
+        {/* Section: Produtos */}
+        <section id="produtos" className="w-full">
+          <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
+            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Produtos</h2>
+            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Coleção principal com curadoria especial</p>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+            {CATEGORIES.PRODUTOS.map(product => (
+              <div key={product.id} className="scale-[1.02] sm:scale-100">
+                <MiniCard product={product} />
+              </div>
+            ))}
           </div>
         </section>
 
