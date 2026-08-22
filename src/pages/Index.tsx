@@ -50,7 +50,7 @@ const MiniCard = ({ product }: { product: Product }) => {
 };
 
 const MENU_ITEMS = [
-  { label: "Dia dos Pais", id: "dia-dos-pais" },
+  { label: "Mamães / Bebês", id: "mamaes-bebes" },
   { label: "Produtos", id: "produtos" },
   { label: "Quadros A4", id: "quadros-a4" },
   { label: "Quadros 10x15", id: "quadros-10x15" },
@@ -217,7 +217,7 @@ export default function Index() {
             className="flex flex-col w-full max-w-[260px] sm:max-w-xs gap-2.5"
           >
             {[
-              { label: "Dia dos Pais", id: "dia-dos-pais", desc: "Presentes inesquecíveis para o seu herói" },
+              { label: "Mamães / Bebês", id: "mamaes-bebes", desc: "Presentes especiais para mamãe e bebê" },
               { label: "Quadros", id: "quadros-a4", desc: "A4, 10x15 e placas decorativas" },
               { label: "Kits", id: "kits", desc: "Composições exclusivas" },
               { label: "Produtos", id: "produtos", desc: "Itens avulsos personalizados" },
@@ -244,14 +244,14 @@ export default function Index() {
 
       <main className="w-full max-w-[1600px] mx-auto px-2 sm:px-6 md:px-8 py-20 sm:py-32 space-y-24 sm:space-y-40">
         
-        {/* Section: Coleção Dia dos Pais */}
-        <section id="dia-dos-pais" className="w-full">
+        {/* Section: Mamães / Bebês */}
+        <section id="mamaes-bebes" className="w-full">
           <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Coleção Dia dos Pais</h2>
-            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Presentes inesquecíveis para o seu herói</p>
+            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Mamães / Bebês</h2>
+            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Presentes especiais para mamãe e bebê</p>
           </div>
           <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-            {CATEGORIES.DIA_DOS_PAIS.map(product => <MiniCard key={product.id} product={product} />)}
+            {CATEGORIES.MAMAES_BEBES.map(product => <MiniCard key={product.id} product={product} />)}
           </div>
         </section>
         
