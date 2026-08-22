@@ -163,8 +163,8 @@ export default function Index() {
       <section className="relative w-full h-screen min-h-[600px] flex flex-col items-center justify-center overflow-hidden bg-black">
         {/* Background Image */}
         <img
-          src="/dia-dos-pais-bg.jpg"
-          alt="Dia dos Pais"
+          src="/hero-bg.jpg"
+          alt="Hero Background"
           className="absolute inset-0 w-full h-full object-cover opacity-75"
         />
         {/* Overlay gradiente */}
