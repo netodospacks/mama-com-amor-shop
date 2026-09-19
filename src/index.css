@@ -128,4 +128,20 @@
   .border-gold {
     border-color: hsl(var(--gold));
   }
+
+  /* Ocultar scrollbar mantendo funcionalidade de scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
+
+/* Impede scroll horizontal na página toda */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+

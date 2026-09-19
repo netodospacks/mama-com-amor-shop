@@ -1,9 +1,13 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Instagram, MoreHorizontal, X, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import { CATEGORIES, Product } from "@/data/catalog";
-
+import { useEffect, useState } from "react";
+import { Product } from "@/types/product";
+import { supabase } from "@/lib/supabase";
+import { mapProductFromDB } from "@/lib/mapper";
+// ─────────────────────────────────────────────────────────────────────────────
+// MiniCard — card padrão para grades normais (cestas, kits, etc.)
+// ─────────────────────────────────────────────────────────────────────────────
 const MiniCard = ({ product }: { product: Product }) => {
   return (
     <Link to={`/product/${product.id}`} className="block">
@@ -17,13 +21,12 @@ const MiniCard = ({ product }: { product: Product }) => {
         className="flex flex-col group relative cursor-pointer h-full"
       >
         <div className="w-full aspect-[4/5] bg-neutral-100 dark:bg-neutral-800 rounded-lg sm:rounded-xl overflow-hidden shadow-sm group-hover:shadow-lg transition-all duration-500 relative mb-2 sm:mb-3">
-          {/* Placeholder image */}
           {product.image ? (
             <img src={product.image} alt={product.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900 group-hover:scale-105 transition-transform duration-700 ease-out" />
           )}
-          
+
           {product.isPromo && (
             <div className="absolute top-1 right-1 sm:top-2 sm:right-2 bg-black text-white text-[8px] sm:text-[10px] font-medium px-1.5 py-0.5 rounded-sm backdrop-blur-md bg-black/80 uppercase tracking-wider z-10">
               Promo
@@ -35,7 +38,7 @@ const MiniCard = ({ product }: { product: Product }) => {
             </div>
           )}
         </div>
-        
+
         <div className="px-0.5 mt-auto">
           <h3 className="text-[10px] sm:text-[12px] md:text-sm font-medium text-neutral-800 dark:text-neutral-200 truncate mb-0.5 sm:mb-1 transition-colors group-hover:text-black dark:group-hover:text-white">
             {product.name}
@@ -49,19 +52,111 @@ const MiniCard = ({ product }: { product: Product }) => {
   );
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// HScrollCard — card para containers com rolagem horizontal (quadros)
+// ─────────────────────────────────────────────────────────────────────────────
+const HScrollCard = ({ product }: { product: Product }) => {
+  return (
+    <Link to={`/product/${product.id}`} className="block flex-shrink-0 w-[140px] sm:w-[180px] md:w-[200px]">
+      <motion.div
+        whileHover={{ y: -4 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+        className="flex flex-col group cursor-pointer"
+      >
+        <div className="w-full aspect-[4/5] bg-neutral-100 dark:bg-neutral-800 rounded-lg sm:rounded-xl overflow-hidden shadow-sm group-hover:shadow-lg transition-all duration-500 relative mb-2">
+          {product.image ? (
+            <img src={product.image} alt={product.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900" />
+          )}
+          {product.isPromo && (
+            <div className="absolute top-1 right-1 bg-black text-white text-[8px] font-medium px-1.5 py-0.5 rounded-sm uppercase tracking-wider z-10">
+              Promo
+            </div>
+          )}
+        </div>
+        <div className="px-0.5">
+          <h3 className="text-[10px] sm:text-[12px] font-medium text-neutral-800 dark:text-neutral-200 truncate mb-0.5 transition-colors group-hover:text-black dark:group-hover:text-white">
+            {product.name}
+          </h3>
+          <p className="text-[10px] sm:text-[12px] font-semibold text-neutral-900 dark:text-white tracking-tight">
+            {product.price}
+          </p>
+        </div>
+      </motion.div>
+    </Link>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HScrollRow — linha de produtos com rolagem horizontal (somente quadros)
+// ─────────────────────────────────────────────────────────────────────────────
+const HScrollRow = ({ products }: { products: Product[] }) => (
+  <div className="w-full overflow-x-auto overflow-y-visible pb-3 -mx-2 px-2 scrollbar-hide"
+       style={{ WebkitOverflowScrolling: "touch" }}>
+    <div className="flex gap-3 sm:gap-4 w-max">
+      {products.map(product => (
+        <HScrollCard key={product.id} product={product} />
+      ))}
+    </div>
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SubSectionHeader — cabeçalho de subcategoria (alinhado à esquerda)
+// ─────────────────────────────────────────────────────────────────────────────
+const SubSectionHeader = ({ title, description }: { title: string; description?: string }) => (
+  <div className="mb-4 sm:mb-6">
+    <h3 className="text-sm sm:text-base font-semibold tracking-[0.12em] uppercase text-neutral-800 dark:text-neutral-100 mb-1">
+      {title}
+    </h3>
+    {description && (
+      <p className="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400 font-light leading-relaxed max-w-sm">
+        {description}
+      </p>
+    )}
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Menu
+// ─────────────────────────────────────────────────────────────────────────────
 const MENU_ITEMS = [
   { label: "Cestas", id: "cestas" },
-  { label: "Quadros A4", id: "quadros-a4" },
-  { label: "Quadros 10x15", id: "quadros-10x15" },
-  { label: "Quadros e Placas", id: "quadros" },
-  { label: "Kits", id: "kits" },
+  { label: "Quadro A4", id: "quadros-a4" },
+  { label: "Quadro 10x15", id: "quadros-10x15" },
+  { label: "Kits Casal", id: "kits" },
   { label: "Mamães / Bebês", id: "mamaes-bebes" },
   { label: "Produtos", id: "produtos" },
+  { label: "Placas Acrílicas", id: "placas" },
   { label: "Combos Promocionais", id: "combos" },
+  { label: "Especial Mães", id: "maes" },
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Page
+// ─────────────────────────────────────────────────────────────────────────────
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [products, setProducts] = useState<(Product & { categorySlug?: string })[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data } = await supabase
+        .from('products')
+        .select('*, categories(slug)')
+        .eq('active', true)
+        .order('sort_order');
+      
+      if (data) {
+        setProducts(data.map(mapProductFromDB));
+      }
+      setIsLoading(false);
+    };
+    fetchProducts();
+  }, []);
 
   const scrollToSection = (id: string) => {
     setMenuOpen(false);
@@ -83,8 +178,8 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] text-neutral-900 dark:text-neutral-100 font-sans selection:bg-neutral-200 selection:text-black">
-      
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] text-neutral-900 dark:text-neutral-100 font-sans selection:bg-neutral-200 selection:text-black overflow-x-hidden">
+
       {/* Header Premium */}
       <header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between bg-white/70 dark:bg-black/70 backdrop-blur-xl border-b border-black/5 dark:border-white/5 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.02)]">
         <button
@@ -160,19 +255,16 @@ export default function Index() {
         )}
       </AnimatePresence>
 
-      {/* Hero Section com Vídeo */}
+      {/* Hero Section */}
       <section className="relative w-full h-screen min-h-[600px] flex flex-col items-center justify-center overflow-hidden bg-black">
-        {/* Background Image */}
         <img
           src="/hero-bg.jpg"
           alt="Hero Background"
           className="absolute inset-0 w-full h-full object-cover opacity-75"
         />
-        {/* Overlay gradiente */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30" />
 
         <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 w-full h-full pt-20 pb-10">
-          {/* Eyebrow */}
           <motion.span
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 0.9, y: 0 }}
@@ -182,7 +274,6 @@ export default function Index() {
             Catálogo Exclusivo
           </motion.span>
 
-          {/* Título principal */}
           <motion.h1
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -200,7 +291,6 @@ export default function Index() {
             Momentos
           </motion.h2>
 
-          {/* Subtítulo */}
           <motion.p
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 0.7, y: 0 }}
@@ -210,7 +300,6 @@ export default function Index() {
             Presentes personalizados feitos com carinho e exclusividade para quem você ama.
           </motion.p>
 
-          {/* Botões verticais em cards */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -220,10 +309,12 @@ export default function Index() {
             {[
               { label: "Cestas", id: "cestas", desc: "Cestas personalizadas com muito carinho" },
               { label: "Quadros", id: "quadros-a4", desc: "A4, 10x15 e placas decorativas" },
-              { label: "Kits", id: "kits", desc: "Composições exclusivas" },
-              { label: "Mamães / Bebês", id: "mamaes-bebes", desc: "Presentes especiais para mamãe e bebê" },
+              { label: "Kits Casal", id: "kits", desc: "Composições exclusivas" },
+              { label: "Mamães/Bebês", id: "mamaes-bebes", desc: "Presentes especiais para mamãe e bebê" },
               { label: "Produtos", id: "produtos", desc: "Itens avulsos personalizados" },
-              { label: "Combos Promocionais", id: "combos", desc: "Ofertas imperdíveis" },
+              { label: "Placas", id: "placas", desc: "Placas acrílicas incríveis" },
+              { label: "Combos", id: "combos", desc: "Ofertas imperdíveis" },
+              { label: "Mães", id: "maes", desc: "Presentes inesquecíveis" },
             ].map((btn, i) => (
               <motion.button
                 key={btn.id}
@@ -245,98 +336,166 @@ export default function Index() {
       </section>
 
       <main className="w-full max-w-[1600px] mx-auto px-2 sm:px-6 md:px-8 py-20 sm:py-32 space-y-24 sm:space-y-40">
-        
-        {/* Section: Cestas */}
-        <section id="cestas" className="w-full">
-          <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Cestas</h2>
-            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Cestas personalizadas com muito carinho</p>
-          </div>
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-            {CATEGORIES.CESTAS.map(product => <MiniCard key={product.id} product={product} />)}
-          </div>
-        </section>
 
-        {/* Section: Quadros A4 */}
-        <section id="quadros-a4" className="w-full">
-          <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Quadros A4</h2>
-            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Elegância em formato clássico</p>
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* CONTEÚDO DINÂMICO - LOADING OU CATÁLOGO                            */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {isLoading ? (
+          <div className="w-full flex justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black dark:border-white"></div>
           </div>
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-            {CATEGORIES.QUADROS_A4.map(product => <MiniCard key={product.id} product={product} />)}
-          </div>
-        </section>
+        ) : (
+          <>
+            {/* WhatsApp Direct Button */}
+            <div className="w-full px-2 sm:px-0 mb-12 sm:mb-20 flex justify-center">
+              <a 
+                href={`https://wa.me/5583993032780?text=${encodeURIComponent("Olá, gostaria de fazer um pedido na Virtual Store!")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto bg-[#FAFAFA] dark:bg-[#0A0A0A] border border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200 py-4 px-8 rounded-xl text-xs md:text-sm font-medium tracking-[0.1em] uppercase flex items-center justify-center gap-3 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors duration-300 shadow-sm group"
+              >
+                <span className="text-lg">💬</span>
+                <span>PEDIR PELO WHATSAPP</span>
+              </a>
+            </div>
 
-        {/* Section: Quadros 10x15 */}
-        <section id="quadros-10x15" className="w-full">
-          <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Quadros 10x15</h2>
-            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Pequenos detalhes que encantam o ambiente</p>
-          </div>
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-            {CATEGORIES.QUADROS_10x15.map(product => <MiniCard key={product.id} product={product} />)}
-          </div>
-        </section>
-
-        {/* Section: Quadros e Placas */}
-        <section id="quadros" className="w-full">
-          <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Quadros e Placas</h2>
-            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Decoração sofisticada para todos os espaços</p>
-          </div>
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-            {CATEGORIES.QUADROS_PLACAS.map(product => <MiniCard key={product.id} product={product} />)}
-          </div>
-        </section>
-
-        {/* Section: Kits */}
-        <section id="kits" className="w-full">
-          <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Kits</h2>
-            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Composições exclusivas criadas por especialistas</p>
-          </div>
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-            {CATEGORIES.KITS.map(product => <MiniCard key={product.id} product={product} />)}
-          </div>
-        </section>
-
-        {/* Section: Mamães / Bebês */}
-        <section id="mamaes-bebes" className="w-full">
-          <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Mamães / Bebês</h2>
-            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Presentes especiais para mamãe e bebê</p>
-          </div>
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-            {CATEGORIES.MAMAES_BEBES.map(product => <MiniCard key={product.id} product={product} />)}
-          </div>
-        </section>
-
-        {/* Section: Produtos */}
-        <section id="produtos" className="w-full">
-          <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2">Produtos</h2>
-            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Coleção principal com curadoria especial</p>
-          </div>
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-            {CATEGORIES.PRODUTOS.map(product => (
-              <div key={product.id} className="scale-[1.02] sm:scale-100">
-                <MiniCard product={product} />
+            {/* CESTAS */}
+            <section id="cestas" className="w-full">
+              <div className="mb-8 sm:mb-10 px-2 sm:px-0">
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Cestas</h2>
+                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-2" />
               </div>
-            ))}
-          </div>
-        </section>
+              <div className="mb-10 sm:mb-14 px-2 sm:px-0">
+                <SubSectionHeader title="Cesta Café da Manhã" description="Cada detalhe escolhido pensando em transformar uma manhã em uma lembrança inesquecível." />
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                  {products.filter(p => p.categorySlug === 'cesta-cafe-da-manha').map(product => <MiniCard key={product.id} product={product} />)}
+                </div>
+              </div>
+              <div className="mb-10 sm:mb-14 px-2 sm:px-0">
+                <SubSectionHeader title="Cesta Aniversário" description="Um aniversário ainda mais especial, com carinho em cada detalhe." />
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                  {products.filter(p => p.categorySlug === 'cesta-aniversario').map(product => <MiniCard key={product.id} product={product} />)}
+                </div>
+              </div>
+              <div className="px-2 sm:px-0">
+                <SubSectionHeader title="Cesta Cores" description="Mais do que uma cesta, um carinho preparado em cada detalhe." />
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                  {products.filter(p => p.categorySlug === 'cesta-cores').map(product => <MiniCard key={product.id} product={product} />)}
+                </div>
+              </div>
+            </section>
 
-        {/* Section: Combos Promocionais */}
-        <section id="combos" className="w-full">
-          <div className="mb-8 sm:mb-12 px-2 sm:px-0 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-2 text-neutral-900 dark:text-white">Combos Promocionais</h2>
-            <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide">Ofertas imperdíveis por tempo limitado</p>
-          </div>
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-            {CATEGORIES.COMBOS.map(product => <MiniCard key={product.id} product={product} />)}
-          </div>
-        </section>
+            {/* QUADRO A4 */}
+            <section id="quadros-a4" className="w-full">
+              <div className="mb-8 sm:mb-10 px-2 sm:px-0">
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Quadro A4</h2>
+                <p className="text-[11px] sm:text-sm text-neutral-500 dark:text-neutral-400 font-light tracking-wide mt-1">Escolha o tema, personalize cada detalhe e transforme uma memória.</p>
+                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+              </div>
+              <div className="mb-10 sm:mb-14 px-2 sm:px-0">
+                <SubSectionHeader title="Quadros Casal" />
+                <HScrollRow products={products.filter(p => p.categorySlug === 'quadros-casal')} />
+              </div>
+              <div className="px-2 sm:px-0">
+                <SubSectionHeader title="Quadros Aniversário" />
+                <HScrollRow products={products.filter(p => p.categorySlug === 'quadros-aniversario')} />
+              </div>
+            </section>
+
+            {/* QUADRO 10X15 */}
+            <section id="quadros-10x15" className="w-full">
+              <div className="mb-8 sm:mb-10 px-2 sm:px-0">
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Quadro 10x15</h2>
+                <p className="text-[11px] sm:text-sm text-neutral-500 dark:text-neutral-400 font-light tracking-wide mt-1">Transforme momentos especiais em uma lembrança que fica para sempre.</p>
+                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+              </div>
+              <div className="mb-10 sm:mb-14 px-2 sm:px-0">
+                <SubSectionHeader title="Quadro 10x15 Casal" />
+                <HScrollRow products={products.filter(p => p.categorySlug === 'quadro-10x15-casal')} />
+              </div>
+              <div className="px-2 sm:px-0">
+                <SubSectionHeader title="Quadro 10x15 Aniversário" />
+                <HScrollRow products={products.filter(p => p.categorySlug === 'quadro-10x15-aniversario')} />
+              </div>
+            </section>
+
+            {/* KITS CASAL */}
+            <section id="kits" className="w-full">
+              <div className="mb-8 sm:mb-12 px-2 sm:px-0">
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Kits Casal</h2>
+                <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Composições exclusivas criadas por especialistas</p>
+                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                {products.filter(p => p.categorySlug === 'kits-casal').map(product => <MiniCard key={product.id} product={product} />)}
+              </div>
+            </section>
+
+            {/* MAMÃES / BEBÊS */}
+            <section id="mamaes-bebes" className="w-full">
+              <div className="mb-8 sm:mb-12 px-2 sm:px-0">
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Mamães / Bebês</h2>
+                <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Presentes especiais para mamãe e bebê</p>
+                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                {products.filter(p => p.categorySlug === 'mamaes-e-bebes').map(product => <MiniCard key={product.id} product={product} />)}
+              </div>
+            </section>
+
+            {/* PRODUTOS AVULSOS */}
+            <section id="produtos" className="w-full">
+              <div className="mb-8 sm:mb-12 px-2 sm:px-0">
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Produtos</h2>
+                <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Coleção principal com curadoria especial</p>
+                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                {products.filter(p => p.categorySlug === 'produtos').map(product => (
+                  <div key={product.id} className="scale-[1.02] sm:scale-100">
+                    <MiniCard product={product} />
+                  </div>
+                ))}
+              </div>
+            </section>
+            
+            {/* PLACAS ACRÍLICAS */}
+            <section id="placas" className="w-full">
+              <div className="mb-8 sm:mb-12 px-2 sm:px-0">
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Placas Acrílicas</h2>
+                <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Placas decorativas incríveis</p>
+                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                {products.filter(p => p.categorySlug === 'placas-acrilicas').map(product => <MiniCard key={product.id} product={product} />)}
+              </div>
+            </section>
+
+            {/* COMBOS PROMOCIONAIS */}
+            <section id="combos" className="w-full">
+              <div className="mb-8 sm:mb-12 px-2 sm:px-0">
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-neutral-900 dark:text-white">Combos Promocionais</h2>
+                <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Ofertas imperdíveis por tempo limitado</p>
+                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                {products.filter(p => p.categorySlug === 'combos-promocionais').map(product => <MiniCard key={product.id} product={product} />)}
+              </div>
+            </section>
+            
+            {/* ESPECIAL MÃES */}
+            <section id="maes" className="w-full">
+              <div className="mb-8 sm:mb-12 px-2 sm:px-0">
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-rose-500 dark:text-rose-400">Especial Mães</h2>
+                <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Presentes inesquecíveis para quem você mais ama</p>
+                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                {products.filter(p => p.categorySlug === 'especial-maes').map(product => <MiniCard key={product.id} product={product} />)}
+              </div>
+            </section>
+          </>
+        )}
 
       </main>
 
