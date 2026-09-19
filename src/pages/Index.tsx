@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Instagram, MoreHorizontal, X, ChevronRight } from "lucide-react";
+import { Instagram, MoreHorizontal, X, ChevronRight, Settings2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Product } from "@/types/product";
@@ -239,7 +239,7 @@ export default function Index() {
                   </button>
                 ))}
               </nav>
-              <div className="px-6 py-5 border-t border-neutral-100 dark:border-neutral-800">
+              <div className="px-6 py-5 border-t border-neutral-100 dark:border-neutral-800 flex flex-col gap-4">
                 <a
                   href="https://instagram.com/larissagouveiaaa"
                   target="_blank"
@@ -249,6 +249,14 @@ export default function Index() {
                   <Instagram size={18} strokeWidth={1.5} />
                   <span className="tracking-wider">@larissagouveiaaa</span>
                 </a>
+                <Link
+                  to="/admin/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 text-sm text-neutral-400 hover:text-black dark:hover:text-white transition-colors"
+                >
+                  <Settings2 size={16} strokeWidth={1.5} />
+                  <span className="tracking-wider text-xs">Admin</span>
+                </Link>
               </div>
             </motion.div>
           </>
