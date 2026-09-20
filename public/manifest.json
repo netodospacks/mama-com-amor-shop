@@ -2,7 +2,7 @@
   "name": "Virtual Store Admin",
   "short_name": "VS Admin",
   "description": "Painel de Administração da Virtual Store",
-  "start_url": "/admin/login",
+  "start_url": "/admin",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
