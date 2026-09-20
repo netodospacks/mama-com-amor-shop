@@ -54,54 +54,74 @@ export function CartDrawer() {
                   <p className="text-sm">Seu carrinho está vazio</p>
                 </div>
               ) : (
-                items.map(item => (
-                  <motion.div 
-                    layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    key={item.product.id} 
-                    className="flex gap-4 items-center group"
-                  >
-                    {/* Placeholder image */}
-                    <div className="w-16 h-20 sm:w-20 sm:h-24 bg-neutral-100 dark:bg-neutral-800 rounded-lg overflow-hidden shrink-0 relative shadow-sm">
-                      <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-100 dark:from-neutral-700 dark:to-neutral-800" />
-                    </div>
+                items.map(item => {
+                  const isOnPromo = item.product.isPromo && item.product.promoPrice;
+                  return (
+                    <motion.div 
+                      layout
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      key={item.product.id} 
+                      className="flex gap-4 items-center group"
+                    >
+                      {/* Placeholder image */}
+                      <div className="w-16 h-20 sm:w-20 sm:h-24 bg-neutral-100 dark:bg-neutral-800 rounded-lg overflow-hidden shrink-0 relative shadow-sm">
+                        {item.product.image ? (
+                          <img src={item.product.image} alt={item.product.name} className="absolute inset-0 w-full h-full object-cover" />
+                        ) : (
+                          <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-100 dark:from-neutral-700 dark:to-neutral-800" />
+                        )}
+                      </div>
 
-                    <div className="flex-1 flex flex-col justify-center">
-                      <h3 className="text-xs sm:text-sm font-medium mb-1 line-clamp-1 dark:text-white">
-                        {item.product.name}
-                      </h3>
-                      <p className="text-[11px] sm:text-xs font-semibold text-neutral-500 mb-3">
-                        {item.product.price}
-                      </p>
+                      <div className="flex-1 flex flex-col justify-center">
+                        <h3 className="text-xs sm:text-sm font-medium mb-1 line-clamp-1 dark:text-white">
+                          {item.product.name}
+                        </h3>
+                        <div className="flex flex-col leading-tight mb-3">
+                          {isOnPromo ? (
+                            <>
+                              <span className="text-[10px] text-gray-400 line-through">
+                                {item.product.price}
+                              </span>
+                              <span className="text-[11px] sm:text-xs font-semibold text-neutral-500">
+                                {item.product.promoPrice}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-[11px] sm:text-xs font-semibold text-neutral-500">
+                              {item.product.price}
+                            </span>
+                          )}
+                        </div>
 
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center border border-neutral-200 dark:border-neutral-700 rounded-full overflow-hidden">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center border border-neutral-200 dark:border-neutral-700 rounded-full overflow-hidden">
+                            <button 
+                              onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                              className="px-2.5 py-1 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                            >
+                              <Minus size={12} />
+                            </button>
+                            <span className="text-xs font-medium w-4 text-center">{item.quantity}</span>
+                            <button 
+                              onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                              className="px-2.5 py-1 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                            >
+                              <Plus size={12} />
+                            </button>
+                          </div>
                           <button 
-                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                            className="px-2.5 py-1 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                            onClick={() => removeItem(item.product.id)}
+                            className="p-1.5 text-neutral-400 hover:text-red-500 transition-colors"
                           >
-                            <Minus size={12} />
-                          </button>
-                          <span className="text-xs font-medium w-4 text-center">{item.quantity}</span>
-                          <button 
-                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                            className="px-2.5 py-1 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-                          >
-                            <Plus size={12} />
+                            <Trash2 size={14} />
                           </button>
                         </div>
-                        <button 
-                          onClick={() => removeItem(item.product.id)}
-                          className="p-1.5 text-neutral-400 hover:text-red-500 transition-colors"
-                        >
-                          <Trash2 size={14} />
-                        </button>
                       </div>
-                    </div>
-                  </motion.div>
-                ))
+                    </motion.div>
+                  );
+                })
               )}
             </div>
 

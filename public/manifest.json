@@ -1,0 +1,16 @@
+{
+  "name": "Virtual Store Admin",
+  "short_name": "VS Admin",
+  "description": "Painel de Administração da Virtual Store",
+  "start_url": "/admin/login",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/vs_admin_icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

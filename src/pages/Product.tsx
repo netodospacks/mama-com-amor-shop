@@ -149,9 +149,22 @@ export default function Product() {
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-medium tracking-tight mb-3 text-black dark:text-white">
                 {product.name}
               </h1>
-              <p className="text-xl md:text-2xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-200 mb-6">
-                {product.price}
-              </p>
+              <div className="flex flex-col mb-6">
+                {product.isPromo && product.promoPrice ? (
+                  <>
+                    <span className="text-sm md:text-base text-neutral-400 line-through">
+                      {product.price}
+                    </span>
+                    <span className="text-xl md:text-2xl font-semibold tracking-tight text-rose-500">
+                      {product.promoPrice}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-xl md:text-2xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-200">
+                    {product.price}
+                  </span>
+                )}
+              </div>
               
               {/* Descrição Curta */}
               <p className="text-sm md:text-base text-neutral-500 leading-relaxed font-light">

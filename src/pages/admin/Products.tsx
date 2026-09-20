@@ -28,6 +28,7 @@ interface Product {
   id: string;
   name: string;
   price: string;
+  promo_price: number | null;
   image: string | null;
   gallery: string[] | null;
   is_promo: boolean;
@@ -64,6 +65,7 @@ function formatPrice(value: string | number | null | undefined): string {
 type FormData = {
   name: string;
   price: string;
+  promo_price: string;
   image: string;
   gallery: string[];
   is_promo: boolean;
@@ -80,6 +82,7 @@ type FormData = {
 const emptyForm = (): FormData => ({
   name: '',
   price: '',
+  promo_price: '',
   image: '',
   gallery: [],
   is_promo: false,
@@ -458,15 +461,28 @@ export default function Products() {
   // ── Open form ──────────────────────────────────────────────────────────────
 
   const openNew = () => {
-    setFormData({ ...emptyForm(), sort_order: products.length + 1 });
+    const base = { ...emptyForm(), sort_order: products.length + 1 };
+    const draftKey = 'vs_admin_draft_new';
+    const draft = localStorage.getItem(draftKey);
+    if (draft) {
+      try {
+        setFormData(JSON.parse(draft));
+        toast.info("Rascunho restaurado!");
+      } catch(e) {
+        setFormData(base);
+      }
+    } else {
+      setFormData(base);
+    }
     setEditingId(null);
     setPanelOpen(true);
   };
 
   const openEdit = (p: Product) => {
-    setFormData({
+    const base = {
       name: p.name ?? '',
       price: formatPrice(p.price) || '',
+      promo_price: p.promo_price ? formatPrice(p.promo_price) : '',
       image: p.image ?? '',
       gallery: p.gallery ?? [],
       is_promo: p.is_promo ?? false,
@@ -478,13 +494,63 @@ export default function Products() {
       category_id: p.category_id ?? '',
       active: p.active ?? true,
       sort_order: p.sort_order ?? 1,
-    });
+    };
+    
+    const draftKey = `vs_admin_draft_edit_${p.id}`;
+    const draft = localStorage.getItem(draftKey);
+    if (draft) {
+      try {
+        setFormData(JSON.parse(draft));
+        toast.info("Rascunho restaurado!");
+      } catch(e) {
+        setFormData(base);
+      }
+    } else {
+      setFormData(base);
+    }
     setEditingId(p.id);
     setPanelOpen(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const closePanel = () => { setPanelOpen(false); setEditingId(null); };
+
+  const clearDraft = () => {
+    const draftKey = editingId ? `vs_admin_draft_edit_${editingId}` : 'vs_admin_draft_new';
+    localStorage.removeItem(draftKey);
+    
+    if (editingId) {
+      const p = products.find(prod => prod.id === editingId);
+      if (p) {
+        setFormData({
+          name: p.name ?? '',
+          price: formatPrice(p.price) || '',
+          promo_price: p.promo_price ? formatPrice(p.promo_price) : '',
+          image: p.image ?? '',
+          gallery: p.gallery ?? [],
+          is_promo: p.is_promo ?? false,
+          is_new: p.is_new ?? false,
+          short_description: p.short_description ?? '',
+          detailed_description: p.detailed_description ?? '',
+          specifications: p.specifications ?? [],
+          observations: p.observations ?? '',
+          category_id: p.category_id ?? '',
+          active: p.active ?? true,
+          sort_order: p.sort_order ?? 1,
+        });
+      }
+    } else {
+      setFormData({ ...emptyForm(), sort_order: products.length + 1 });
+    }
+    toast.success("Rascunho descartado.");
+  };
+
+  useEffect(() => {
+    if (panelOpen) {
+      const draftKey = editingId ? `vs_admin_draft_edit_${editingId}` : 'vs_admin_draft_new';
+      localStorage.setItem(draftKey, JSON.stringify(formData));
+    }
+  }, [formData, panelOpen, editingId]);
 
   // ── Save product ───────────────────────────────────────────────────────────
 
@@ -498,6 +564,7 @@ export default function Products() {
     const payload = {
       name: formData.name.trim(),
       price: parsePrice(formData.price),
+      promo_price: parsePrice(formData.promo_price) || null,
       image: formData.image || null,
       gallery: formData.gallery.length > 0 ? formData.gallery : null,
       is_promo: formData.is_promo,
@@ -511,6 +578,14 @@ export default function Products() {
       sort_order: formData.sort_order,
     };
 
+    if (payload.is_promo && payload.promo_price) {
+      if (payload.promo_price >= payload.price) {
+        toast.error('O preço promocional deve ser menor que o preço original.');
+        setSaving(false);
+        return;
+      }
+    }
+
     try {
       if (editingId) {
         const { error } = await supabase.from('products').update(payload).eq('id', editingId);
@@ -521,6 +596,8 @@ export default function Products() {
         if (error) throw error;
         toast.success('Produto criado com sucesso!');
       }
+      const draftKey = editingId ? `vs_admin_draft_edit_${editingId}` : 'vs_admin_draft_new';
+      localStorage.removeItem(draftKey);
       closePanel();
       fetchAll();
     } catch (err: any) {
@@ -632,8 +709,8 @@ export default function Products() {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              {/* Row 1: Name + Price */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Row 1: Name + Price + Promo Price */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-medium mb-1.5">Nome do produto *</label>
                   <input
@@ -645,13 +722,26 @@ export default function Products() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium mb-1.5">Preço *</label>
+                  <label className="block text-xs font-medium mb-1.5">Preço Original *</label>
                   <input
                     required
                     value={formData.price}
                     onChange={e => setFormData({ ...formData, price: e.target.value })}
                     placeholder='Ex: R$ 49,90'
                     className="w-full px-3 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm bg-neutral-50 dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium mb-1.5 text-neutral-500">
+                    Preço Promocional {formData.is_promo && <span className="text-rose-500 ml-1">*</span>}
+                  </label>
+                  <input
+                    required={formData.is_promo}
+                    disabled={!formData.is_promo}
+                    value={formData.promo_price}
+                    onChange={e => setFormData({ ...formData, promo_price: e.target.value })}
+                    placeholder={formData.is_promo ? 'Ex: R$ 39,90' : 'Marque "Promoção"'}
+                    className="w-full px-3 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm bg-neutral-50 dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -767,9 +857,16 @@ export default function Products() {
                   Cancelar
                 </button>
                 <button
+                  type="button"
+                  onClick={clearDraft}
+                  className="sm:w-auto flex-1 py-2.5 px-6 border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+                >
+                  Limpar Rascunho
+                </button>
+                <button
                   type="submit"
                   disabled={saving || imageUploading}
-                  className="sm:w-auto flex-1 py-2.5 px-6 bg-black dark:bg-white text-white dark:text-black rounded-xl text-sm font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
+                  className="sm:w-auto flex-[2] py-2.5 px-6 bg-black dark:bg-white text-white dark:text-black rounded-xl text-sm font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   {saving && <Loader2 size={14} className="animate-spin" />}
                   {saving ? 'Salvando...' : editingId ? 'Salvar alterações' : 'Criar produto'}

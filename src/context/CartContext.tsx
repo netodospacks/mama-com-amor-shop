@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useMemo } from "react";
 import { Product } from "@/types/product";
+import { getEffectivePrice } from "@/lib/mapper";
 import { toast } from "sonner";
 
 export interface CartItem {
@@ -14,6 +15,7 @@ interface CartContextType {
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
+  totalPrice: number;
   totalPriceFormatted: string;
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
@@ -71,12 +73,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [items]
   );
 
-  const parsePrice = (priceStr: string) => {
-    return parseFloat(priceStr.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
-  };
-
+  // Usa o preço efetivo (promoPrice quando disponível, senão price)
   const totalPrice = useMemo(
-    () => items.reduce((total, item) => total + parsePrice(item.product.price) * item.quantity, 0),
+    () => items.reduce((total, item) => total + getEffectivePrice(item.product) * item.quantity, 0),
     [items]
   );
 
@@ -94,6 +93,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         updateQuantity, 
         clearCart, 
         totalItems, 
+        totalPrice,
         totalPriceFormatted,
         isCartOpen,
         setIsCartOpen,

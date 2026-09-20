@@ -6,10 +6,25 @@
     <title>CATALOGO VS</title>
     <meta name="description" content="Catálogo Virtual Store">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/vs_admin_icon.png" />
+    <link rel="manifest" href="/manifest.json" />
     
+    <meta name="theme-color" content="#000000" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="VIRTUAL STORE">
     <meta property="og:description" content="Catálogo Virtual Store">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          // Apenas registra o SW se a página for do admin para não afetar caching desnecessário do catálogo
+          if (window.location.pathname.startsWith('/admin')) {
+            navigator.serviceWorker.register('/sw.js').catch(err => {
+              console.log('SW registration failed: ', err);
+            });
+          }
+        });
+      }
+    </script>
   </head>
 
   <body>

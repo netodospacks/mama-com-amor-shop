@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Package, Tags, Activity, CheckCircle2 } from 'lucide-react';
+import { Mascot } from './Mascot';
 
 interface Stats {
   totalProducts: number;
@@ -102,6 +103,8 @@ export default function Dashboard() {
           colorClass="bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400" 
         />
       </div>
+
+      <Mascot />
     </div>
   );
 }

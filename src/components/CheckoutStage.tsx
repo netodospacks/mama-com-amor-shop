@@ -65,10 +65,15 @@ export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: (
     message += "*PRODUTOS:*\n\n";
     items.forEach(item => {
       const categoria = getCategoryForProduct(item.product.id);
+      const isOnPromo = item.product.isPromo && item.product.promoPrice;
+      const priceStr = isOnPromo
+        ? `${item.product.promoPrice} (em promoção, antes: ${item.product.price})`
+        : item.product.price;
+        
       message += `*${item.product.name}*\n`;
       message += `Categoria: ${categoria}\n`;
       message += `Quantidade: ${item.quantity}\n`;
-      message += `Preço: ${item.product.price}\n\n`;
+      message += `Preço: ${priceStr}\n\n`;
     });
     
     message += `*Total: ${totalPriceFormatted}*\n\n`;

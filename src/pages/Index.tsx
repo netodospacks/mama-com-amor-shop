@@ -43,9 +43,22 @@ const MiniCard = ({ product }: { product: Product }) => {
           <h3 className="text-[10px] sm:text-[12px] md:text-sm font-medium text-neutral-800 dark:text-neutral-200 truncate mb-0.5 sm:mb-1 transition-colors group-hover:text-black dark:group-hover:text-white">
             {product.name}
           </h3>
-          <p className="text-[10px] sm:text-[12px] md:text-sm font-semibold text-neutral-900 dark:text-white tracking-tight">
-            {product.price}
-          </p>
+          <div className="flex flex-col leading-none gap-0.5 pb-1">
+            {product.isPromo && product.promoPrice ? (
+              <>
+                <span className="text-[9px] sm:text-[10px] md:text-[11px] text-neutral-400 line-through font-normal">
+                  {product.price}
+                </span>
+                <span className="text-[10px] sm:text-[12px] md:text-sm font-semibold text-rose-500 tracking-tight">
+                  {product.promoPrice}
+                </span>
+              </>
+            ) : (
+              <span className="text-[10px] sm:text-[12px] md:text-sm font-semibold text-neutral-900 dark:text-white tracking-tight">
+                {product.price}
+              </span>
+            )}
+          </div>
         </div>
       </motion.div>
     </Link>
@@ -76,13 +89,26 @@ const HScrollCard = ({ product }: { product: Product }) => {
             </div>
           )}
         </div>
-        <div className="px-0.5">
+        <div className="px-0.5 mt-2">
           <h3 className="text-[10px] sm:text-[12px] font-medium text-neutral-800 dark:text-neutral-200 truncate mb-0.5 transition-colors group-hover:text-black dark:group-hover:text-white">
             {product.name}
           </h3>
-          <p className="text-[10px] sm:text-[12px] font-semibold text-neutral-900 dark:text-white tracking-tight">
-            {product.price}
-          </p>
+          <div className="flex flex-col leading-none gap-0.5 pb-1">
+            {product.isPromo && product.promoPrice ? (
+              <>
+                <span className="text-[9px] sm:text-[10px] text-neutral-400 line-through font-normal">
+                  {product.price}
+                </span>
+                <span className="text-[10px] sm:text-[12px] font-semibold text-rose-500 tracking-tight">
+                  {product.promoPrice}
+                </span>
+              </>
+            ) : (
+              <span className="text-[10px] sm:text-[12px] font-semibold text-neutral-900 dark:text-white tracking-tight">
+                {product.price}
+              </span>
+            )}
+          </div>
         </div>
       </motion.div>
     </Link>
