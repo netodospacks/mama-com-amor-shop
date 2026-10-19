@@ -4,10 +4,11 @@ import { motion } from "framer-motion";
 import { ArrowLeft, ShoppingBag, ShieldCheck, Truck, MessageCircle } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { FormattedDescription } from "@/components/FormattedDescription";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Product as ProductType } from "@/types/product";
 import { mapProductFromDB } from "@/lib/mapper";
 import { useCart } from "@/context/CartContext";
+import { getProductById } from "@/data/catalog";
 
 export default function Product() {
   const { id } = useParams();
@@ -21,16 +22,31 @@ export default function Product() {
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id) return;
-      const { data } = await supabase
-        .from('products')
-        .select('*, categories(slug)')
-        .eq('id', id)
-        .single();
-      
-      if (data) {
-        const mappedProduct = mapProductFromDB(data);
-        setProduct(mappedProduct);
-        setMainImage(mappedProduct.gallery?.[0] || mappedProduct.image);
+      try {
+        if (isSupabaseConfigured) {
+          const { data } = await supabase
+            .from('products')
+            .select('*, categories(slug)')
+            .eq('id', id)
+            .single();
+          
+          if (data) {
+            const mappedProduct = mapProductFromDB(data);
+            setProduct(mappedProduct);
+            setMainImage(mappedProduct.gallery?.[0] || mappedProduct.image);
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao buscar produto no Supabase:", err);
+      }
+
+      // Fallback para o catálogo local
+      const local = getProductById(id);
+      if (local) {
+        setProduct(local);
+        setMainImage(local.gallery?.[0] || local.image);
       }
       setIsLoading(false);
     };

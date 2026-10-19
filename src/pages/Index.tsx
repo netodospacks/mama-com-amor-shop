@@ -4,8 +4,18 @@ import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { Product } from "@/types/product";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { mapProductFromDB } from "@/lib/mapper";
+import { 
+  CATEGORIES, 
+  CESTAS_CAFE_DA_MANHA, 
+  CESTAS_ANIVERSARIO, 
+  CESTAS_CORES,
+  QUADROS_A4_CASAL,
+  QUADROS_A4_ANIVERSARIO,
+  QUADROS_10x15_CASAL,
+  QUADROS_10x15_ANIVERSARIO
+} from "@/data/catalog";
 
 const CATEGORY_PILLS = [
   { label: "Cestas", id: "cestas" },
@@ -185,19 +195,36 @@ export default function Index() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const { data } = await supabase
-        .from('products')
-        .select('*, categories(slug)')
-        .eq('active', true)
-        .order('sort_order');
-      
-      if (data) {
-        setProducts(data.map(mapProductFromDB));
+      try {
+        if (!isSupabaseConfigured) {
+          setIsLoading(false);
+          return;
+        }
+        const { data, error } = await supabase
+          .from('products')
+          .select('*, categories(slug)')
+          .eq('active', true)
+          .order('sort_order');
+        
+        if (data && data.length > 0) {
+          setProducts(data.map(mapProductFromDB));
+        }
+      } catch (err) {
+        console.error("Erro ao carregar produtos:", err);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     fetchProducts();
   }, []);
+
+  const getCategoryProducts = (slug: string, fallback?: Product[]): Product[] => {
+    if (products && products.length > 0) {
+      const filtered = products.filter(p => p.categorySlug === slug);
+      if (filtered && filtered.length > 0) return filtered;
+    }
+    return fallback || [];
+  };
 
   const scrollToSection = (id: string) => {
     setActiveCategory(id);
@@ -483,19 +510,19 @@ export default function Index() {
               <div className="mb-10 sm:mb-14 px-2 sm:px-0">
                 <SubSectionHeader title="Cesta Café da Manhã" description="Cada detalhe escolhido pensando em transformar uma manhã em uma lembrança inesquecível." />
                 <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                  {products.filter(p => p.categorySlug === 'cesta-cafe-da-manha').map(product => <MiniCard key={product.id} product={product} />)}
+                  {getCategoryProducts('cesta-cafe-da-manha', CESTAS_CAFE_DA_MANHA).map(product => <MiniCard key={product.id} product={product} />)}
                 </div>
               </div>
               <div className="mb-10 sm:mb-14 px-2 sm:px-0">
                 <SubSectionHeader title="Cesta Aniversário" description="Um aniversário ainda mais especial, com carinho em cada detalhe." />
                 <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                  {products.filter(p => p.categorySlug === 'cesta-aniversario').map(product => <MiniCard key={product.id} product={product} />)}
+                  {getCategoryProducts('cesta-aniversario', CESTAS_ANIVERSARIO).map(product => <MiniCard key={product.id} product={product} />)}
                 </div>
               </div>
               <div className="px-2 sm:px-0">
                 <SubSectionHeader title="Cesta Cores" description="Mais do que uma cesta, um carinho preparado em cada detalhe." />
                 <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                  {products.filter(p => p.categorySlug === 'cesta-cores').map(product => <MiniCard key={product.id} product={product} />)}
+                  {getCategoryProducts('cesta-cores', CESTAS_CORES).map(product => <MiniCard key={product.id} product={product} />)}
                 </div>
               </div>
             </section>
@@ -509,11 +536,11 @@ export default function Index() {
               </div>
               <div className="mb-10 sm:mb-14 px-2 sm:px-0">
                 <SubSectionHeader title="Quadros Casal" />
-                <HScrollRow products={products.filter(p => p.categorySlug === 'quadros-casal')} />
+                <HScrollRow products={getCategoryProducts('quadros-casal', QUADROS_A4_CASAL)} />
               </div>
               <div className="px-2 sm:px-0">
                 <SubSectionHeader title="Quadros Aniversário" />
-                <HScrollRow products={products.filter(p => p.categorySlug === 'quadros-aniversario')} />
+                <HScrollRow products={getCategoryProducts('quadros-aniversario', QUADROS_A4_ANIVERSARIO)} />
               </div>
             </section>
 
@@ -526,11 +553,11 @@ export default function Index() {
               </div>
               <div className="mb-10 sm:mb-14 px-2 sm:px-0">
                 <SubSectionHeader title="Quadro 10x15 Casal" />
-                <HScrollRow products={products.filter(p => p.categorySlug === 'quadro-10x15-casal')} />
+                <HScrollRow products={getCategoryProducts('quadro-10x15-casal', QUADROS_10x15_CASAL)} />
               </div>
               <div className="px-2 sm:px-0">
                 <SubSectionHeader title="Quadro 10x15 Aniversário" />
-                <HScrollRow products={products.filter(p => p.categorySlug === 'quadro-10x15-aniversario')} />
+                <HScrollRow products={getCategoryProducts('quadro-10x15-aniversario', QUADROS_10x15_ANIVERSARIO)} />
               </div>
             </section>
 
@@ -542,7 +569,7 @@ export default function Index() {
                 <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
               </div>
               <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                {products.filter(p => p.categorySlug === 'kits-casal').map(product => <MiniCard key={product.id} product={product} />)}
+                {getCategoryProducts('kits-casal', CATEGORIES.KITS).map(product => <MiniCard key={product.id} product={product} />)}
               </div>
             </section>
 
@@ -554,7 +581,7 @@ export default function Index() {
                 <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
               </div>
               <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                {products.filter(p => p.categorySlug === 'mamaes-e-bebes').map(product => <MiniCard key={product.id} product={product} />)}
+                {getCategoryProducts('mamaes-e-bebes', CATEGORIES.MAMAES_BEBES).map(product => <MiniCard key={product.id} product={product} />)}
               </div>
             </section>
 
@@ -566,7 +593,7 @@ export default function Index() {
                 <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
               </div>
               <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                {products.filter(p => p.categorySlug === 'produtos').map(product => (
+                {getCategoryProducts('produtos', CATEGORIES.PRODUTOS).map(product => (
                   <div key={product.id} className="scale-[1.02] sm:scale-100">
                     <MiniCard product={product} />
                   </div>
@@ -582,7 +609,7 @@ export default function Index() {
                 <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
               </div>
               <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                {products.filter(p => p.categorySlug === 'placas-acrilicas').map(product => <MiniCard key={product.id} product={product} />)}
+                {getCategoryProducts('placas-acrilicas', CATEGORIES.QUADROS_PLACAS).map(product => <MiniCard key={product.id} product={product} />)}
               </div>
             </section>
 
@@ -594,7 +621,7 @@ export default function Index() {
                 <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
               </div>
               <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                {products.filter(p => p.categorySlug === 'combos-promocionais').map(product => <MiniCard key={product.id} product={product} />)}
+                {getCategoryProducts('combos-promocionais', CATEGORIES.COMBOS).map(product => <MiniCard key={product.id} product={product} />)}
               </div>
             </section>
             
@@ -606,7 +633,7 @@ export default function Index() {
                 <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
               </div>
               <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                {products.filter(p => p.categorySlug === 'especial-maes').map(product => <MiniCard key={product.id} product={product} />)}
+                {getCategoryProducts('especial-maes', CATEGORIES.MAES).map(product => <MiniCard key={product.id} product={product} />)}
               </div>
             </section>
           </>

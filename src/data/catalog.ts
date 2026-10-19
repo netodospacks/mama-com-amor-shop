@@ -284,6 +284,7 @@ export const CATEGORIES = {
 export const CESTAS_CAFE_MANHA: Product[] = CATEGORIES.CESTAS.filter(p =>
   ["cesta-1", "cesta-2", "cesta-3", "cesta-4"].includes(p.id)
 );
+export const CESTAS_CAFE_DA_MANHA = CESTAS_CAFE_MANHA;
 
 export const CESTAS_ANIVERSARIO: Product[] = CATEGORIES.CESTAS.filter(p =>
   ["cesta-5", "cesta-6", "cesta-7", "cesta-8", "cesta-9"].includes(p.id)
