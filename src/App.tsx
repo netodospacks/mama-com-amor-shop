@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "./context/CartContext";
 import { CartDrawer, FloatingCart } from "@/components/CartComponents";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 import Index from "./pages/Index.tsx";
 import Product from "./pages/Product.tsx";
@@ -35,39 +36,41 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => (
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <CartProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* PUBLIC ROUTES */}
-            <Route path="/" element={<PublicLayout><Index /></PublicLayout>} />
-            <Route path="/product/:id" element={<PublicLayout><Product /></PublicLayout>} />
-            <Route path="/cart" element={<PublicLayout><Cart /></PublicLayout>} />
-            <Route path="/checkout" element={<PublicLayout><Checkout /></PublicLayout>} />
-            
-            {/* ADMIN ROUTES */}
-            <Route path="/admin/login" element={<Login />} />
-            <Route element={<AdminRoute />}>
-              <Route element={<AdminLayout />}>
-                <Route path="/admin" element={<Dashboard />} />
-                <Route path="/admin/categorias" element={<Categories />} />
-                <Route path="/admin/produtos" element={<Products />} />
-                <Route path="/admin/migracao" element={<Migration />} />
-                <Route path="/admin/pedidos" element={<div className="p-4">Pedidos (Em breve)</div>} />
-                <Route path="/admin/configuracoes" element={<div className="p-4">Configurações (Em breve)</div>} />
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <CartProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* PUBLIC ROUTES */}
+              <Route path="/" element={<PublicLayout><Index /></PublicLayout>} />
+              <Route path="/product/:id" element={<PublicLayout><Product /></PublicLayout>} />
+              <Route path="/cart" element={<PublicLayout><Cart /></PublicLayout>} />
+              <Route path="/checkout" element={<PublicLayout><Checkout /></PublicLayout>} />
+              
+              {/* ADMIN ROUTES */}
+              <Route path="/admin/login" element={<Login />} />
+              <Route element={<AdminRoute />}>
+                <Route element={<AdminLayout />}>
+                  <Route path="/admin" element={<Dashboard />} />
+                  <Route path="/admin/categorias" element={<Categories />} />
+                  <Route path="/admin/produtos" element={<Products />} />
+                  <Route path="/admin/migracao" element={<Migration />} />
+                  <Route path="/admin/pedidos" element={<div className="p-4">Pedidos (Em breve)</div>} />
+                  <Route path="/admin/configuracoes" element={<div className="p-4">Configurações (Em breve)</div>} />
+                </Route>
               </Route>
-            </Route>
 
-            {/* CATCH-ALL */}
-            <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
-          </Routes>
-        </BrowserRouter>
-      </CartProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+              {/* CATCH-ALL */}
+              <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
+            </Routes>
+          </BrowserRouter>
+        </CartProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

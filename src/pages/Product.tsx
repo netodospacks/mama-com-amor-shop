@@ -9,6 +9,7 @@ import { Product as ProductType } from "@/types/product";
 import { mapProductFromDB } from "@/lib/mapper";
 import { useCart } from "@/context/CartContext";
 import { getProductById } from "@/data/catalog";
+import { toast } from "sonner";
 
 export default function Product() {
   const { id } = useParams();
@@ -59,12 +60,15 @@ export default function Product() {
   }, []);
 
   const handleAddToCart = () => {
-    addItem(product!);
-    navigate("/");
+    if (!product) return;
+    addItem(product);
+    toast.success(`${product.name} adicionado ao carrinho! 🛍️`);
+    setIsCartOpen(true);
   };
 
   const handleCheckoutDirect = () => {
-    addItem(product!);
+    if (!product) return;
+    addItem(product);
     setIsCheckoutOpen(true);
   };
 
@@ -240,25 +244,29 @@ export default function Product() {
                 />
               </section>
 
-              <section>
-                <h3 className="text-xs uppercase tracking-[0.2em] font-medium text-black dark:text-white mb-4">
-                  Especificações
-                </h3>
-                <ul className="list-disc pl-4 space-y-2 marker:text-neutral-300 dark:marker:text-neutral-700">
-                  {product.specifications.map((spec, index) => (
-                    <li key={index} className="pl-2">{spec}</li>
-                  ))}
-                </ul>
-              </section>
+              {product.specifications && product.specifications.length > 0 && (
+                <section>
+                  <h3 className="text-xs uppercase tracking-[0.2em] font-medium text-black dark:text-white mb-4">
+                    Especificações
+                  </h3>
+                  <ul className="list-disc pl-4 space-y-2 marker:text-neutral-300 dark:marker:text-neutral-700">
+                    {product.specifications.map((spec, index) => (
+                      <li key={index} className="pl-2">{spec}</li>
+                    ))}
+                  </ul>
+                </section>
+              )}
 
-              <section className="bg-neutral-50 dark:bg-neutral-900 p-5 rounded-xl border border-neutral-100 dark:border-neutral-800">
-                <h3 className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-medium text-black dark:text-white mb-2">
-                  Observações
-                </h3>
-                <p className="text-xs leading-relaxed text-neutral-500">
-                  {product.observations}
-                </p>
-              </section>
+              {product.observations && (
+                <section className="bg-neutral-50 dark:bg-neutral-900 p-5 rounded-xl border border-neutral-100 dark:border-neutral-800">
+                  <h3 className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-medium text-black dark:text-white mb-2">
+                    Observações
+                  </h3>
+                  <p className="text-xs leading-relaxed text-neutral-500">
+                    {product.observations}
+                  </p>
+                </section>
+              )}
 
             </div>
 

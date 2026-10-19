@@ -101,10 +101,7 @@ export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: (
     const whatsappNumber = "5583993032780"; // WhatsApp da loja
     
     window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, "_blank");
-    
-    // Opcional: limpar carrinho após enviar
-    // clearCart();
-    // onClose();
+    onClose();
   };
 
   return (

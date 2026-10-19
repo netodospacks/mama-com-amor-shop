@@ -1,28 +1,64 @@
 import { Product } from "@/types/product";
 
-const formatBRL = (value: number | null | undefined): string =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value ?? 0);
+const formatPriceValue = (value: number | string | null | undefined): string => {
+  if (value === null || value === undefined) return 'R$ 0,00';
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed.startsWith('R$')) return trimmed;
+    const cleaned = trimmed.replace(/\./g, '').replace(',', '.');
+    const parsed = parseFloat(cleaned);
+    if (!isNaN(parsed)) {
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(parsed);
+    }
+    return trimmed;
+  }
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+};
 
 export const mapProductFromDB = (dbProduct: any): Product & { categorySlug?: string } => {
+  let specs: string[] = [];
+  if (Array.isArray(dbProduct.specifications)) {
+    specs = dbProduct.specifications;
+  } else if (typeof dbProduct.specifications === 'string') {
+    try {
+      const parsed = JSON.parse(dbProduct.specifications);
+      if (Array.isArray(parsed)) specs = parsed;
+      else specs = dbProduct.specifications.split('\n').map((s: string) => s.trim()).filter(Boolean);
+    } catch {
+      specs = dbProduct.specifications.split('\n').map((s: string) => s.trim()).filter(Boolean);
+    }
+  }
+
+  let gallery: string[] | undefined = undefined;
+  if (Array.isArray(dbProduct.gallery)) {
+    gallery = dbProduct.gallery;
+  } else if (typeof dbProduct.gallery === 'string' && dbProduct.gallery.trim()) {
+    try {
+      const parsed = JSON.parse(dbProduct.gallery);
+      if (Array.isArray(parsed)) gallery = parsed;
+      else gallery = [dbProduct.gallery];
+    } catch {
+      gallery = [dbProduct.gallery];
+    }
+  }
+
   return {
-    id: dbProduct.id,
-    name: dbProduct.name,
-    // Converte o NUMERIC do banco (ex: 129.9) para string monetária brasileira
-    price: formatBRL(dbProduct.price),
-    // Preço promocional: só presente se is_promo = true e promo_price não for nulo
+    id: String(dbProduct.id),
+    name: dbProduct.name || '',
+    price: formatPriceValue(dbProduct.price),
     promoPrice:
       dbProduct.is_promo && dbProduct.promo_price != null
-        ? formatBRL(dbProduct.promo_price)
+        ? formatPriceValue(dbProduct.promo_price)
         : undefined,
     image: dbProduct.image || undefined,
-    gallery: dbProduct.gallery || undefined,
-    isPromo: dbProduct.is_promo,
-    isNew: dbProduct.is_new,
-    shortDescription: dbProduct.short_description || "",
-    detailedDescription: dbProduct.detailed_description || "",
-    specifications: dbProduct.specifications || [],
-    observations: dbProduct.observations || "",
-    categorySlug: dbProduct.categories?.slug
+    gallery,
+    isPromo: Boolean(dbProduct.is_promo),
+    isNew: Boolean(dbProduct.is_new),
+    shortDescription: dbProduct.short_description || '',
+    detailedDescription: dbProduct.detailed_description || '',
+    specifications: specs,
+    observations: dbProduct.observations || '',
+    categorySlug: dbProduct.categories?.slug || ''
   };
 };
 

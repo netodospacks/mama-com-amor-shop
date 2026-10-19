@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShoppingBag } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,8 +93,23 @@ export default function Checkout() {
   };
 
   if (items.length === 0) {
-    navigate("/");
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mb-4 text-rose-500">
+          <ShoppingBag className="w-10 h-10" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Seu carrinho está vazio</h2>
+        <p className="text-sm text-gray-500 mb-6 max-w-xs">
+          Adicione presentes ao seu carrinho antes de ir para o checkout.
+        </p>
+        <Button 
+          onClick={() => navigate("/")}
+          className="bg-black text-white hover:bg-neutral-800 rounded-xl px-6 py-2.5 text-sm"
+        >
+          Voltar ao Catálogo
+        </Button>
+      </div>
+    );
   }
 
   return (

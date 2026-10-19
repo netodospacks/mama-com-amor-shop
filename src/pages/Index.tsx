@@ -21,11 +21,12 @@ const CATEGORY_PILLS = [
   { label: "Cestas", id: "cestas" },
   { label: "Quadros A4", id: "quadros-a4" },
   { label: "Quadros 10x15", id: "quadros-10x15" },
-  { label: "Quadros e Placas", id: "quadros" },
-  { label: "Kits", id: "kits" },
+  { label: "Kits Casal", id: "kits" },
   { label: "Mamães / Bebês", id: "mamaes-bebes" },
   { label: "Produtos", id: "produtos" },
+  { label: "Placas Acrílicas", id: "placas" },
   { label: "Combos Promocionais", id: "combos" },
+  { label: "Especial Mães", id: "maes" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
