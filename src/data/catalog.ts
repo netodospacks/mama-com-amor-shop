@@ -1,17 +1,6 @@
-export type Product = {
-  id: string;
-  name: string;
-  price: string;
-  image?: string;
-  gallery?: string[];
-  isPromo?: boolean;
-  isNew?: boolean;
-  shortDescription: string;
-  detailedDescription: string;
-  specifications: string[];
-  observations: string;
-};
+import { Product } from "@/types/product";
 
+export type { Product };
 const defaultDescription = {
   shortDescription: "Uma peça elegante e minimalista, ideal para transformar o ambiente.",
   detailedDescription: "Desenvolvido com materiais de alta qualidade e um design premium, este produto oferece o equilíbrio perfeito entre sofisticação e durabilidade. Cada detalhe foi pensado para os clientes mais exigentes, trazendo um toque de exclusividade e modernidade para o seu espaço.",
@@ -291,6 +280,38 @@ export const CATEGORIES = {
   ]
 };
 
+// ── Subcategorias de Cestas ──────────────────────────────────────────────────
+export const CESTAS_CAFE_MANHA: Product[] = CATEGORIES.CESTAS.filter(p =>
+  ["cesta-1", "cesta-2", "cesta-3", "cesta-4"].includes(p.id)
+);
+
+export const CESTAS_ANIVERSARIO: Product[] = CATEGORIES.CESTAS.filter(p =>
+  ["cesta-5", "cesta-6", "cesta-7", "cesta-8", "cesta-9"].includes(p.id)
+);
+
+export const CESTAS_CORES: Product[] = CATEGORIES.CESTAS.filter(p =>
+  ["cesta-10", "cesta-11", "cesta-12", "cesta-13"].includes(p.id)
+);
+
+// ── Subcategorias de Quadros A4 ───────────────────────────────────────────────
+export const QUADROS_A4_CASAL: Product[] = CATEGORIES.QUADROS_A4.filter(p =>
+  ["qa4-1", "qa4-2", "qa4-3", "qa4-4", "qa4-5"].includes(p.id)
+);
+
+export const QUADROS_A4_ANIVERSARIO: Product[] = CATEGORIES.QUADROS_A4.filter(p =>
+  ["qa4-6", "qa4-7", "qa4-8", "qa4-9", "qa4-10"].includes(p.id)
+);
+
+// ── Subcategorias de Quadros 10x15 ────────────────────────────────────────────
+export const QUADROS_10x15_CASAL: Product[] = CATEGORIES.QUADROS_10x15.filter(p =>
+  ["q1015-1", "q1015-2", "q1015-3"].includes(p.id)
+);
+
+export const QUADROS_10x15_ANIVERSARIO: Product[] = CATEGORIES.QUADROS_10x15.filter(p =>
+  ["q1015-4", "q1015-5"].includes(p.id)
+);
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 export const getAllProducts = (): Product[] => {
   return Object.values(CATEGORIES).flat();
 };

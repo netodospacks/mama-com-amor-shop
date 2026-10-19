@@ -27,7 +27,7 @@ const BAIRROS_POR_CIDADE: Record<string, string[]> = {
 };
 
 export default function Checkout() {
-  const { items, totalPrice, clearCart, formaPagamento, setFormaPagamento } = useCart();
+  const { items, totalPrice, totalPriceFormatted, clearCart, formaPagamento, setFormaPagamento } = useCart();
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
@@ -212,7 +212,7 @@ export default function Checkout() {
           </div>
           <div className="flex justify-between items-center px-1">
             <span className="font-medium text-gray-600">Total do pedido:</span>
-            <span className="font-bold text-lg text-store-pink">R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
+            <span className="font-bold text-lg text-store-pink">{totalPriceFormatted}</span>
           </div>
           <Button 
             onClick={handleSubmit}

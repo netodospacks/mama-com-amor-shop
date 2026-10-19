@@ -1,25 +1,41 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ShoppingBag, ShieldCheck, Truck } from "lucide-react";
+import { ArrowLeft, ShoppingBag, ShieldCheck, Truck, MessageCircle } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { FormattedDescription } from "@/components/FormattedDescription";
-import { getProductById } from "@/data/catalog";
+import { supabase } from "@/lib/supabase";
+import { Product as ProductType } from "@/types/product";
+import { mapProductFromDB } from "@/lib/mapper";
 import { useCart } from "@/context/CartContext";
 
 export default function Product() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const product = getProductById(id || "");
+  const [product, setProduct] = useState<ProductType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { addItem, isCartOpen, setIsCartOpen, setIsCheckoutOpen } = useCart();
 
-  const [mainImage, setMainImage] = useState<string | undefined>(product?.gallery?.[0] || product?.image);
+  const [mainImage, setMainImage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (product) {
-      setMainImage(product.gallery?.[0] || product.image);
-    }
-  }, [product]);
+    const fetchProduct = async () => {
+      if (!id) return;
+      const { data } = await supabase
+        .from('products')
+        .select('*, categories(slug)')
+        .eq('id', id)
+        .single();
+      
+      if (data) {
+        const mappedProduct = mapProductFromDB(data);
+        setProduct(mappedProduct);
+        setMainImage(mappedProduct.gallery?.[0] || mappedProduct.image);
+      }
+      setIsLoading(false);
+    };
+    fetchProduct();
+  }, [id]);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -35,6 +51,14 @@ export default function Product() {
     addItem(product!);
     setIsCheckoutOpen(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAFAFA] dark:bg-[#050505]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black dark:border-white"></div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -127,9 +151,22 @@ export default function Product() {
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-medium tracking-tight mb-3 text-black dark:text-white">
                 {product.name}
               </h1>
-              <p className="text-xl md:text-2xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-200 mb-6">
-                {product.price}
-              </p>
+              <div className="flex flex-col mb-6">
+                {product.isPromo && product.promoPrice ? (
+                  <>
+                    <span className="text-sm md:text-base text-neutral-400 line-through">
+                      {product.price}
+                    </span>
+                    <span className="text-xl md:text-2xl font-semibold tracking-tight text-rose-500">
+                      {product.promoPrice}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-xl md:text-2xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-200">
+                    {product.price}
+                  </span>
+                )}
+              </div>
               
               {/* Descrição Curta */}
               <FormattedDescription 

@@ -8,7 +8,7 @@ import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { toast } from "sonner";
 
 export default function Cart() {
-  const { items, updateQuantity, removeItem, totalPrice, formaPagamento, setFormaPagamento } = useCart();
+  const { items, updateQuantity, removeItem, totalPriceFormatted, formaPagamento, setFormaPagamento } = useCart();
   const [paymentError, setPaymentError] = useState(false);
   const navigate = useNavigate();
 
@@ -50,51 +50,67 @@ export default function Cart() {
           </div>
         ) : (
           <div className="space-y-4">
-            {items.map((item) => (
-              <div key={item.product.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
-                <img 
-                  src={item.product.image} 
-                  alt={item.product.name} 
-                  className="w-20 h-20 object-cover rounded-xl bg-gray-50"
-                />
-                <div className="flex-1 flex flex-col justify-between">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-bold text-sm text-gray-800 line-clamp-2 pr-2">
-                      {item.product.name}
-                    </h3>
-                    <button 
-                      onClick={() => removeItem(item.product.id)}
-                      className="text-gray-400 hover:text-red-500 p-1"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                  
-                  <div className="flex justify-between items-end mt-2">
-                    <p className="text-store-pink font-bold">
-                      R$ {typeof item.product.price === 'number' ? item.product.price.toFixed(2).replace('.', ',') : String(item.product.price).replace('R$', '').trim()}
-                    </p>
+            {items.map((item) => {
+              const isOnPromo = item.product.isPromo && item.product.promoPrice;
+              return (
+                <div key={item.product.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
+                  <img 
+                    src={item.product.image} 
+                    alt={item.product.name} 
+                    className="w-20 h-20 object-cover rounded-xl bg-gray-50"
+                  />
+                  <div className="flex-1 flex flex-col justify-between">
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-bold text-sm text-gray-800 line-clamp-2 pr-2">
+                        {item.product.name}
+                      </h3>
+                      <button 
+                        onClick={() => removeItem(item.product.id)}
+                        className="text-gray-400 hover:text-red-500 p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                     
-                    <div className="flex items-center gap-3 bg-store-light rounded-full px-3 py-1">
-                      <button 
-                        onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                        className="text-store-dark hover:opacity-70 disabled:opacity-30"
-                        disabled={item.quantity <= 1}
-                      >
-                        <Minus className="w-3 h-3" />
-                      </button>
-                      <span className="text-sm font-bold w-4 text-center">{item.quantity}</span>
-                      <button 
-                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                        className="text-store-dark hover:opacity-70"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </button>
+                    <div className="flex justify-between items-end mt-2">
+                      <div className="flex flex-col leading-tight">
+                        {isOnPromo ? (
+                          <>
+                            <span className="text-[10px] text-gray-400 line-through">
+                              {item.product.price}
+                            </span>
+                            <span className="text-store-pink font-bold">
+                              {item.product.promoPrice}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-store-pink font-bold">
+                            {item.product.price}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-3 bg-store-light rounded-full px-3 py-1">
+                        <button 
+                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                          className="text-store-dark hover:opacity-70 disabled:opacity-30"
+                          disabled={item.quantity <= 1}
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="text-sm font-bold w-4 text-center">{item.quantity}</span>
+                        <button 
+                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                          className="text-store-dark hover:opacity-70"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {/* Seção Forma de Pagamento */}
             <div className="mt-6 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
@@ -112,11 +128,11 @@ export default function Cart() {
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-store-light">
               <div className="flex justify-between items-center mb-2 text-sm text-gray-600">
                 <span>Subtotal</span>
-                <span>R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
+                <span>{totalPriceFormatted}</span>
               </div>
               <div className="flex justify-between items-center font-bold text-lg text-gray-900 border-t border-gray-100 pt-3 mt-2">
                 <span>Total</span>
-                <span className="text-store-pink">R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
+                <span className="text-store-pink">{totalPriceFormatted}</span>
               </div>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { CartItem } from "@/context/CartContext";
+import { getEffectivePrice } from "@/lib/mapper";
 
 export interface CheckoutData {
   nome: string;
@@ -25,6 +26,9 @@ export function generateWhatsAppLink(
   total: number,
   phoneNumber: string = "5583993032780" // WhatsApp oficial Virtual Store
 ) {
+  const formatBRL = (n: number) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
+
   let message = `Pedido Virtual Store 🛍️\n\n`;
   message += `*Nome:* ${data.nome}\n`;
   message += `*Cidade:* ${data.cidade}\n`;
@@ -40,11 +44,16 @@ export function generateWhatsAppLink(
   }
   
   message += `\n*Itens do pedido:*\n`;
-  cartItems.forEach((item) => {
-    message += `- ${item.quantity}x ${item.product.name} (${formatPrice(item.product.price)})\n`;
+  cartItems.forEach(item => {
+    const effectivePrice = getEffectivePrice(item.product);
+    const isOnPromo = item.product.isPromo && item.product.promoPrice;
+    const priceStr = isOnPromo
+      ? `${formatBRL(effectivePrice)} (em promoção, antes: ${item.product.price})`
+      : formatBRL(effectivePrice);
+    message += `- ${item.quantity}x ${item.product.name} (${priceStr})\n`;
   });
 
-  message += `\n*Total:* R$ ${total.toFixed(2).replace(".", ",")}\n`;
+  message += `\n*Total:* ${formatBRL(total)}\n`;
 
   const encodedMessage = encodeURIComponent(message);
   return `https://wa.me/${phoneNumber}?text=${encodedMessage}`;

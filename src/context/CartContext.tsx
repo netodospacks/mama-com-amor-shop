@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useMemo } from "react";
-import { Product } from "@/data/catalog";
+import { Product } from "@/types/product";
+import { getEffectivePrice } from "@/lib/mapper";
 import { PaymentMethod } from "@/components/PaymentMethodSelector";
 import { toast } from "sonner";
 
@@ -76,12 +77,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [items]
   );
 
-  const parsePrice = (priceStr: string) => {
-    return parseFloat(priceStr.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
-  };
-
+  // Usa o preço efetivo (promoPrice quando disponível, senão price)
   const totalPrice = useMemo(
-    () => items.reduce((total, item) => total + parsePrice(item.product.price) * item.quantity, 0),
+    () => items.reduce((total, item) => total + getEffectivePrice(item.product) * item.quantity, 0),
     [items]
   );
 
