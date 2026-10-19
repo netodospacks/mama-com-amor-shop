@@ -1,12 +1,32 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { ShoppingBag, X, Plus, Minus, Trash2 } from "lucide-react";
 import { CheckoutStage } from "./CheckoutStage";
+import { WhatsAppIcon } from "./WhatsAppIcon";
+import { PaymentMethodSelector } from "./PaymentMethodSelector";
+import { toast } from "sonner";
 
 export function CartDrawer() {
-  const { items, isCartOpen, setIsCartOpen, removeItem, updateQuantity, totalPriceFormatted, setIsCheckoutOpen } = useCart();
+  const { 
+    items, 
+    isCartOpen, 
+    setIsCartOpen, 
+    removeItem, 
+    updateQuantity, 
+    totalPriceFormatted, 
+    setIsCheckoutOpen,
+    formaPagamento,
+    setFormaPagamento 
+  } = useCart();
+  const [paymentError, setPaymentError] = useState(false);
 
   const handleCheckout = () => {
+    if (!formaPagamento) {
+      setPaymentError(true);
+      toast.error("Por favor, selecione a forma de pagamento (PIX ou CARTÃO).");
+      return;
+    }
     setIsCartOpen(false);
     setIsCheckoutOpen(true);
   };
@@ -107,20 +127,63 @@ export function CartDrawer() {
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="p-5 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-[#0A0A0A]">
-                <div className="flex justify-between items-center mb-6">
-                  <span className="text-xs uppercase tracking-widest text-neutral-500">Total</span>
-                  <span className="text-lg font-semibold">{totalPriceFormatted}</span>
+              <div className="p-5 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-[#0A0A0A] space-y-4">
+                {/* Seletor de Forma de Pagamento */}
+                <div>
+                  <PaymentMethodSelector 
+                    value={formaPagamento} 
+                    onChange={(method) => {
+                      setFormaPagamento(method);
+                      setPaymentError(false);
+                    }}
+                    error={paymentError}
+                  />
+                </div>
+
+                {/* Total */}
+                <div className="flex justify-between items-center pt-1 border-t border-neutral-200/60 dark:border-neutral-800/60">
+                  <span className="text-xs uppercase tracking-widest text-neutral-500 dark:text-neutral-400 font-medium">Total</span>
+                  <span className="text-xl font-bold text-[#E5C378]">{totalPriceFormatted}</span>
                 </div>
                 
+                {/* Botão de WhatsApp */}
                 <motion.button 
-                  whileHover={{ scale: 1.02 }}
+                  whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleCheckout}
-                  className="w-full bg-black dark:bg-white text-white dark:text-black py-4 rounded-xl text-xs sm:text-sm font-medium tracking-[0.15em] uppercase shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-4 rounded-xl text-xs sm:text-sm font-semibold tracking-wide uppercase shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#25D366]/50 focus:ring-offset-2"
                 >
-                  Finalizar Pedido
+                  <WhatsAppIcon size={19} className="text-white shrink-0" />
+                  <span>Finalizar Pedido pelo WhatsApp</span>
                 </motion.button>
+
+                {/* Opção de envio rápido direto pelo WhatsApp */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!formaPagamento) {
+                      setPaymentError(true);
+                      toast.error("Por favor, selecione a forma de pagamento (PIX ou CARTÃO).");
+                      return;
+                    }
+                    let message = "Olá, gostaria de fazer este pedido:\n\n";
+                    message += "*PRODUTOS:*\n\n";
+                    items.forEach(item => {
+                      message += `*${item.product.name}*\n`;
+                      message += `Quantidade: ${item.quantity}\n`;
+                      message += `Preço: ${item.product.price}\n\n`;
+                    });
+                    message += `*Total: ${totalPriceFormatted}*\n\n`;
+                    message += `*Forma de pagamento:* ${formaPagamento}\n\n`;
+                    message += "_Dados de entrega a combinar no WhatsApp._";
+
+                    const encodedMessage = encodeURIComponent(message);
+                    window.open(`https://wa.me/5583993032780?text=${encodedMessage}`, "_blank");
+                  }}
+                  className="w-full text-center text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors underline underline-offset-4 pt-1 block"
+                >
+                  Ou enviar direto no WhatsApp sem preencher endereço
+                </button>
               </div>
             )}
           </motion.div>

@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LocationPicker } from "@/components/LocationPicker";
+import { PaymentMethodSelector, PaymentMethod } from "@/components/PaymentMethodSelector";
 import { generateWhatsAppLink } from "@/lib/whatsapp";
 import { toast } from "sonner";
 
@@ -25,7 +27,7 @@ const BAIRROS_POR_CIDADE: Record<string, string[]> = {
 };
 
 export default function Checkout() {
-  const { items, totalPrice, clearCart } = useCart();
+  const { items, totalPrice, clearCart, formaPagamento, setFormaPagamento } = useCart();
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
@@ -34,7 +36,16 @@ export default function Checkout() {
     bairro: "Tibiri",
     tipoEntrega: "Retirada",
     linkMaps: "",
+    formaPagamento: formaPagamento || ("" as PaymentMethod | ""),
   });
+  const [paymentError, setPaymentError] = useState(false);
+
+  // Keep in sync with cart context
+  useEffect(() => {
+    if (formaPagamento && !formData.formaPagamento) {
+      setFormData(prev => ({ ...prev, formaPagamento }));
+    }
+  }, [formaPagamento]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -59,6 +70,12 @@ export default function Checkout() {
     
     if (!formData.nome) {
       toast.error("Por favor, preencha seu nome.");
+      return;
+    }
+
+    if (!formData.formaPagamento) {
+      setPaymentError(true);
+      toast.error("Por favor, selecione a forma de pagamento (PIX ou CARTÃO).");
       return;
     }
 
@@ -167,22 +184,42 @@ export default function Checkout() {
               <LocationPicker onLocationChange={handleLocationChange} />
             )}
           </div>
+
+          {/* Escolha a forma de pagamento - ÚLTIMA OPÇÃO */}
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+            <h2 className="font-bold text-gray-800 border-b pb-2">Escolha a forma de pagamento</h2>
+            <PaymentMethodSelector 
+              value={formData.formaPagamento} 
+              onChange={(method) => {
+                setFormData(prev => ({ ...prev, formaPagamento: method }));
+                setFormaPagamento(method);
+                setPaymentError(false);
+              }}
+              error={paymentError}
+            />
+          </div>
         </form>
 
       </main>
 
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40">
         <div className="container max-w-lg mx-auto flex flex-col gap-2">
+          <div className="flex justify-between items-center px-1 text-xs text-gray-500">
+            <span>Forma de pagamento:</span>
+            <span className={`font-semibold ${formData.formaPagamento ? "text-gray-800" : "text-amber-500"}`}>
+              {formData.formaPagamento || "Selecione acima"}
+            </span>
+          </div>
           <div className="flex justify-between items-center px-1">
             <span className="font-medium text-gray-600">Total do pedido:</span>
             <span className="font-bold text-lg text-store-pink">R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
           </div>
           <Button 
             onClick={handleSubmit}
-            className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white h-14 rounded-xl font-bold shadow-soft text-lg"
+            className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white h-14 rounded-xl font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-all duration-200 text-base sm:text-lg flex items-center justify-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-[#25D366]/50 focus:ring-offset-2"
           >
-            <MessageCircle className="w-5 h-5 mr-2" />
-            Finalizar pelo WhatsApp
+            <WhatsAppIcon size={22} className="text-white shrink-0" />
+            <span>Finalizar pelo WhatsApp</span>
           </Button>
         </div>
       </div>

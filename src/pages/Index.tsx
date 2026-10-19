@@ -1,8 +1,20 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Instagram, MoreHorizontal, X, ChevronRight } from "lucide-react";
+import { Instagram, MoreHorizontal, X, ChevronRight, Menu, Gift, MapPin } from "lucide-react";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CATEGORIES, Product } from "@/data/catalog";
+
+const CATEGORY_PILLS = [
+  { label: "Cestas", id: "cestas" },
+  { label: "Quadros A4", id: "quadros-a4" },
+  { label: "Quadros 10x15", id: "quadros-10x15" },
+  { label: "Quadros e Placas", id: "quadros" },
+  { label: "Kits", id: "kits" },
+  { label: "Mamães / Bebês", id: "mamaes-bebes" },
+  { label: "Produtos", id: "produtos" },
+  { label: "Combos Promocionais", id: "combos" },
+];
 
 const MiniCard = ({ product }: { product: Product }) => {
   return (
@@ -62,13 +74,16 @@ const MENU_ITEMS = [
 
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>("cestas");
+  const pillsContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToSection = (id: string) => {
+    setActiveCategory(id);
     setMenuOpen(false);
     setTimeout(() => {
       const el = document.getElementById(id);
       if (el) {
-        const offset = 80;
+        const offset = window.innerWidth < 768 ? 65 : 75;
         const bodyRect = document.body.getBoundingClientRect().top;
         const elementRect = el.getBoundingClientRect().top;
         const elementPosition = elementRect - bodyRect;
@@ -79,34 +94,43 @@ export default function Index() {
           behavior: "smooth"
         });
       }
-    }, 150);
+    }, 100);
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 120;
+      for (let i = CATEGORY_PILLS.length - 1; i >= 0; i--) {
+        const item = CATEGORY_PILLS[i];
+        const el = document.getElementById(item.id);
+        if (el && scrollPosition >= el.offsetTop) {
+          setActiveCategory(item.id);
+          break;
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (pillsContainerRef.current) {
+      const activeButton = pillsContainerRef.current.querySelector<HTMLButtonElement>(`[data-pill-id="${activeCategory}"]`);
+      if (activeButton) {
+        activeButton.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center"
+        });
+      }
+    }
+  }, [activeCategory]);
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] text-neutral-900 dark:text-neutral-100 font-sans selection:bg-neutral-200 selection:text-black">
       
-      {/* Header Premium */}
-      <header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between bg-white/70 dark:bg-black/70 backdrop-blur-xl border-b border-black/5 dark:border-white/5 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.02)]">
-        <button
-          onClick={() => setMenuOpen(true)}
-          className="p-1.5 text-neutral-800 dark:text-neutral-200 hover:opacity-60 transition-opacity"
-        >
-          <MoreHorizontal size={22} strokeWidth={1.5} />
-        </button>
-        <span className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] text-neutral-900 dark:text-white uppercase ml-3">
-          Virtual Store
-        </span>
-        <a
-          href="https://instagram.com/larissagouveiaaa"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-1.5 text-neutral-800 dark:text-neutral-200 hover:opacity-60 transition-opacity"
-        >
-          <Instagram size={20} strokeWidth={1.5} />
-        </a>
-      </header>
-
-      {/* Menu Lateral */}
+      {/* Menu Lateral (Compartilhado) */}
       <AnimatePresence>
         {menuOpen && (
           <>
@@ -144,14 +168,23 @@ export default function Index() {
                   </button>
                 ))}
               </nav>
-              <div className="px-6 py-5 border-t border-neutral-100 dark:border-neutral-800">
+              <div className="px-6 py-5 border-t border-neutral-100 dark:border-neutral-800 space-y-3">
+                <a
+                  href="https://wa.me/5583993032780?text=Ol%C3%A1%2C%20gostaria%20de%20um%20atendimento%20pelo%20WhatsApp!"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-xl bg-[#25D366] hover:bg-[#128C7E] text-white text-xs font-semibold uppercase tracking-wider shadow-sm hover:shadow-md active:scale-[0.98] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#25D366]/50"
+                >
+                  <WhatsAppIcon size={18} className="text-white shrink-0" />
+                  <span>Falar no WhatsApp</span>
+                </a>
                 <a
                   href="https://instagram.com/larissagouveiaaa"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-sm text-neutral-500 hover:text-black dark:hover:text-white transition-colors"
+                  className="flex items-center gap-3 text-xs text-neutral-500 hover:text-black dark:hover:text-white transition-colors pt-1"
                 >
-                  <Instagram size={18} strokeWidth={1.5} />
+                  <Instagram size={16} strokeWidth={1.5} />
                   <span className="tracking-wider">@larissagouveiaaa</span>
                 </a>
               </div>
@@ -160,91 +193,139 @@ export default function Index() {
         )}
       </AnimatePresence>
 
-      {/* Hero Section com Vídeo */}
-      <section className="relative w-full h-screen min-h-[600px] flex flex-col items-center justify-center overflow-hidden bg-black">
-        {/* Background Image */}
-        <img
-          src="/hero-bg.jpg"
-          alt="Hero Background"
-          className="absolute inset-0 w-full h-full object-cover opacity-75"
-        />
-        {/* Overlay gradiente */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30" />
+      {/* ========================================================== */}
+      {/* CABEÇALHO E HERO PRINCIPAL LUXURY (MODELO VISUAL)          */}
+      {/* ========================================================== */}
+      <section className="relative w-full overflow-hidden bg-[#0A0A0A]">
+        {/* Fundo fotográfico original da loja (termina exatamente após Santa Rita / Região) */}
+        <div className="absolute inset-0 w-full h-full pointer-events-none">
+          <img
+            src="/hero-bg.jpg"
+            alt="Virtual Store Presentes Personalizados"
+            className="w-full h-full object-cover object-center"
+          />
+          {/* Overlay escuro elegante para máxima legibilidade dos textos e detalhes dourados */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/60 to-black/95" />
+          {/* Transição suave para a seção dos cards de categorias que fica fora da imagem */}
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0A0A0A] to-transparent" />
+        </div>
 
-        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 w-full h-full pt-20 pb-10">
-          {/* Eyebrow */}
-          <motion.span
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 0.9, y: 0 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            className="text-[9px] sm:text-[11px] uppercase font-light text-white/80 tracking-[0.45em] mb-5"
+        {/* Barra Superior: Menu (3 linhas) + Marca Central + Instagram */}
+        <div className="relative z-20 max-w-4xl mx-auto px-4 sm:px-6 pt-3.5 pb-2 flex items-center justify-between">
+          {/* Menu de três linhas no canto superior esquerdo */}
+          <button
+            onClick={() => setMenuOpen(true)}
+            aria-label="Abrir Menu"
+            className="p-2 text-white/90 hover:text-white active:scale-90 transition-transform -ml-1 rounded-full focus:outline-none"
           >
-            Catálogo Exclusivo
-          </motion.span>
+            <Menu size={22} strokeWidth={1.8} />
+          </button>
 
-          {/* Título principal */}
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl sm:text-6xl md:text-7xl font-extralight text-white tracking-[0.2em] mb-4 uppercase leading-tight"
-          >
-            Eternizando
-          </motion.h1>
-          <motion.h2
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-xl sm:text-3xl md:text-4xl font-thin text-white/70 tracking-[0.35em] uppercase mb-8"
-          >
-            Momentos
-          </motion.h2>
+          {/* Marca VIRTUAL STORE centralizada com ícone de presente */}
+          <div className="flex flex-col items-center justify-center text-center">
+            <Gift size={20} strokeWidth={1.5} className="text-[#E5C378] mb-0.5 drop-shadow-[0_2px_8px_rgba(229,195,120,0.35)]" />
+            <span className="text-[13px] sm:text-sm font-semibold tracking-[0.28em] text-white uppercase leading-none font-sans drop-shadow-sm">
+              VIRTUAL STORE
+            </span>
+            <div className="flex items-center justify-center gap-1.5 mt-1.5">
+              <span className="h-[1px] w-3.5 bg-[#E5C378]/70" />
+              <span className="text-[8px] sm:text-[8.5px] font-light tracking-[0.24em] text-[#E5C378] uppercase">
+                PRESENTES PERSONALIZADOS
+              </span>
+              <span className="h-[1px] w-3.5 bg-[#E5C378]/70" />
+            </div>
+          </div>
 
-          {/* Subtítulo */}
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 0.7, y: 0 }}
-            transition={{ duration: 1.2, delay: 0.35, ease: "easeOut" }}
-            className="text-xs sm:text-sm font-light text-white/70 tracking-wider max-w-xs sm:max-w-sm mb-12 leading-relaxed"
+          {/* Ícone do Instagram no canto superior direito */}
+          <a
+            href="https://instagram.com/larissagouveiaaa"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram da loja"
+            className="p-2 text-white/90 hover:text-white active:scale-90 transition-transform -mr-1 rounded-full focus:outline-none"
           >
-            Presentes personalizados feitos com carinho e exclusividade para quem você ama.
-          </motion.p>
+            <Instagram size={20} strokeWidth={1.8} />
+          </a>
+        </div>
 
-          {/* Botões verticais em cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col w-full max-w-[260px] sm:max-w-xs gap-2.5"
+        {/* Apresentação da Marca (A imagem termina exatamente após estas informações) */}
+        <div className="relative z-10 max-w-2xl mx-auto px-4 pt-6 sm:pt-10 pb-10 sm:pb-14 flex flex-col items-center text-center">
+          {/* CATÁLOGO EXCLUSIVO */}
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <span className="h-[1px] w-4 bg-[#E5C378]/60" />
+            <span className="text-[9.5px] sm:text-[10.5px] tracking-[0.35em] text-[#E5C378] font-light uppercase">
+              CATÁLOGO EXCLUSIVO
+            </span>
+            <span className="h-[1px] w-4 bg-[#E5C378]/60" />
+          </div>
+
+          {/* Transforme sentimentos em presentes inesquecíveis */}
+          <h1 className="font-serif text-[22px] sm:text-[28px] md:text-[32px] font-normal text-white tracking-wide leading-snug max-w-md mx-auto mb-3.5 drop-shadow-md">
+            Transforme sentimentos em presentes inesquecíveis
+          </h1>
+
+          {/* Santa Rita, João Pessoa e Região */}
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-black/45 backdrop-blur-md border border-[#E5C378]/25 shadow-sm">
+            <MapPin size={12} className="text-[#E5C378] shrink-0" />
+            <span className="text-[10.5px] sm:text-xs font-light text-neutral-200 tracking-wider">
+              Santa Rita, João Pessoa e Região
+            </span>
+          </div>
+
+          {/* Botão Falar no WhatsApp */}
+          <a
+            href="https://wa.me/5583993032780?text=Ol%C3%A1%2C%20gostaria%20de%20um%20atendimento%20pelo%20WhatsApp!"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3 rounded-full bg-[#25D366] hover:bg-[#1ebd5b] text-white text-xs sm:text-sm font-semibold tracking-wider uppercase shadow-[0_4px_20px_rgba(37,211,102,0.4)] hover:shadow-[0_6px_25px_rgba(37,211,102,0.6)] active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#25D366]/50"
           >
-            {[
-              { label: "Cestas", id: "cestas", desc: "Cestas personalizadas com muito carinho" },
-              { label: "Quadros", id: "quadros-a4", desc: "A4, 10x15 e placas decorativas" },
-              { label: "Kits", id: "kits", desc: "Composições exclusivas" },
-              { label: "Mamães / Bebês", id: "mamaes-bebes", desc: "Presentes especiais para mamãe e bebê" },
-              { label: "Produtos", id: "produtos", desc: "Itens avulsos personalizados" },
-              { label: "Combos Promocionais", id: "combos", desc: "Ofertas imperdíveis" },
-            ].map((btn, i) => (
-              <motion.button
-                key={btn.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.55 + i * 0.08, ease: "easeOut" }}
-                onClick={() => scrollToSection(btn.id)}
-                className="group flex items-center justify-between w-full px-4 py-3 rounded-xl bg-white/8 backdrop-blur-md border border-white/15 text-white hover:bg-white hover:text-black transition-all duration-300 hover:border-white hover:shadow-[0_4px_24px_rgba(255,255,255,0.15)]"
-              >
-                <div className="flex flex-col items-start text-left">
-                  <span className="text-[11px] sm:text-xs font-semibold tracking-[0.12em] uppercase leading-none mb-0.5">{btn.label}</span>
-                  <span className="text-[9px] sm:text-[10px] font-light tracking-wide opacity-60 group-hover:opacity-50 leading-none">{btn.desc}</span>
-                </div>
-                <ChevronRight size={14} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
-              </motion.button>
-            ))}
-          </motion.div>
+            <WhatsAppIcon size={18} className="text-white shrink-0" />
+            <span>Falar no WhatsApp</span>
+          </a>
         </div>
       </section>
 
-      <main className="w-full max-w-[1600px] mx-auto px-2 sm:px-6 md:px-8 py-20 sm:py-32 space-y-24 sm:space-y-40">
+      {/* 2. Barra de Categorias Horizontal Deslizante (Pills / Chips) */}
+      <nav 
+        aria-label="Navegação por categorias"
+        className="sticky top-0 z-30 bg-[#0A0A0A]/95 backdrop-blur-md border-y border-[#E5C378]/25 py-2.5 sm:py-3 shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+      >
+        <div className="relative max-w-6xl mx-auto px-2 sm:px-4">
+          {/* Sombras suaves nas laterais para indicar rolagem fluida */}
+          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-[#0A0A0A] to-transparent z-10" />
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10" />
+
+          {/* Lista com rolagem horizontal suave */}
+          <div 
+            ref={pillsContainerRef}
+            className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 px-4 sm:px-2 scroll-smooth"
+          >
+            {CATEGORY_PILLS.map((pill) => {
+              const isActive = activeCategory === pill.id;
+              return (
+                <button
+                  key={pill.id}
+                  data-pill-id={pill.id}
+                  onClick={() => scrollToSection(pill.id)}
+                  className={`shrink-0 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs tracking-wider uppercase transition-all duration-200 border whitespace-nowrap active:scale-95 flex items-center gap-1.5 focus:outline-none ${
+                    isActive
+                      ? "bg-[#E5C378] text-[#0A0A0A] border-[#E5C378] shadow-[0_2px_12px_rgba(229,195,120,0.45)] font-semibold"
+                      : "bg-[#141414] text-neutral-300 hover:text-white border-[#E5C378]/25 hover:border-[#E5C378]/60 hover:bg-[#1c1c1c]"
+                  }`}
+                >
+                  {isActive && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0A0A0A] shrink-0" />
+                  )}
+                  <span>{pill.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
+
+
+      <main className="w-full max-w-[1600px] mx-auto px-2 sm:px-6 md:px-8 pt-4 pb-20 md:py-32 space-y-14 md:space-y-40">
         
         {/* Section: Cestas */}
         <section id="cestas" className="w-full">
@@ -345,6 +426,15 @@ export default function Index() {
         <p className="text-xs text-neutral-400 max-w-sm font-light leading-relaxed">
           A excelência em produtos premium, pensados para os clientes mais exigentes.
         </p>
+        <a
+          href="https://wa.me/5583993032780?text=Ol%C3%A1%2C%20gostaria%20de%20um%20atendimento%20pelo%20WhatsApp!"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-6 inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-[#25D366] hover:bg-[#128C7E] text-white text-xs font-semibold uppercase tracking-wider shadow-md hover:shadow-lg active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#25D366]/50"
+        >
+          <WhatsAppIcon size={18} className="text-white shrink-0" />
+          <span>Atendimento WhatsApp</span>
+        </a>
         <div className="mt-8 pt-8 border-t border-black/5 dark:border-white/5 w-full max-w-xs text-[10px] text-neutral-400">
           © {new Date().getFullYear()} Eternizando Momentos. Todos os direitos reservados.
         </div>

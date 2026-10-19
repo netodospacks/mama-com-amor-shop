@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ShoppingBag, ShieldCheck, Truck, MessageCircle } from "lucide-react";
+import { ArrowLeft, ShoppingBag, ShieldCheck, Truck } from "lucide-react";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
+import { FormattedDescription } from "@/components/FormattedDescription";
 import { getProductById } from "@/data/catalog";
 import { useCart } from "@/context/CartContext";
 
@@ -130,9 +132,10 @@ export default function Product() {
               </p>
               
               {/* Descrição Curta */}
-              <p className="text-sm md:text-base text-neutral-500 leading-relaxed font-light">
-                {product.shortDescription}
-              </p>
+              <FormattedDescription 
+                text={(product as any).short_description || product.shortDescription} 
+                className="text-sm md:text-base text-neutral-500"
+              />
             </div>
 
             <div className="flex flex-col gap-3 mb-10">
@@ -148,15 +151,15 @@ export default function Product() {
                 <span className="relative z-10">Adicionar ao Carrinho</span>
               </motion.button>
 
-              {/* Botão Secundário WhatsApp */}
+              {/* Botão Secundário WhatsApp Oficial */}
               <motion.button 
                 onClick={handleCheckoutDirect}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full bg-[#FAFAFA] dark:bg-[#0A0A0A] border border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200 py-3.5 md:py-4 rounded-xl text-xs md:text-sm font-medium tracking-[0.1em] uppercase flex items-center justify-center gap-2 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors duration-300"
+                className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-3.5 md:py-4 rounded-xl text-xs md:text-sm font-semibold tracking-[0.1em] uppercase flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#25D366]/50 focus:ring-offset-2"
               >
-                <MessageCircle size={18} strokeWidth={1.5} />
-                <span>Finalizar no WhatsApp</span>
+                <WhatsAppIcon size={19} className="text-white shrink-0" />
+                <span className="text-white font-medium">Finalizar no WhatsApp</span>
               </motion.button>
             </div>
 
@@ -179,9 +182,9 @@ export default function Product() {
                 <h3 className="text-xs uppercase tracking-[0.2em] font-medium text-black dark:text-white mb-4">
                   Detalhes do Produto
                 </h3>
-                <p className="leading-relaxed">
-                  {product.detailedDescription}
-                </p>
+                <FormattedDescription 
+                  text={(product as any).description || (product as any).detailed_description || product.detailedDescription}
+                />
               </section>
 
               <section>

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { X, MapPin } from "lucide-react";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
+import { PaymentMethodSelector, PaymentMethod } from "@/components/PaymentMethodSelector";
 import { CATEGORIES } from "@/data/catalog";
 
 const CIDADES = ["Santa Rita", "Bayeux", "João Pessoa"] as const;
@@ -40,7 +42,7 @@ function getCategoryForProduct(productId: string): string {
 }
 
 export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const { items, totalPriceFormatted, clearCart } = useCart();
+  const { items, totalPriceFormatted, clearCart, formaPagamento, setFormaPagamento } = useCart();
   
   const [nome, setNome] = useState("");
   const [rua, setRua] = useState("");
@@ -48,6 +50,7 @@ export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: (
   const [complemento, setComplemento] = useState("");
   const [cidade, setCidade] = useState<Cidade>("Santa Rita");
   const [bairro, setBairro] = useState(BAIRROS["Santa Rita"][0]);
+  const [paymentError, setPaymentError] = useState(false);
 
   // Reset bairro when cidade changes
   useEffect(() => {
@@ -57,6 +60,12 @@ export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: (
   const handleSendOrder = () => {
     if (!nome || !rua || !numero || !bairro) {
       alert("Por favor, preencha todos os campos obrigatórios (Nome, Rua, Número e Bairro).");
+      return;
+    }
+
+    if (!formaPagamento) {
+      setPaymentError(true);
+      alert("Por favor, selecione a forma de pagamento (PIX ou CARTÃO).");
       return;
     }
 
@@ -72,6 +81,7 @@ export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: (
     });
     
     message += `*Total: ${totalPriceFormatted}*\n\n`;
+    message += `*Forma de pagamento:* ${formaPagamento}\n\n`;
     
     message += "*DADOS DO CLIENTE:*\n";
     message += `Nome: ${nome}\n`;
@@ -127,7 +137,7 @@ export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: (
 
             {/* Formulário */}
             <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
-              
+
               <div className="space-y-1">
                 <label className="text-[11px] uppercase tracking-wider text-neutral-500 font-medium">Nome Completo</label>
                 <input 
@@ -204,21 +214,52 @@ export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: (
                   />
                 </div>
               </div>
-              
-              <div className="pt-4 flex flex-col items-center justify-center">
-                 <span className="text-xs uppercase tracking-[0.2em] font-medium text-neutral-400">Taxa de entrega a combinar</span>
+
+              {/* Escolha a forma de pagamento - ÚLTIMA OPÇÃO */}
+              <PaymentMethodSelector 
+                value={formaPagamento} 
+                onChange={(method) => {
+                  setFormaPagamento(method);
+                  setPaymentError(false);
+                }}
+                error={paymentError}
+              />
+
+              {/* Resumo do Pedido */}
+              <div className="pt-3 border-t border-neutral-200 dark:border-neutral-800 space-y-1.5 bg-neutral-50/50 dark:bg-neutral-900/40 p-3.5 rounded-xl">
+                <div className="flex justify-between items-center text-xs text-neutral-500 dark:text-neutral-400">
+                  <span>Itens no Pedido:</span>
+                  <span className="font-medium text-neutral-800 dark:text-neutral-200">
+                    {items.reduce((acc, i) => acc + i.quantity, 0)} produto(s)
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-neutral-500 dark:text-neutral-400">
+                  <span>Forma de Pagamento:</span>
+                  <span className={`font-semibold ${formaPagamento ? "text-neutral-900 dark:text-white" : "text-amber-500"}`}>
+                    {formaPagamento || "Pendente de escolha"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm font-semibold text-neutral-900 dark:text-white pt-1 border-t border-neutral-200/60 dark:border-neutral-800/60">
+                  <span>Total:</span>
+                  <span className="text-base font-bold text-[#E5C378]">{totalPriceFormatted}</span>
+                </div>
+              </div>
+
+              <div className="pt-1 flex flex-col items-center justify-center">
+                 <span className="text-[11px] uppercase tracking-[0.15em] font-medium text-neutral-400">Taxa de entrega a combinar</span>
               </div>
             </div>
 
             {/* Footer */}
             <div className="p-5 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-[#0A0A0A] shrink-0 rounded-b-3xl">
               <motion.button 
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSendOrder}
-                className="w-full bg-black dark:bg-white text-white dark:text-black py-4 rounded-xl text-xs sm:text-sm font-medium tracking-[0.15em] uppercase shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-4 rounded-xl text-xs sm:text-sm font-semibold tracking-wide uppercase shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#25D366]/50 focus:ring-offset-2"
               >
-                Enviar Pedido
+                <WhatsAppIcon size={19} className="text-white shrink-0" />
+                <span>Enviar Pedido pelo WhatsApp</span>
               </motion.button>
             </div>
             

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useMemo } from "react";
 import { Product } from "@/data/catalog";
+import { PaymentMethod } from "@/components/PaymentMethodSelector";
 import { toast } from "sonner";
 
 export interface CartItem {
@@ -14,11 +15,14 @@ interface CartContextType {
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
+  totalPrice: number;
   totalPriceFormatted: string;
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
   isCheckoutOpen: boolean;
   setIsCheckoutOpen: (open: boolean) => void;
+  formaPagamento: PaymentMethod | "";
+  setFormaPagamento: (method: PaymentMethod | "") => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -27,6 +31,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [formaPagamento, setFormaPagamento] = useState<PaymentMethod | "">("");
 
   const addItem = (product: Product, quantity = 1) => {
     setItems((currentItems) => {
@@ -94,11 +99,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         updateQuantity, 
         clearCart, 
         totalItems, 
+        totalPrice,
         totalPriceFormatted,
         isCartOpen,
         setIsCartOpen,
         isCheckoutOpen,
-        setIsCheckoutOpen
+        setIsCheckoutOpen,
+        formaPagamento,
+        setFormaPagamento,
       }}
     >
       {children}

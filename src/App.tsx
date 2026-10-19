@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "./context/CartContext";
 import { CartDrawer, FloatingCart } from "@/components/CartComponents";
+import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 
 import Index from "./pages/Index.tsx";
 import Product from "./pages/Product.tsx";
@@ -22,6 +23,7 @@ const App = () => (
         <Sonner />
         <CartDrawer />
         <FloatingCart />
+        <FloatingWhatsApp />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />

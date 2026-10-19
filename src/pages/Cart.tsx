@@ -1,14 +1,28 @@
+import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PaymentMethodSelector } from "@/components/PaymentMethodSelector";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
+import { toast } from "sonner";
 
 export default function Cart() {
-  const { items, updateQuantity, removeItem, totalPrice } = useCart();
+  const { items, updateQuantity, removeItem, totalPrice, formaPagamento, setFormaPagamento } = useCart();
+  const [paymentError, setPaymentError] = useState(false);
   const navigate = useNavigate();
 
+  const handleProceedToCheckout = () => {
+    if (!formaPagamento) {
+      setPaymentError(true);
+      toast.error("Por favor, selecione a forma de pagamento (PIX ou CARTÃO).");
+      return;
+    }
+    navigate("/checkout");
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
+    <div className="min-h-screen bg-gray-50 pb-36">
       <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 p-4 flex items-center shadow-sm">
         <button 
           onClick={() => navigate(-1)}
@@ -58,7 +72,7 @@ export default function Cart() {
                   
                   <div className="flex justify-between items-end mt-2">
                     <p className="text-store-pink font-bold">
-                      R$ {item.product.price.toFixed(2).replace('.', ',')}
+                      R$ {typeof item.product.price === 'number' ? item.product.price.toFixed(2).replace('.', ',') : String(item.product.price).replace('R$', '').trim()}
                     </p>
                     
                     <div className="flex items-center gap-3 bg-store-light rounded-full px-3 py-1">
@@ -82,7 +96,20 @@ export default function Cart() {
               </div>
             ))}
 
-            <div className="mt-8 bg-white p-5 rounded-2xl shadow-sm border border-store-light">
+            {/* Seção Forma de Pagamento */}
+            <div className="mt-6 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+              <PaymentMethodSelector 
+                value={formaPagamento}
+                onChange={(method) => {
+                  setFormaPagamento(method);
+                  setPaymentError(false);
+                }}
+                error={paymentError}
+              />
+            </div>
+
+            {/* Total do Pedido */}
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-store-light">
               <div className="flex justify-between items-center mb-2 text-sm text-gray-600">
                 <span>Subtotal</span>
                 <span>R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
@@ -100,10 +127,11 @@ export default function Cart() {
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40">
           <div className="container max-w-lg mx-auto">
             <Button 
-              onClick={() => navigate("/checkout")}
-              className="w-full bg-store-pink hover:bg-store-dark text-white h-14 rounded-xl font-bold shadow-soft text-lg"
+              onClick={handleProceedToCheckout}
+              className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white h-14 rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-200 text-base flex items-center justify-center gap-2"
             >
-              Ir para Checkout
+              <WhatsAppIcon size={20} className="text-white shrink-0" />
+              <span>Finalizar Pedido pelo WhatsApp</span>
             </Button>
           </div>
         </div>

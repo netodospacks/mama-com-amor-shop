@@ -16,22 +16,6 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      // Bloquear clique direito
-      document.addEventListener('contextmenu', event => event.preventDefault());
-      
-      // Bloquear atalhos de inspeção
-      document.addEventListener('keydown', function(e) {
-        if (
-          e.key === 'F12' || 
-          (e.ctrlKey && e.shiftKey && e.key === 'I') || 
-          (e.ctrlKey && e.shiftKey && e.key === 'C') || 
-          (e.ctrlKey && e.key === 'U') ||
-          (e.ctrlKey && e.key === 'u')
-        ) {
-          e.preventDefault();
-        }
-      });
-
       // Forçar bloqueio de Pinch Zoom no iOS / Safari
       document.addEventListener('touchstart', function(event) {
         if (event.touches && event.touches.length > 1) {
