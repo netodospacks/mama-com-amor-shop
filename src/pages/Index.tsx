@@ -31,6 +31,75 @@ const CATEGORY_PILLS = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
+// FeaturedCard — card especial para "Produtos em destaque" (conforme referência)
+// ─────────────────────────────────────────────────────────────────────────────
+const FeaturedCard = ({ product }: { product: Product }) => {
+  return (
+    <Link to={`/product/${product.id}`} className="block h-full group">
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        whileHover={{ y: -4 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+        className="flex flex-col h-full bg-[#f2f3f5] dark:bg-neutral-800/80 rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300"
+      >
+        {/* Imagem do Produto */}
+        <div className="w-full aspect-[4/5] bg-neutral-200/60 dark:bg-neutral-700/50 relative overflow-hidden">
+          {product.image ? (
+            <img
+              src={product.image}
+              alt={product.name}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-neutral-200 dark:bg-neutral-700" />
+          )}
+
+          {product.isPromo && (
+            <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur-sm text-white text-[9px] sm:text-[10px] font-medium px-2 py-0.5 rounded-md uppercase tracking-wider z-10">
+              Promo
+            </div>
+          )}
+
+          {/* Botão Comprar flutuante no canto inferior direito da foto */}
+          <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 z-10">
+            <span className="inline-flex items-center justify-center bg-black text-white text-xs sm:text-[13px] font-medium px-3.5 py-1.5 sm:px-4 sm:py-1.5 rounded-lg sm:rounded-xl shadow-md group-hover:bg-neutral-800 group-hover:scale-105 transition-all duration-200">
+              Comprar
+            </span>
+          </div>
+        </div>
+
+        {/* Textos: Nome e Preço */}
+        <div className="p-3 sm:p-4 flex flex-col justify-between flex-grow">
+          <h3 className="text-xs sm:text-[13px] md:text-sm font-semibold text-neutral-600 dark:text-neutral-300 uppercase tracking-wide line-clamp-2 leading-snug mb-1.5 sm:mb-2 group-hover:text-black dark:group-hover:text-white transition-colors">
+            {product.name}
+          </h3>
+
+          <div className="mt-auto">
+            {product.isPromo && product.promoPrice ? (
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-[11px] sm:text-xs text-neutral-400 line-through">
+                  {product.price}
+                </span>
+                <span className="text-sm sm:text-base md:text-lg font-bold text-neutral-700 dark:text-neutral-100">
+                  {product.promoPrice}
+                </span>
+              </div>
+            ) : (
+              <span className="text-sm sm:text-base md:text-lg font-bold text-neutral-700 dark:text-neutral-100">
+                {product.price}
+              </span>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </Link>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // MiniCard — card padrão para grades normais (cestas, kits, etc.)
 // ─────────────────────────────────────────────────────────────────────────────
 const MiniCard = ({ product }: { product: Product }) => {
@@ -515,20 +584,16 @@ export default function Index() {
           </div>
         ) : (
           <>
-            {/* ITENS EM DESTAQUE (CURADORIA ESPECIAL) */}
-            <section id="destaques" className="w-full pb-4 sm:pb-8 border-b border-neutral-100">
-              <div className="mb-6 sm:mb-8 px-2 sm:px-0">
-                <span className="text-[10px] sm:text-xs font-semibold tracking-[0.2em] text-neutral-400 uppercase block mb-1">
-                  Curadoria Especial
-                </span>
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                  Itens em Destaque
+            {/* PRODUTOS EM DESTAQUE */}
+            <section id="destaques" className="w-full pb-4 sm:pb-8">
+              <div className="mb-4 sm:mb-6 px-1 sm:px-0">
+                <h2 className="text-xl sm:text-2xl font-bold text-neutral-600 dark:text-neutral-300 tracking-tight">
+                  Produtos em destaque
                 </h2>
-                <div className="w-8 h-px bg-black mt-2" />
               </div>
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 {getFeaturedProducts().map(product => (
-                  <MiniCard key={product.id} product={product} />
+                  <FeaturedCard key={product.id} product={product} />
                 ))}
               </div>
             </section>
