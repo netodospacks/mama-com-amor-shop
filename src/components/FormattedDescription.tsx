@@ -34,7 +34,7 @@ export const FormattedDescription: React.FC<FormattedDescriptionProps> = ({
                   {showBulletSymbol && (
                     <span
                       aria-hidden="true"
-                      className="text-[#E5C378] font-semibold select-none shrink-0 text-sm leading-relaxed"
+                      className="text-neutral-800 dark:text-neutral-200 font-semibold select-none shrink-0 text-sm leading-relaxed"
                     >
                       -
                     </span>

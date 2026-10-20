@@ -163,7 +163,7 @@ export function CartDrawer() {
                 {/* Total */}
                 <div className="flex justify-between items-center pt-1 border-t border-neutral-200/60 dark:border-neutral-800/60">
                   <span className="text-xs uppercase tracking-widest text-neutral-500 dark:text-neutral-400 font-medium">Total</span>
-                  <span className="text-xl font-bold text-[#E5C378]">{totalPriceFormatted}</span>
+                  <span className="text-xl font-bold text-black dark:text-white">{totalPriceFormatted}</span>
                 </div>
                 
                 {/* Botão de WhatsApp */}

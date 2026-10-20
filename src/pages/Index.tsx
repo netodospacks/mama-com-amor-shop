@@ -18,15 +18,15 @@ import {
 } from "@/data/catalog";
 
 const CATEGORY_PILLS = [
-  { label: "Cestas", id: "cestas" },
-  { label: "Quadros A4", id: "quadros-a4" },
-  { label: "Quadros 10x15", id: "quadros-10x15" },
-  { label: "Kits Casal", id: "kits" },
-  { label: "Mamães / Bebês", id: "mamaes-bebes" },
-  { label: "Produtos", id: "produtos" },
-  { label: "Placas Acrílicas", id: "placas" },
-  { label: "Combos Promocionais", id: "combos" },
-  { label: "Especial Mães", id: "maes" },
+  { label: "cestas.", id: "cestas" },
+  { label: "Quadros a4.", id: "quadros-a4" },
+  { label: "Quadros 10x15.", id: "quadros-10x15" },
+  { label: "Kits casal.", id: "kits" },
+  { label: "Mamães / bebês.", id: "mamaes-bebes" },
+  { label: "Produtos.", id: "produtos" },
+  { label: "Placas acrílicas.", id: "placas" },
+  { label: "Combos.", id: "combos" },
+  { label: "Especial mães.", id: "maes" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -57,14 +57,14 @@ const MiniCard = ({ product }: { product: Product }) => {
             </div>
           )}
           {product.isNew && (
-            <div className="absolute top-1 left-1 sm:top-2 sm:left-2 bg-rose-600 text-white text-[8px] sm:text-[10px] font-medium px-1.5 py-0.5 rounded-sm backdrop-blur-md bg-rose-600/90 uppercase tracking-wider z-10">
+            <div className="absolute top-1 left-1 sm:top-2 sm:left-2 bg-black text-white text-[8px] sm:text-[10px] font-medium px-1.5 py-0.5 rounded-sm uppercase tracking-wider z-10">
               Novidade
             </div>
           )}
         </div>
 
         <div className="px-0.5 mt-auto">
-          <h3 className="text-[10px] sm:text-[12px] md:text-sm font-medium text-neutral-800 dark:text-neutral-200 truncate mb-0.5 sm:mb-1 transition-colors group-hover:text-black dark:group-hover:text-white">
+          <h3 className="text-[10px] sm:text-[12px] md:text-sm font-medium text-neutral-900 dark:text-neutral-100 truncate mb-0.5 sm:mb-1 transition-colors group-hover:text-black dark:group-hover:text-white">
             {product.name}
           </h3>
           <div className="flex flex-col leading-none gap-0.5 pb-1">
@@ -73,7 +73,7 @@ const MiniCard = ({ product }: { product: Product }) => {
                 <span className="text-[9px] sm:text-[10px] md:text-[11px] text-neutral-400 line-through font-normal">
                   {product.price}
                 </span>
-                <span className="text-[10px] sm:text-[12px] md:text-sm font-semibold text-rose-500 tracking-tight">
+                <span className="text-[10px] sm:text-[12px] md:text-sm font-bold text-black dark:text-white tracking-tight">
                   {product.promoPrice}
                 </span>
               </>
@@ -123,7 +123,7 @@ const HScrollCard = ({ product }: { product: Product }) => {
                 <span className="text-[9px] sm:text-[10px] text-neutral-400 line-through font-normal">
                   {product.price}
                 </span>
-                <span className="text-[10px] sm:text-[12px] font-semibold text-rose-500 tracking-tight">
+                <span className="text-[10px] sm:text-[12px] font-bold text-black dark:text-white tracking-tight">
                   {product.promoPrice}
                 </span>
               </>
@@ -158,11 +158,11 @@ const HScrollRow = ({ products }: { products: Product[] }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 const SubSectionHeader = ({ title, description }: { title: string; description?: string }) => (
   <div className="mb-4 sm:mb-6">
-    <h3 className="text-sm sm:text-base font-semibold tracking-[0.12em] uppercase text-neutral-800 dark:text-neutral-100 mb-1">
+    <h3 className="text-sm sm:text-base font-semibold tracking-[0.12em] uppercase text-black mb-1">
       {title}
     </h3>
     {description && (
-      <p className="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400 font-light leading-relaxed max-w-sm">
+      <p className="text-[11px] sm:text-xs text-neutral-600 font-light leading-relaxed max-w-sm">
         {description}
       </p>
     )}
@@ -294,7 +294,7 @@ export default function Index() {
   }, [activeCategory]);
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#050505] text-neutral-900 dark:text-neutral-100 font-sans selection:bg-neutral-200 selection:text-black">
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-black selection:text-white">
       
       {/* Menu Lateral */}
       <AnimatePresence>
@@ -368,45 +368,32 @@ export default function Index() {
       </AnimatePresence>
 
       {/* ========================================================== */}
-      {/* CABEÇALHO E HERO PRINCIPAL LUXURY (MODELO VISUAL)          */}
+      {/* CABEÇALHO E HERO PRINCIPAL (MODELO EDITORIAL P&B)          */}
       {/* ========================================================== */}
-      <section className="relative w-full overflow-hidden bg-[#0A0A0A]">
-        {/* Fundo fotográfico original da loja */}
-        <div className="absolute inset-0 w-full h-full pointer-events-none">
-          <img
-            src="/hero-bg.jpg"
-            alt="Virtual Store Presentes Personalizados"
-            className="w-full h-full object-cover object-center"
-          />
-          {/* Overlay escuro elegante para máxima legibilidade dos textos e detalhes dourados */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/60 to-black/95" />
-          {/* Transição suave para a seção dos cards de categorias que fica fora da imagem */}
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0A0A0A] to-transparent" />
-        </div>
-
+      <section className="relative w-full bg-white text-black">
         {/* Barra Superior: Menu (3 linhas) + Marca Central + Instagram */}
-        <div className="relative z-20 max-w-4xl mx-auto px-4 sm:px-6 pt-3.5 pb-2 flex items-center justify-between">
+        <div className="relative z-20 max-w-4xl mx-auto px-4 sm:px-6 pt-4 pb-2 flex items-center justify-between bg-white text-black">
           {/* Menu de três linhas no canto superior esquerdo */}
           <button
             onClick={() => setMenuOpen(true)}
             aria-label="Abrir Menu"
-            className="p-2 text-white/90 hover:text-white active:scale-90 transition-transform -ml-1 rounded-full focus:outline-none"
+            className="p-2 text-black hover:opacity-70 active:scale-90 transition-transform -ml-1 rounded-full focus:outline-none"
           >
             <Menu size={22} strokeWidth={1.8} />
           </button>
 
           {/* Marca VIRTUAL STORE centralizada com ícone de presente */}
           <div className="flex flex-col items-center justify-center text-center">
-            <Gift size={20} strokeWidth={1.5} className="text-[#E5C378] mb-0.5 drop-shadow-[0_2px_8px_rgba(229,195,120,0.35)]" />
-            <span className="text-[13px] sm:text-sm font-semibold tracking-[0.28em] text-white uppercase leading-none font-sans drop-shadow-sm">
+            <Gift size={20} strokeWidth={1.8} className="text-black mb-0.5" />
+            <span className="text-[13px] sm:text-sm font-semibold tracking-[0.28em] text-black uppercase leading-none font-sans">
               VIRTUAL STORE
             </span>
             <div className="flex items-center justify-center gap-1.5 mt-1.5">
-              <span className="h-[1px] w-3.5 bg-[#E5C378]/70" />
-              <span className="text-[8px] sm:text-[8.5px] font-light tracking-[0.24em] text-[#E5C378] uppercase">
+              <span className="h-[1px] w-3.5 bg-black" />
+              <span className="text-[8px] sm:text-[8.5px] font-medium tracking-[0.24em] text-black uppercase">
                 PRESENTES PERSONALIZADOS
               </span>
-              <span className="h-[1px] w-3.5 bg-[#E5C378]/70" />
+              <span className="h-[1px] w-3.5 bg-black" />
             </div>
           </div>
 
@@ -416,50 +403,42 @@ export default function Index() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Instagram da loja"
-            className="p-2 text-white/90 hover:text-white active:scale-90 transition-transform -mr-1 rounded-full focus:outline-none"
+            className="p-2 text-black hover:opacity-70 active:scale-90 transition-transform -mr-1 rounded-full focus:outline-none"
           >
             <Instagram size={20} strokeWidth={1.8} />
           </a>
         </div>
 
-        {/* Apresentação da Marca */}
-        <div className="relative z-10 max-w-2xl mx-auto px-4 pt-6 sm:pt-10 pb-10 sm:pb-14 flex flex-col items-center text-center">
-          {/* CATÁLOGO EXCLUSIVO */}
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <span className="h-[1px] w-4 bg-[#E5C378]/60" />
-            <span className="text-[9.5px] sm:text-[10.5px] tracking-[0.35em] text-[#E5C378] font-light uppercase">
-              CATÁLOGO EXCLUSIVO
-            </span>
-            <span className="h-[1px] w-4 bg-[#E5C378]/60" />
-          </div>
+        {/* Apresentação da Marca (Fiel à imagem de referência) */}
+        <div className="relative z-10 max-w-3xl mx-auto px-4 pt-8 sm:pt-12 pb-10 sm:pb-14 flex flex-col items-center text-center">
+          {/* Catálogo exclusivo */}
+          <p className="text-base sm:text-lg md:text-xl font-normal text-black tracking-normal mb-5 sm:mb-7 font-sans">
+            Catálogo exclusivo
+          </p>
 
-          {/* Transforme sentimentos em presentes inesquecíveis */}
-          <h1 className="font-serif text-[22px] sm:text-[28px] md:text-[32px] font-normal text-white tracking-wide leading-snug max-w-md mx-auto mb-3.5 drop-shadow-md">
-            Transforme sentimentos em presentes inesquecíveis
+          {/* Transformamos sentimentos em presentes inesquecíveis. */}
+          <h1 className="font-anton text-[36px] sm:text-[58px] md:text-[72px] lg:text-[84px] font-normal text-black tracking-[-0.01em] leading-[0.98] max-w-2xl mx-auto mb-6 sm:mb-8 text-center select-none">
+            Transformamos<br />
+            sentimentos em presentes<br />
+            inesquecíveis.
           </h1>
 
-          {/* Santa Rita, João Pessoa e Região */}
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-black/45 backdrop-blur-md border border-[#E5C378]/25 shadow-sm">
-            <MapPin size={12} className="text-[#E5C378] shrink-0" />
-            <span className="text-[10.5px] sm:text-xs font-light text-neutral-200 tracking-wider">
-              Santa Rita, João Pessoa e Região
-            </span>
-          </div>
+          {/* JOÃO PESSOA - SANTA RITA E REGIÃO */}
+          <p className="font-serif font-black text-xs sm:text-sm md:text-base tracking-[0.06em] text-black uppercase text-center">
+            JOÃO PESSOA - SANTA RITA E REGIÃO
+          </p>
         </div>
       </section>
 
-      {/* Barra de Categorias Horizontal Deslizante (Pills / Chips) */}
+      {/* Barra de Categorias Horizontal ("Nomes soltos" separados apenas por linha, fundo branco) */}
       <nav 
         aria-label="Navegação por categorias"
-        className="sticky top-0 z-30 bg-[#0A0A0A]/95 backdrop-blur-md border-y border-[#E5C378]/25 py-2.5 sm:py-3 shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+        className="sticky top-0 z-30 bg-white border-y-2 border-black py-2.5 sm:py-3 shadow-sm"
       >
         <div className="relative max-w-6xl mx-auto px-2 sm:px-4">
-          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-[#0A0A0A] to-transparent z-10" />
-          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10" />
-
           <div 
             ref={pillsContainerRef}
-            className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 px-4 sm:px-2 scroll-smooth"
+            className="flex items-center gap-6 sm:gap-8 md:gap-10 overflow-x-auto no-scrollbar py-1 px-4 sm:px-2 scroll-smooth"
           >
             {CATEGORY_PILLS.map((pill) => {
               const isActive = activeCategory === pill.id;
@@ -468,16 +447,13 @@ export default function Index() {
                   key={pill.id}
                   data-pill-id={pill.id}
                   onClick={() => scrollToSection(pill.id)}
-                  className={`shrink-0 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs tracking-wider uppercase transition-all duration-200 border whitespace-nowrap active:scale-95 flex items-center gap-1.5 focus:outline-none ${
+                  className={`shrink-0 py-1 text-xs sm:text-sm md:text-base tracking-wide transition-all whitespace-nowrap focus:outline-none ${
                     isActive
-                      ? "bg-[#E5C378] text-[#0A0A0A] border-[#E5C378] shadow-[0_2px_12px_rgba(229,195,120,0.45)] font-semibold"
-                      : "bg-[#141414] text-neutral-300 hover:text-white border-[#E5C378]/25 hover:border-[#E5C378]/60 hover:bg-[#1c1c1c]"
+                      ? "text-black font-bold scale-[1.03]"
+                      : "text-neutral-500 hover:text-black font-normal"
                   }`}
                 >
-                  {isActive && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0A0A0A] shrink-0" />
-                  )}
-                  <span>{pill.label}</span>
+                  {pill.label}
                 </button>
               );
             })}
@@ -498,7 +474,7 @@ export default function Index() {
             <section id="cestas" className="w-full">
               <div className="mb-8 sm:mb-10 px-2 sm:px-0">
                 <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Cestas</h2>
-                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-2" />
+                <div className="w-8 h-px bg-black mt-2" />
               </div>
               <div className="mb-10 sm:mb-14 px-2 sm:px-0">
                 <SubSectionHeader title="Cesta Café da Manhã" description="Cada detalhe escolhido pensando em transformar uma manhã em uma lembrança inesquecível." />
@@ -525,7 +501,7 @@ export default function Index() {
               <div className="mb-8 sm:mb-10 px-2 sm:px-0">
                 <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Quadro A4</h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 dark:text-neutral-400 font-light tracking-wide mt-1">Escolha o tema, personalize cada detalhe e transforme uma memória.</p>
-                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+                <div className="w-8 h-px bg-black mt-3" />
               </div>
               <div className="mb-10 sm:mb-14 px-2 sm:px-0">
                 <SubSectionHeader title="Quadros Casal" />
@@ -542,7 +518,7 @@ export default function Index() {
               <div className="mb-8 sm:mb-10 px-2 sm:px-0">
                 <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Quadro 10x15</h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 dark:text-neutral-400 font-light tracking-wide mt-1">Transforme momentos especiais em uma lembrança que fica para sempre.</p>
-                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+                <div className="w-8 h-px bg-black mt-3" />
               </div>
               <div className="mb-10 sm:mb-14 px-2 sm:px-0">
                 <SubSectionHeader title="Quadro 10x15 Casal" />
@@ -559,7 +535,7 @@ export default function Index() {
               <div className="mb-8 sm:mb-12 px-2 sm:px-0">
                 <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Kits Casal</h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Composições exclusivas criadas por especialistas</p>
-                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+                <div className="w-8 h-px bg-black mt-3" />
               </div>
               <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
                 {getCategoryProducts('kits-casal', CATEGORIES.KITS).map(product => <MiniCard key={product.id} product={product} />)}
@@ -571,7 +547,7 @@ export default function Index() {
               <div className="mb-8 sm:mb-12 px-2 sm:px-0">
                 <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Mamães / Bebês</h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Presentes especiais para mamãe e bebê</p>
-                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+                <div className="w-8 h-px bg-black mt-3" />
               </div>
               <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
                 {getCategoryProducts('mamaes-e-bebes', CATEGORIES.MAMAES_BEBES).map(product => <MiniCard key={product.id} product={product} />)}
@@ -583,7 +559,7 @@ export default function Index() {
               <div className="mb-8 sm:mb-12 px-2 sm:px-0">
                 <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Produtos</h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Coleção principal com curadoria especial</p>
-                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+                <div className="w-8 h-px bg-black mt-3" />
               </div>
               <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
                 {getCategoryProducts('produtos', CATEGORIES.PRODUTOS).map(product => (
@@ -599,7 +575,7 @@ export default function Index() {
               <div className="mb-8 sm:mb-12 px-2 sm:px-0">
                 <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Placas Acrílicas</h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Placas decorativas incríveis</p>
-                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+                <div className="w-8 h-px bg-black mt-3" />
               </div>
               <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
                 {getCategoryProducts('placas-acrilicas', CATEGORIES.QUADROS_PLACAS).map(product => <MiniCard key={product.id} product={product} />)}
@@ -611,7 +587,7 @@ export default function Index() {
               <div className="mb-8 sm:mb-12 px-2 sm:px-0">
                 <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-neutral-900 dark:text-white">Combos Promocionais</h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Ofertas imperdíveis por tempo limitado</p>
-                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+                <div className="w-8 h-px bg-black mt-3" />
               </div>
               <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
                 {getCategoryProducts('combos-promocionais', CATEGORIES.COMBOS).map(product => <MiniCard key={product.id} product={product} />)}
@@ -621,9 +597,9 @@ export default function Index() {
             {/* ESPECIAL MÃES */}
             <section id="maes" className="w-full">
               <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-rose-500 dark:text-rose-400">Especial Mães</h2>
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-black">Especial Mães</h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Presentes inesquecíveis para quem você mais ama</p>
-                <div className="w-8 h-px bg-neutral-300 dark:bg-neutral-700 mt-3" />
+                <div className="w-8 h-px bg-black mt-3" />
               </div>
               <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
                 {getCategoryProducts('especial-maes', CATEGORIES.MAES).map(product => <MiniCard key={product.id} product={product} />)}
@@ -634,12 +610,12 @@ export default function Index() {
 
       </main>
 
-      <footer className="w-full border-t border-black/5 dark:border-white/5 py-16 px-4 flex flex-col items-center justify-center text-center mt-20 bg-white/30 dark:bg-black/30">
+      <footer className="w-full border-t border-neutral-200 py-16 px-4 flex flex-col items-center justify-center text-center mt-20 bg-white text-black">
         <span className="text-sm font-semibold tracking-[0.3em] mb-4 uppercase">Eternizando Momentos</span>
-        <p className="text-xs text-neutral-400 max-w-sm font-light leading-relaxed">
+        <p className="text-xs text-neutral-500 max-w-sm font-light leading-relaxed">
           A excelência em produtos premium, pensados para os clientes mais exigentes.
         </p>
-        <div className="mt-8 pt-8 border-t border-black/5 dark:border-white/5 w-full max-w-xs text-[10px] text-neutral-400">
+        <div className="mt-8 pt-8 border-t border-neutral-200 w-full max-w-xs text-[10px] text-neutral-400">
           © {new Date().getFullYear()} Eternizando Momentos. Todos os direitos reservados.
         </div>
       </footer>

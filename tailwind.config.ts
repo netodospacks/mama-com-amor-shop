@@ -14,10 +14,11 @@ export default {
     },
     extend: {
       fontFamily: {
+        anton: ['Anton', 'sans-serif'],
         display: ['Playfair Display', 'serif'],
         serif: ['Playfair Display', 'serif'],
         cinzel: ['Cinzel', 'serif'],
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Poppins', 'Inter', 'sans-serif'],
       },
       colors: {
         gold: {

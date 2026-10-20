@@ -243,7 +243,7 @@ export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: (
                 </div>
                 <div className="flex justify-between items-center text-sm font-semibold text-neutral-900 dark:text-white pt-1 border-t border-neutral-200/60 dark:border-neutral-800/60">
                   <span>Total:</span>
-                  <span className="text-base font-bold text-[#E5C378]">{totalPriceFormatted}</span>
+                  <span className="text-base font-bold text-black dark:text-white">{totalPriceFormatted}</span>
                 </div>
               </div>
 
