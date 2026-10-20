@@ -427,9 +427,11 @@ export default function Index() {
             <span>Catálogo Exclusivo</span>
           </div>
 
-          {/* Slogan Principal — Tipografia Editorial Harmoniosa */}
-          <h1 className="font-serif text-2xl sm:text-4xl md:text-[44px] lg:text-[48px] font-normal text-neutral-900 tracking-tight leading-[1.2] max-w-2xl mx-auto mb-3.5 sm:mb-4">
-            Transformamos<br className="hidden sm:inline" /> sentimentos em presentes<br className="hidden sm:inline" /> inesquecíveis.
+          {/* Slogan Principal — Fonte Anton (anterior) */}
+          <h1 className="font-anton text-[36px] sm:text-[58px] md:text-[72px] lg:text-[84px] font-normal text-black tracking-[-0.01em] leading-[0.98] max-w-2xl mx-auto mb-5 sm:mb-6 text-center select-none">
+            Transformamos<br />
+            sentimentos em presentes<br />
+            inesquecíveis.
           </h1>
 
           {/* Região de Atendimento */}
