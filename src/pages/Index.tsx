@@ -18,15 +18,15 @@ import {
 } from "@/data/catalog";
 
 const CATEGORY_PILLS = [
-  { label: "cestas.", id: "cestas" },
-  { label: "Quadros a4.", id: "quadros-a4" },
-  { label: "Quadros 10x15.", id: "quadros-10x15" },
-  { label: "Kits casal.", id: "kits" },
-  { label: "Mamães / bebês.", id: "mamaes-bebes" },
-  { label: "Produtos.", id: "produtos" },
-  { label: "Placas acrílicas.", id: "placas" },
-  { label: "Combos.", id: "combos" },
-  { label: "Especial mães.", id: "maes" },
+  { label: "Cestas", id: "cestas" },
+  { label: "Quadros A4", id: "quadros-a4" },
+  { label: "Quadros 10x15", id: "quadros-10x15" },
+  { label: "Kits Casal", id: "kits" },
+  { label: "Mamães / Bebês", id: "mamaes-bebes" },
+  { label: "Produtos", id: "produtos" },
+  { label: "Placas Acrílicas", id: "placas" },
+  { label: "Combos", id: "combos" },
+  { label: "Especial Mães", id: "maes" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -368,77 +368,102 @@ export default function Index() {
       </AnimatePresence>
 
       {/* ========================================================== */}
-      {/* CABEÇALHO E HERO PRINCIPAL (MODELO EDITORIAL P&B)          */}
+      {/* CABEÇALHO E HERO PROFISSIONAL — VIRTUAL STORE              */}
       {/* ========================================================== */}
-      <section className="relative w-full bg-white text-black">
-        {/* Barra Superior: Menu (3 linhas) + Marca Central + Instagram */}
-        <div className="relative z-20 max-w-4xl mx-auto px-4 sm:px-6 pt-4 pb-2 flex items-center justify-between bg-white text-black">
-          {/* Menu de três linhas no canto superior esquerdo */}
+      <header className="relative w-full bg-white text-neutral-900 border-b border-neutral-100">
+        {/* Barra Superior: Menu + Marca Central + Ações (Instagram + WhatsApp) */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between border-b border-neutral-100">
+          {/* Menu Hambúrguer */}
           <button
             onClick={() => setMenuOpen(true)}
             aria-label="Abrir Menu"
-            className="p-2 text-black hover:opacity-70 active:scale-90 transition-transform -ml-1 rounded-full focus:outline-none"
+            className="p-2 -ml-2 text-neutral-700 hover:text-black hover:bg-neutral-100/80 rounded-lg transition-colors focus:outline-none"
           >
-            <Menu size={22} strokeWidth={1.8} />
+            <Menu size={22} strokeWidth={1.75} />
           </button>
 
-          {/* Marca VIRTUAL STORE centralizada com ícone de presente */}
+          {/* Marca Centralizada */}
           <div className="flex flex-col items-center justify-center text-center">
-            <Gift size={20} strokeWidth={1.8} className="text-black mb-0.5" />
-            <span className="text-[13px] sm:text-sm font-semibold tracking-[0.28em] text-black uppercase leading-none font-sans">
-              VIRTUAL STORE
-            </span>
-            <div className="flex items-center justify-center gap-1.5 mt-1.5">
-              <span className="h-[1px] w-3.5 bg-black" />
-              <span className="text-[8px] sm:text-[8.5px] font-medium tracking-[0.24em] text-black uppercase">
-                PRESENTES PERSONALIZADOS
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <Gift size={16} strokeWidth={1.75} className="text-neutral-900" />
+              <span className="text-sm sm:text-base font-semibold tracking-[0.22em] text-neutral-900 uppercase leading-tight font-sans">
+                VIRTUAL STORE
               </span>
-              <span className="h-[1px] w-3.5 bg-black" />
             </div>
+            <span className="text-[8.5px] sm:text-[9.5px] font-normal tracking-[0.26em] text-neutral-400 uppercase">
+              Presentes Personalizados
+            </span>
           </div>
 
-          {/* Ícone do Instagram no canto superior direito */}
-          <a
-            href="https://instagram.com/larissagouveiaaa"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Instagram da loja"
-            className="p-2 text-black hover:opacity-70 active:scale-90 transition-transform -mr-1 rounded-full focus:outline-none"
-          >
-            <Instagram size={20} strokeWidth={1.8} />
-          </a>
+          {/* Ações Direitas: Instagram + Botão WhatsApp no Header */}
+          <div className="flex items-center gap-1.5 sm:gap-2 -mr-2">
+            <a
+              href="https://instagram.com/larissagouveiaaa"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram da loja"
+              className="p-2 text-neutral-700 hover:text-black hover:bg-neutral-100/80 rounded-lg transition-colors focus:outline-none"
+            >
+              <Instagram size={20} strokeWidth={1.75} />
+            </a>
+            <a
+              href="https://wa.me/5583993032780?text=Ol%C3%A1%2C%20gostaria%20de%20um%20atendimento%20pelo%20WhatsApp!"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Falar no WhatsApp"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#25D366]/10 hover:bg-[#25D366] text-[#128C7E] hover:text-white border border-[#25D366]/30 transition-all duration-200 text-[11px] sm:text-xs font-semibold tracking-wider uppercase focus:outline-none"
+            >
+              <WhatsAppIcon size={14} className="shrink-0" />
+              <span className="hidden sm:inline">WhatsApp</span>
+            </a>
+          </div>
         </div>
 
-        {/* Apresentação da Marca (Fiel à imagem de referência) */}
-        <div className="relative z-10 max-w-3xl mx-auto px-4 pt-8 sm:pt-12 pb-10 sm:pb-14 flex flex-col items-center text-center">
-          {/* Catálogo exclusivo */}
-          <p className="text-base sm:text-lg md:text-xl font-normal text-black tracking-normal mb-5 sm:mb-7 font-sans">
-            Catálogo exclusivo
-          </p>
+        {/* Apresentação da Marca (Hero Editorial e Equilibrado) */}
+        <div className="max-w-3xl mx-auto px-4 pt-10 sm:pt-14 pb-8 sm:pb-10 flex flex-col items-center text-center">
+          {/* Tag de Topo Refinada */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-neutral-100/80 border border-neutral-200/60 text-neutral-500 text-[10.5px] sm:text-xs font-medium tracking-[0.2em] uppercase mb-4 sm:mb-5">
+            <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
+            <span>Catálogo Exclusivo</span>
+          </div>
 
-          {/* Transformamos sentimentos em presentes inesquecíveis. */}
-          <h1 className="font-anton text-[36px] sm:text-[58px] md:text-[72px] lg:text-[84px] font-normal text-black tracking-[-0.01em] leading-[0.98] max-w-2xl mx-auto mb-6 sm:mb-8 text-center select-none">
-            Transformamos<br />
-            sentimentos em presentes<br />
-            inesquecíveis.
+          {/* Slogan Principal — Tipografia Editorial Harmoniosa */}
+          <h1 className="font-serif text-2xl sm:text-4xl md:text-[44px] lg:text-[48px] font-normal text-neutral-900 tracking-tight leading-[1.2] max-w-2xl mx-auto mb-3.5 sm:mb-4">
+            Transformamos<br className="hidden sm:inline" /> sentimentos em presentes<br className="hidden sm:inline" /> inesquecíveis.
           </h1>
 
-          {/* JOÃO PESSOA - SANTA RITA E REGIÃO */}
-          <p className="font-serif font-black text-xs sm:text-sm md:text-base tracking-[0.06em] text-black uppercase text-center">
-            JOÃO PESSOA - SANTA RITA E REGIÃO
-          </p>
-        </div>
-      </section>
+          {/* Região de Atendimento */}
+          <div className="inline-flex items-center justify-center gap-1.5 text-xs sm:text-[13px] font-medium tracking-[0.14em] text-neutral-500 uppercase mb-6 sm:mb-7">
+            <MapPin size={13} strokeWidth={1.8} className="text-neutral-400 shrink-0" />
+            <span>João Pessoa • Santa Rita e Região</span>
+          </div>
 
-      {/* Barra de Categorias Horizontal ("Nomes soltos" separados apenas por linha, fundo branco) */}
+          {/* Botão Principal de WhatsApp no Header / Hero */}
+          <a
+            href="https://wa.me/5583993032780?text=Ol%C3%A1%2C%20gostaria%20de%20um%20atendimento%20pelo%20WhatsApp!"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2.5 px-6 py-3 sm:px-7 sm:py-3.5 rounded-full bg-[#25D366] hover:bg-[#20ba59] active:scale-95 text-white text-xs sm:text-sm font-semibold tracking-wider uppercase shadow-[0_4px_18px_rgba(37,211,102,0.28)] hover:shadow-[0_6px_24px_rgba(37,211,102,0.42)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#25D366]/50 group"
+          >
+            <WhatsAppIcon size={18} className="text-white shrink-0 group-hover:scale-110 transition-transform" />
+            <span>Falar no WhatsApp</span>
+          </a>
+        </div>
+      </header>
+
+      {/* Barra de Categorias Horizontal ("Cards Pequenos" inspirados no esboço, com tipografia profissional e acabamento comercial) */}
       <nav 
         aria-label="Navegação por categorias"
-        className="sticky top-0 z-30 bg-white border-y-2 border-black py-2.5 sm:py-3 shadow-sm"
+        className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-y border-neutral-200 py-3 sm:py-3.5 shadow-sm transition-all"
       >
-        <div className="relative max-w-6xl mx-auto px-2 sm:px-4">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
+          {/* Fades laterais para indicar rolagem no mobile */}
+          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white to-transparent z-10 sm:hidden" />
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white to-transparent z-10 sm:hidden" />
+
           <div 
             ref={pillsContainerRef}
-            className="flex items-center gap-6 sm:gap-8 md:gap-10 overflow-x-auto no-scrollbar py-1 px-4 sm:px-2 scroll-smooth"
+            className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-0.5 px-1 scroll-smooth"
           >
             {CATEGORY_PILLS.map((pill) => {
               const isActive = activeCategory === pill.id;
@@ -447,10 +472,10 @@ export default function Index() {
                   key={pill.id}
                   data-pill-id={pill.id}
                   onClick={() => scrollToSection(pill.id)}
-                  className={`shrink-0 py-1 text-xs sm:text-sm md:text-base tracking-wide transition-all whitespace-nowrap focus:outline-none ${
+                  className={`relative shrink-0 px-4 py-2 sm:px-4.5 sm:py-2 rounded-lg text-xs sm:text-[13px] tracking-wide transition-all whitespace-nowrap focus:outline-none select-none border ${
                     isActive
-                      ? "text-black font-bold scale-[1.03]"
-                      : "text-neutral-500 hover:text-black font-normal"
+                      ? "bg-black text-white border-black font-semibold shadow-sm"
+                      : "bg-neutral-50/90 text-neutral-600 hover:text-black hover:bg-neutral-100 border-neutral-200/80 font-medium"
                   }`}
                 >
                   {pill.label}
