@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Instagram, MoreHorizontal, X, ChevronRight, Menu, Gift, MapPin, Settings2 } from "lucide-react";
+import { Instagram, MoreHorizontal, X, ChevronRight, ChevronLeft, Menu, Gift, MapPin, Settings2 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
@@ -35,14 +35,14 @@ const CATEGORY_PILLS = [
 // ─────────────────────────────────────────────────────────────────────────────
 const FeaturedCard = ({ product }: { product: Product }) => {
   return (
-    <Link to={`/product/${product.id}`} className="block h-full group">
+    <Link
+      to={`/product/${product.id}`}
+      className="block flex-shrink-0 w-[205px] sm:w-[240px] md:w-[270px] snap-start group h-full select-none"
+    >
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
         whileHover={{ y: -4 }}
         whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
         className="flex flex-col h-full bg-[#f2f3f5] dark:bg-neutral-800/80 rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300"
       >
         {/* Imagem do Produto */}
@@ -51,7 +51,7 @@ const FeaturedCard = ({ product }: { product: Product }) => {
             <img
               src={product.image}
               alt={product.name}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out pointer-events-none"
             />
           ) : (
             <div className="absolute inset-0 bg-neutral-200 dark:bg-neutral-700" />
@@ -72,8 +72,8 @@ const FeaturedCard = ({ product }: { product: Product }) => {
         </div>
 
         {/* Textos: Nome e Preço */}
-        <div className="p-3 sm:p-4 flex flex-col justify-between flex-grow">
-          <h3 className="text-xs sm:text-[13px] md:text-sm font-semibold text-neutral-600 dark:text-neutral-300 uppercase tracking-wide line-clamp-2 leading-snug mb-1.5 sm:mb-2 group-hover:text-black dark:group-hover:text-white transition-colors">
+        <div className="p-3.5 sm:p-4 flex flex-col justify-between flex-grow">
+          <h3 className="text-xs sm:text-[13px] md:text-sm font-semibold text-neutral-600 dark:text-neutral-300 uppercase tracking-wide line-clamp-2 leading-snug mb-2 group-hover:text-black dark:group-hover:text-white transition-colors">
             {product.name}
           </h3>
 
@@ -298,17 +298,30 @@ export default function Index() {
     return fallback || [];
   };
 
+  const featuredScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollFeatured = (direction: 'left' | 'right') => {
+    if (featuredScrollRef.current) {
+      const scrollAmount = direction === 'left' ? -280 : 280;
+      featuredScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   const getFeaturedProducts = (): Product[] => {
     if (products && products.length > 0) {
       const fromDb = products.filter(p => p.isFeatured);
       if (fromDb.length > 0) return fromDb;
     }
-    // Fallback inicial para curadoria em destaque
+    // Fallback inicial para curadoria em destaque com rolagem horizontal
     const fallbackList = [
       CESTAS_CAFE_DA_MANHA?.[0],
       QUADROS_A4_CASAL?.[0],
       CATEGORIES.KITS?.[0],
       CATEGORIES.COMBOS?.[0],
+      CESTAS_ANIVERSARIO?.[0],
+      QUADROS_10x15_CASAL?.[0],
+      CATEGORIES.MAMAES_BEBES?.[0],
+      CATEGORIES.PRODUTOS?.[0],
     ].filter(Boolean) as Product[];
 
     return fallbackList.map(p => ({ ...p, isFeatured: true }));
@@ -584,17 +597,43 @@ export default function Index() {
           </div>
         ) : (
           <>
-            {/* PRODUTOS EM DESTAQUE */}
+            {/* PRODUTOS EM DESTAQUE (ROLAGEM HORIZONTAL PARA A DIREITA) */}
             <section id="destaques" className="w-full pb-4 sm:pb-8">
-              <div className="mb-4 sm:mb-6 px-1 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-bold text-neutral-600 dark:text-neutral-300 tracking-tight">
+              <div className="flex items-center justify-between mb-3 sm:mb-5 px-1 sm:px-0">
+                <h2 className="text-xl sm:text-2xl font-bold text-neutral-700 dark:text-neutral-200 tracking-tight">
                   Produtos em destaque
                 </h2>
+
+                {/* Controles de Navegação (Desktop/Tablet) */}
+                <div className="hidden sm:flex items-center gap-1.5">
+                  <button
+                    onClick={() => scrollFeatured('left')}
+                    aria-label="Rolar para a esquerda"
+                    className="w-8 h-8 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => scrollFeatured('right')}
+                    aria-label="Rolar para a direita"
+                    className="w-8 h-8 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-                {getFeaturedProducts().map(product => (
-                  <FeaturedCard key={product.id} product={product} />
-                ))}
+
+              {/* Trilho com rolagem horizontal para a direita */}
+              <div
+                ref={featuredScrollRef}
+                className="w-full overflow-x-auto overflow-y-visible pb-4 pt-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-hide no-scrollbar scroll-smooth snap-x snap-mandatory"
+                style={{ WebkitOverflowScrolling: "touch" }}
+              >
+                <div className="flex gap-3 sm:gap-4.5 w-max pr-6 sm:pr-8">
+                  {getFeaturedProducts().map(product => (
+                    <FeaturedCard key={product.id} product={product} />
+                  ))}
+                </div>
               </div>
             </section>
 
