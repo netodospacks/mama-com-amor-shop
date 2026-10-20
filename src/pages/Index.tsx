@@ -18,6 +18,7 @@ import {
 } from "@/data/catalog";
 
 const CATEGORY_PILLS = [
+  { label: "Destaques", id: "destaques" },
   { label: "Cestas", id: "cestas" },
   { label: "Quadros A4", id: "quadros-a4" },
   { label: "Quadros 10x15", id: "quadros-10x15" },
@@ -173,6 +174,7 @@ const SubSectionHeader = ({ title, description }: { title: string; description?:
 // Menu
 // ─────────────────────────────────────────────────────────────────────────────
 const MENU_ITEMS = [
+  { label: "Destaques", id: "destaques" },
   { label: "Cestas", id: "cestas" },
   { label: "Quadro A4", id: "quadros-a4" },
   { label: "Quadro 10x15", id: "quadros-10x15" },
@@ -189,7 +191,7 @@ const MENU_ITEMS = [
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<string>("cestas");
+  const [activeCategory, setActiveCategory] = useState<string>("destaques");
   const pillsContainerRef = useRef<HTMLDivElement>(null);
   const [products, setProducts] = useState<(Product & { categorySlug?: string })[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -225,6 +227,22 @@ export default function Index() {
       if (filtered && filtered.length > 0) return filtered;
     }
     return fallback || [];
+  };
+
+  const getFeaturedProducts = (): Product[] => {
+    if (products && products.length > 0) {
+      const fromDb = products.filter(p => p.isFeatured);
+      if (fromDb.length > 0) return fromDb;
+    }
+    // Fallback inicial para curadoria em destaque
+    const fallbackList = [
+      CESTAS_CAFE_DA_MANHA?.[0],
+      QUADROS_A4_CASAL?.[0],
+      CATEGORIES.KITS?.[0],
+      CATEGORIES.COMBOS?.[0],
+    ].filter(Boolean) as Product[];
+
+    return fallbackList.map(p => ({ ...p, isFeatured: true }));
   };
 
   const isScrollingRef = useRef(false);
@@ -497,6 +515,24 @@ export default function Index() {
           </div>
         ) : (
           <>
+            {/* ITENS EM DESTAQUE (CURADORIA ESPECIAL) */}
+            <section id="destaques" className="w-full pb-4 sm:pb-8 border-b border-neutral-100">
+              <div className="mb-6 sm:mb-8 px-2 sm:px-0">
+                <span className="text-[10px] sm:text-xs font-semibold tracking-[0.2em] text-neutral-400 uppercase block mb-1">
+                  Curadoria Especial
+                </span>
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                  Itens em Destaque
+                </h2>
+                <div className="w-8 h-px bg-black mt-2" />
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                {getFeaturedProducts().map(product => (
+                  <MiniCard key={product.id} product={product} />
+                ))}
+              </div>
+            </section>
+
             {/* CESTAS */}
             <section id="cestas" className="w-full">
               <div className="mb-8 sm:mb-10 px-2 sm:px-0">

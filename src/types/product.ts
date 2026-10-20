@@ -7,6 +7,7 @@ export type Product = {
   gallery?: string[];
   isPromo?: boolean;
   isNew?: boolean;
+  isFeatured?: boolean; // Produto em destaque na página inicial
   shortDescription: string;
   detailedDescription: string;
   specifications: string[];

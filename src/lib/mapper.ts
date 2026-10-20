@@ -54,6 +54,7 @@ export const mapProductFromDB = (dbProduct: any): Product & { categorySlug?: str
     gallery,
     isPromo: Boolean(dbProduct.is_promo),
     isNew: Boolean(dbProduct.is_new),
+    isFeatured: Boolean(dbProduct.is_featured),
     shortDescription: dbProduct.short_description || '',
     detailedDescription: dbProduct.detailed_description || '',
     specifications: specs,

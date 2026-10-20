@@ -33,6 +33,7 @@ interface Product {
   gallery: string[] | null;
   is_promo: boolean;
   is_new: boolean;
+  is_featured: boolean;
   short_description: string | null;
   detailed_description: string | null;
   specifications: string[] | null;
@@ -70,6 +71,7 @@ type FormData = {
   gallery: string[];
   is_promo: boolean;
   is_new: boolean;
+  is_featured: boolean;
   short_description: string;
   detailed_description: string;
   specifications: string[];
@@ -87,6 +89,7 @@ const emptyForm = (): FormData => ({
   gallery: [],
   is_promo: false,
   is_new: false,
+  is_featured: false,
   short_description: '',
   detailed_description: '',
   specifications: [],
@@ -487,6 +490,7 @@ export default function Products() {
       gallery: p.gallery ?? [],
       is_promo: p.is_promo ?? false,
       is_new: p.is_new ?? false,
+      is_featured: p.is_featured ?? false,
       short_description: p.short_description ?? '',
       detailed_description: p.detailed_description ?? '',
       specifications: p.specifications ?? [],
@@ -530,6 +534,7 @@ export default function Products() {
           gallery: p.gallery ?? [],
           is_promo: p.is_promo ?? false,
           is_new: p.is_new ?? false,
+          is_featured: p.is_featured ?? false,
           short_description: p.short_description ?? '',
           detailed_description: p.detailed_description ?? '',
           specifications: p.specifications ?? [],
@@ -569,6 +574,7 @@ export default function Products() {
       gallery: formData.gallery.length > 0 ? formData.gallery : null,
       is_promo: formData.is_promo,
       is_new: formData.is_new,
+      is_featured: formData.is_featured,
       short_description: formData.short_description || null,
       detailed_description: formData.detailed_description || null,
       specifications: formData.specifications.length > 0 ? formData.specifications : null,
@@ -782,6 +788,10 @@ export default function Products() {
                     <span className="text-sm font-medium">Produto ativo</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" checked={formData.is_featured} onChange={e => setFormData({ ...formData, is_featured: e.target.checked })} className="w-4 h-4 rounded accent-amber-500" />
+                    <span className="text-sm font-medium text-amber-700 dark:text-amber-400">⭐ Destaque (Página Inicial)</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input type="checkbox" checked={formData.is_promo} onChange={e => setFormData({ ...formData, is_promo: e.target.checked })} className="w-4 h-4 rounded" />
                     <span className="text-sm">Promoção</span>
                   </label>
@@ -972,7 +982,8 @@ export default function Products() {
                             </div>
                             <div>
                               <p className="font-medium text-sm leading-tight">{p.name}</p>
-                              <div className="flex gap-1 mt-0.5">
+                              <div className="flex gap-1 mt-0.5 flex-wrap">
+                                {p.is_featured && <span className="text-[10px] bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5">⭐ Destaque</span>}
                                 {p.is_promo && <span className="text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded font-medium">Promo</span>}
                                 {p.is_new && <span className="text-[10px] bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-1.5 py-0.5 rounded font-medium">Novo</span>}
                               </div>
@@ -1047,6 +1058,7 @@ export default function Products() {
                         {' · '}Ordem: {p.sort_order}
                       </p>
                       <div className="flex gap-1 mt-1 flex-wrap">
+                        {p.is_featured && <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5">⭐ Destaque</span>}
                         {p.is_promo && <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Promo</span>}
                         {p.is_new && <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">Novo</span>}
                       </div>
