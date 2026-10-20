@@ -227,29 +227,38 @@ export default function Index() {
     return fallback || [];
   };
 
+  const isScrollingRef = useRef(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const scrollToSection = (id: string) => {
     setActiveCategory(id);
     setMenuOpen(false);
-    setTimeout(() => {
-      const el = document.getElementById(id);
-      if (el) {
-        const offset = window.innerWidth < 768 ? 65 : 75;
-        const bodyRect = document.body.getBoundingClientRect().top;
-        const elementRect = el.getBoundingClientRect().top;
-        const elementPosition = elementRect - bodyRect;
-        const offsetPosition = elementPosition - offset;
+    isScrollingRef.current = true;
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: "smooth"
-        });
-      }
-    }, 100);
+    const el = document.getElementById(id);
+    if (el) {
+      const navHeight = 70;
+      const elementPosition = el.getBoundingClientRect().top + window.scrollY;
+      const offsetPosition = Math.max(0, elementPosition - navHeight);
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+
+      scrollTimeoutRef.current = setTimeout(() => {
+        isScrollingRef.current = false;
+      }, 800);
+    } else {
+      isScrollingRef.current = false;
+    }
   };
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 120;
+      if (isScrollingRef.current) return;
+      const scrollPosition = window.scrollY + 140;
       for (let i = CATEGORY_PILLS.length - 1; i >= 0; i--) {
         const item = CATEGORY_PILLS[i];
         const el = document.getElementById(item.id);
@@ -261,17 +270,24 @@ export default function Index() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
   }, []);
 
   useEffect(() => {
     if (pillsContainerRef.current) {
-      const activeButton = pillsContainerRef.current.querySelector<HTMLButtonElement>(`[data-pill-id="${activeCategory}"]`);
+      const container = pillsContainerRef.current;
+      const activeButton = container.querySelector<HTMLButtonElement>(`[data-pill-id="${activeCategory}"]`);
       if (activeButton) {
-        activeButton.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-          inline: "center"
+        const buttonLeft = activeButton.offsetLeft;
+        const buttonWidth = activeButton.offsetWidth;
+        const containerWidth = container.offsetWidth;
+        const targetScroll = buttonLeft - (containerWidth / 2) + (buttonWidth / 2);
+        container.scrollTo({
+          left: Math.max(0, targetScroll),
+          behavior: "smooth"
         });
       }
     }
@@ -429,17 +445,6 @@ export default function Index() {
               Santa Rita, João Pessoa e Região
             </span>
           </div>
-
-          {/* Botão Falar no WhatsApp */}
-          <a
-            href="https://wa.me/5583993032780?text=Ol%C3%A1%2C%20gostaria%20de%20um%20atendimento%20pelo%20WhatsApp!"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3 rounded-full bg-[#25D366] hover:bg-[#1ebd5b] text-white text-xs sm:text-sm font-semibold tracking-wider uppercase shadow-[0_4px_20px_rgba(37,211,102,0.4)] hover:shadow-[0_6px_25px_rgba(37,211,102,0.6)] active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#25D366]/50"
-          >
-            <WhatsAppIcon size={18} className="text-white shrink-0" />
-            <span>Falar no WhatsApp</span>
-          </a>
         </div>
       </section>
 
@@ -489,19 +494,6 @@ export default function Index() {
           </div>
         ) : (
           <>
-            {/* WhatsApp Direct Button */}
-            <div className="w-full px-2 sm:px-0 mb-8 sm:mb-14 flex justify-center">
-              <a 
-                href={`https://wa.me/5583993032780?text=${encodeURIComponent("Olá, gostaria de fazer um pedido na Virtual Store!")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto bg-[#FAFAFA] dark:bg-[#0A0A0A] border border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200 py-4 px-8 rounded-xl text-xs md:text-sm font-medium tracking-[0.1em] uppercase flex items-center justify-center gap-3 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors duration-300 shadow-sm group"
-              >
-                <WhatsAppIcon size={20} className="text-[#25D366] shrink-0" />
-                <span>PEDIR PELO WHATSAPP</span>
-              </a>
-            </div>
-
             {/* CESTAS */}
             <section id="cestas" className="w-full">
               <div className="mb-8 sm:mb-10 px-2 sm:px-0">
@@ -647,15 +639,6 @@ export default function Index() {
         <p className="text-xs text-neutral-400 max-w-sm font-light leading-relaxed">
           A excelência em produtos premium, pensados para os clientes mais exigentes.
         </p>
-        <a
-          href="https://wa.me/5583993032780?text=Ol%C3%A1%2C%20gostaria%20de%20um%20atendimento%20pelo%20WhatsApp!"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-6 inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-[#25D366] hover:bg-[#128C7E] text-white text-xs font-semibold uppercase tracking-wider shadow-md hover:shadow-lg active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#25D366]/50"
-        >
-          <WhatsAppIcon size={18} className="text-white shrink-0" />
-          <span>Atendimento WhatsApp</span>
-        </a>
         <div className="mt-8 pt-8 border-t border-black/5 dark:border-white/5 w-full max-w-xs text-[10px] text-neutral-400">
           © {new Date().getFullYear()} Eternizando Momentos. Todos os direitos reservados.
         </div>

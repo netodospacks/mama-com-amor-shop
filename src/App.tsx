@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "./context/CartContext";
 import { CartDrawer, FloatingCart } from "@/components/CartComponents";
-import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 import Index from "./pages/Index.tsx";
@@ -28,7 +27,6 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => (
   <>
     <CartDrawer />
     <FloatingCart />
-    <FloatingWhatsApp />
     {children}
   </>
 );
