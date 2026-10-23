@@ -13,8 +13,11 @@ import {
   ChevronDown,
   PackageX,
   AlertTriangle,
+  Gift,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { SubproductsManager } from '@/components/admin/SubproductsManager';
+import { fetchAddonCountsByProduct } from '@/lib/subproducts';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -416,6 +419,9 @@ export default function Products() {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Subproduct / Addon counts
+  const [addonCounts, setAddonCounts] = useState<Record<string, number>>({});
+
   // Generate a stable temp ID for new product uploads
   const [tempId] = useState(() => crypto.randomUUID());
 
@@ -423,12 +429,13 @@ export default function Products() {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [prodRes, catRes] = await Promise.all([
+    const [prodRes, catRes, counts] = await Promise.all([
       supabase
         .from('products')
         .select('*, categories(name)')
         .order('sort_order', { ascending: true }),
       supabase.from('categories').select('id, name, active').order('name'),
+      fetchAddonCountsByProduct(),
     ]);
 
     if (prodRes.error) {
@@ -442,6 +449,10 @@ export default function Products() {
       console.error(catRes.error);
     } else {
       setCategories(catRes.data as Category[]);
+    }
+
+    if (counts) {
+      setAddonCounts(counts);
     }
 
     setLoading(false);
@@ -857,6 +868,20 @@ export default function Products() {
                 onChange={specs => setFormData(f => ({ ...f, specifications: specs }))}
               />
 
+              {/* ── Subprodutos e Adicionais ── */}
+              <div className="pt-6 border-t border-neutral-100 dark:border-neutral-800">
+                <SubproductsManager
+                  productId={uploadTargetId}
+                  productName={formData.name || 'Produto'}
+                  isNewProduct={!editingId}
+                  onCountChange={(count) => {
+                    if (editingId) {
+                      setAddonCounts(prev => ({ ...prev, [editingId]: count }));
+                    }
+                  }}
+                />
+              </div>
+
               {/* Form actions */}
               <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-neutral-100 dark:border-neutral-800">
                 <button
@@ -986,6 +1011,12 @@ export default function Products() {
                                 {p.is_featured && <span className="text-[10px] bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5">⭐ Destaque</span>}
                                 {p.is_promo && <span className="text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded font-medium">Promo</span>}
                                 {p.is_new && <span className="text-[10px] bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-1.5 py-0.5 rounded font-medium">Novo</span>}
+                                {addonCounts[p.id] ? (
+                                  <span className="text-[10px] bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/40 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                                    <Gift size={10} className="text-store-pink" />
+                                    <span>{addonCounts[p.id]} {addonCounts[p.id] === 1 ? 'adicional' : 'adicionais'}</span>
+                                  </span>
+                                ) : null}
                               </div>
                             </div>
                           </div>
@@ -1061,6 +1092,12 @@ export default function Products() {
                         {p.is_featured && <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5">⭐ Destaque</span>}
                         {p.is_promo && <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Promo</span>}
                         {p.is_new && <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">Novo</span>}
+                        {addonCounts[p.id] ? (
+                          <span className="text-[10px] bg-rose-50 text-rose-700 border border-rose-200 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                            <Gift size={10} className="text-store-pink" />
+                            <span>{addonCounts[p.id]} {addonCounts[p.id] === 1 ? 'adicional' : 'adicionais'}</span>
+                          </span>
+                        ) : null}
                       </div>
 
                       {/* Actions row */}

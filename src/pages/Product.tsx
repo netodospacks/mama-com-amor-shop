@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ShoppingBag, ShieldCheck, Truck, MessageCircle } from "lucide-react";
+import { ArrowLeft, ShoppingBag, ShieldCheck, Truck, MessageCircle, Gift, Check, Sparkles } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { FormattedDescription } from "@/components/FormattedDescription";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Product as ProductType } from "@/types/product";
-import { mapProductFromDB } from "@/lib/mapper";
+import { Subproduct } from "@/types/subproduct";
+import { mapProductFromDB, getEffectivePrice } from "@/lib/mapper";
+import { fetchSubproductsForProduct, formatSubproductPrice } from "@/lib/subproducts";
 import { useCart } from "@/context/CartContext";
 import { getProductById } from "@/data/catalog";
 import { toast } from "sonner";
@@ -18,7 +20,9 @@ export default function Product() {
   const [isLoading, setIsLoading] = useState(true);
   const { addItem, isCartOpen, setIsCartOpen, setIsCheckoutOpen } = useCart();
 
-  const [mainImage, setMainImage] = useState<string | undefined>(undefined);
+  const [addons, setAddons] = useState<Subproduct[]>([]);
+  const [selectedAddons, setSelectedAddons] = useState<Subproduct[]>([]);
+  const [loadingAddons, setLoadingAddons] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -36,6 +40,17 @@ export default function Product() {
             setProduct(mappedProduct);
             setMainImage(mappedProduct.gallery?.[0] || mappedProduct.image);
             setIsLoading(false);
+
+            // Carregar adicionais vinculados a este produto
+            setLoadingAddons(true);
+            try {
+              const subs = await fetchSubproductsForProduct(id);
+              setAddons(subs);
+            } catch (e) {
+              console.warn("Erro ao buscar adicionais:", e);
+            } finally {
+              setLoadingAddons(false);
+            }
             return;
           }
         }
@@ -48,6 +63,12 @@ export default function Product() {
       if (local) {
         setProduct(local);
         setMainImage(local.gallery?.[0] || local.image);
+        try {
+          const subs = await fetchSubproductsForProduct(id);
+          setAddons(subs);
+        } catch (e) {
+          console.warn("Erro ao carregar mimos locais:", e);
+        }
       }
       setIsLoading(false);
     };
@@ -59,16 +80,32 @@ export default function Product() {
     window.scrollTo(0, 0);
   }, []);
 
+  const toggleSelectAddon = (addon: Subproduct) => {
+    setSelectedAddons((prev) => {
+      const exists = prev.some((a) => a.id === addon.id);
+      if (exists) {
+        return prev.filter((a) => a.id !== addon.id);
+      } else {
+        return [...prev, addon];
+      }
+    });
+  };
+
   const handleAddToCart = () => {
     if (!product) return;
-    addItem(product);
-    toast.success(`${product.name} adicionado ao carrinho! 🛍️`);
+    addItem(product, 1, selectedAddons);
+    const addonsCount = selectedAddons.length;
+    if (addonsCount > 0) {
+      toast.success(`${product.name} (+ ${addonsCount} ${addonsCount === 1 ? 'mimo' : 'mimos'}) adicionado ao carrinho! 🎁`);
+    } else {
+      toast.success(`${product.name} adicionado ao carrinho! 🛍️`);
+    }
     setIsCartOpen(true);
   };
 
   const handleCheckoutDirect = () => {
     if (!product) return;
-    addItem(product);
+    addItem(product, 1, selectedAddons);
     setIsCheckoutOpen(true);
   };
 
@@ -195,6 +232,92 @@ export default function Product() {
               />
             </div>
 
+            {/* Seção de Mimos & Adicionais Disponíveis */}
+            {addons.length > 0 && (
+              <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-rose-50/50 via-white to-pink-50/30 dark:from-neutral-900 dark:via-neutral-900 dark:to-neutral-800/40 border border-rose-100 dark:border-neutral-800 shadow-xs">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-store-pink/10 text-store-pink flex items-center justify-center shrink-0">
+                      <Gift size={15} />
+                    </div>
+                    <div>
+                      <h3 className="text-xs sm:text-sm font-bold tracking-tight text-neutral-900 dark:text-white flex items-center gap-1.5">
+                        <span>Que tal adicionar um mimo?</span>
+                      </h3>
+                      <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                        Personalize seu presente e surpreenda quem você ama!
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500">
+                    Opcional
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {addons.map((addon) => {
+                    const isSelected = selectedAddons.some((a) => a.id === addon.id);
+                    return (
+                      <div
+                        key={addon.id}
+                        onClick={() => toggleSelectAddon(addon)}
+                        className={`p-2.5 rounded-xl border flex items-center gap-3 cursor-pointer select-none transition-all ${
+                          isSelected
+                            ? "bg-rose-500/10 border-rose-400 dark:border-rose-500 shadow-sm"
+                            : "bg-white/80 dark:bg-neutral-900/80 border-neutral-200/80 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700"
+                        }`}
+                      >
+                        <div className="w-12 h-12 rounded-lg bg-neutral-100 dark:bg-neutral-800 overflow-hidden shrink-0 relative">
+                          {addon.image ? (
+                            <img src={addon.image} alt={addon.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-neutral-400">
+                              <Gift size={16} />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-xs font-semibold text-neutral-900 dark:text-white truncate">
+                            {addon.name}
+                          </h4>
+                          {addon.description && (
+                            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 truncate">
+                              {addon.description}
+                            </p>
+                          )}
+                          <p className="text-[11px] font-bold text-store-pink mt-0.5">
+                            + {formatSubproductPrice(addon.price)}
+                          </p>
+                        </div>
+
+                        <div
+                          className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 border transition-colors ${
+                            isSelected
+                              ? "bg-store-pink border-store-pink text-white"
+                              : "border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+                          }`}
+                        >
+                          {isSelected && <Check size={12} strokeWidth={3} />}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {selectedAddons.length > 0 && (
+                  <div className="mt-3 pt-2.5 border-t border-rose-100/80 dark:border-neutral-800 flex items-center justify-between text-xs">
+                    <span className="text-neutral-600 dark:text-neutral-400">
+                      {selectedAddons.length} {selectedAddons.length === 1 ? "mimo selecionado" : "mimos selecionados"}
+                    </span>
+                    <span className="font-bold text-neutral-900 dark:text-white">
+                      + {formatSubproductPrice(selectedAddons.reduce((acc, a) => acc + (Number(a.price) || 0), 0))}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex flex-col gap-3 mb-10">
               {/* Botão Adicionar ao Carrinho Premium */}
               <motion.button 
@@ -205,7 +328,11 @@ export default function Product() {
               >
                 <div className="absolute inset-0 bg-white/20 dark:bg-black/10 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 ease-out rounded-xl" />
                 <ShoppingBag size={20} strokeWidth={1.5} className="relative z-10" />
-                <span className="relative z-10">Adicionar ao Carrinho</span>
+                <span className="relative z-10">
+                  {selectedAddons.length > 0
+                    ? `Adicionar ao Carrinho (+${selectedAddons.length} ${selectedAddons.length === 1 ? 'mimo' : 'mimos'})`
+                    : "Adicionar ao Carrinho"}
+                </span>
               </motion.button>
 
               {/* Botão Secundário WhatsApp Oficial */}

@@ -82,7 +82,15 @@ export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: (
       message += `*${item.product.name}*\n`;
       message += `Categoria: ${categoria}\n`;
       message += `Quantidade: ${item.quantity}\n`;
-      message += `Preço: ${priceStr}\n\n`;
+      message += `Preço: ${priceStr}\n`;
+      if (item.selectedAddons && item.selectedAddons.length > 0) {
+        message += `Adicionais:\n`;
+        item.selectedAddons.forEach(addon => {
+          const addonPrice = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(addon.price);
+          message += `- ${addon.name} (+ ${addonPrice})\n`;
+        });
+      }
+      message += `\n`;
     });
     
     message += `*Total: ${totalPriceFormatted}*\n\n`;

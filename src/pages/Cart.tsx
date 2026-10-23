@@ -1,14 +1,27 @@
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PaymentMethodSelector } from "@/components/PaymentMethodSelector";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
+import { CartAddonsSection } from "@/components/CartAddonsSection";
+import { formatSubproductPrice } from "@/lib/subproducts";
 import { toast } from "sonner";
 
 export default function Cart() {
-  const { items, updateQuantity, removeItem, totalPriceFormatted, formaPagamento, setFormaPagamento } = useCart();
+  const { 
+    items, 
+    updateQuantity, 
+    removeItem, 
+    removeAddon,
+    totalPriceFormatted, 
+    subtotalProductsFormatted,
+    subtotalAddonsFormatted,
+    subtotalAddons,
+    formaPagamento, 
+    setFormaPagamento 
+  } = useCart();
   const [paymentError, setPaymentError] = useState(false);
   const navigate = useNavigate();
 
@@ -53,61 +66,97 @@ export default function Cart() {
             {items.map((item) => {
               const isOnPromo = item.product.isPromo && item.product.promoPrice;
               return (
-                <div key={item.product.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
-                  <img 
-                    src={item.product.image} 
-                    alt={item.product.name} 
-                    className="w-20 h-20 object-cover rounded-xl bg-gray-50"
-                  />
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-bold text-sm text-gray-800 line-clamp-2 pr-2">
-                        {item.product.name}
-                      </h3>
-                      <button 
-                        onClick={() => removeItem(item.product.id)}
-                        className="text-gray-400 hover:text-red-500 p-1"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    
-                    <div className="flex justify-between items-end mt-2">
-                      <div className="flex flex-col leading-tight">
-                        {isOnPromo ? (
-                          <>
-                            <span className="text-[10px] text-gray-400 line-through">
-                              {item.product.price}
-                            </span>
-                            <span className="text-store-pink font-bold">
-                              {item.product.promoPrice}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-store-pink font-bold">
-                            {item.product.price}
-                          </span>
-                        )}
+                <div key={item.id || item.product.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3">
+                  <div className="flex gap-4">
+                    <img 
+                      src={item.product.image} 
+                      alt={item.product.name} 
+                      className="w-20 h-20 object-cover rounded-xl bg-gray-50 shrink-0"
+                    />
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-bold text-sm text-gray-800 line-clamp-2 pr-2">
+                          {item.product.name}
+                        </h3>
+                        <button 
+                          onClick={() => removeItem(item.id)}
+                          className="text-gray-400 hover:text-red-500 p-1"
+                          title="Remover produto do carrinho"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                       
-                      <div className="flex items-center gap-3 bg-store-light rounded-full px-3 py-1">
-                        <button 
-                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                          className="text-store-dark hover:opacity-70 disabled:opacity-30"
-                          disabled={item.quantity <= 1}
-                        >
-                          <Minus className="w-3 h-3" />
-                        </button>
-                        <span className="text-sm font-bold w-4 text-center">{item.quantity}</span>
-                        <button 
-                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                          className="text-store-dark hover:opacity-70"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </button>
+                      <div className="flex justify-between items-end mt-2">
+                        <div className="flex flex-col leading-tight">
+                          {isOnPromo ? (
+                            <>
+                              <span className="text-[10px] text-gray-400 line-through">
+                                {item.product.price}
+                              </span>
+                              <span className="text-store-pink font-bold">
+                                {item.product.promoPrice}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-store-pink font-bold">
+                              {item.product.price}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-3 bg-store-light rounded-full px-3 py-1">
+                          <button 
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            className="text-store-dark hover:opacity-70 disabled:opacity-30"
+                            disabled={item.quantity <= 1}
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="text-sm font-bold w-4 text-center">{item.quantity}</span>
+                          <button 
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            className="text-store-dark hover:opacity-70"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
+
+                  {/* Mimos Selecionados para esta cesta/produto */}
+                  {item.selectedAddons && item.selectedAddons.length > 0 && (
+                    <div className="bg-rose-50/60 p-2.5 rounded-xl border border-rose-100 flex flex-col gap-1.5">
+                      <span className="text-[11px] font-semibold text-rose-900">
+                        Mimos e adicionais selecionados:
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {item.selectedAddons.map((addon) => (
+                          <span
+                            key={addon.id}
+                            className="inline-flex items-center gap-1.5 bg-white text-rose-700 border border-rose-200 rounded-lg px-2.5 py-1 text-xs font-medium shadow-xs"
+                          >
+                            <span>{addon.name}</span>
+                            <span className="text-[10px] text-rose-500 font-bold">
+                              (+{formatSubproductPrice(addon.price)})
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => removeAddon(item.id, addon.id)}
+                              className="hover:text-red-600 text-rose-400 p-0.5 rounded-full"
+                              title="Remover adicional"
+                            >
+                              <X size={12} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Seção 'Que tal adicionar mais um mimo?' */}
+                  <CartAddonsSection item={item} />
                 </div>
               );
             })}
@@ -125,11 +174,17 @@ export default function Cart() {
             </div>
 
             {/* Total do Pedido */}
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-store-light">
-              <div className="flex justify-between items-center mb-2 text-sm text-gray-600">
-                <span>Subtotal</span>
-                <span>{totalPriceFormatted}</span>
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-store-light space-y-2">
+              <div className="flex justify-between items-center text-sm text-gray-600">
+                <span>Produtos</span>
+                <span>{subtotalProductsFormatted}</span>
               </div>
+              {subtotalAddons > 0 && (
+                <div className="flex justify-between items-center text-sm text-store-pink">
+                  <span>Mimos e adicionais</span>
+                  <span>+{subtotalAddonsFormatted}</span>
+                </div>
+              )}
               <div className="flex justify-between items-center font-bold text-lg text-gray-900 border-t border-gray-100 pt-3 mt-2">
                 <span>Total</span>
                 <span className="text-store-pink">{totalPriceFormatted}</span>
