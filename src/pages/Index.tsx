@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Instagram, MoreHorizontal, X, ChevronRight, ChevronLeft, Menu, Gift, MapPin, Settings2 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Link } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Product } from "@/types/product";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { mapProductFromDB } from "@/lib/mapper";
@@ -262,37 +262,94 @@ export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>("destaques");
   const pillsContainerRef = useRef<HTMLDivElement>(null);
-  const [products, setProducts] = useState<(Product & { categorySlug?: string })[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categoriesList, setCategoriesList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
         if (!isSupabaseConfigured) {
           setIsLoading(false);
           return;
         }
-        const { data, error } = await supabase
-          .from('products')
-          .select('*, categories(slug)')
-          .eq('active', true)
-          .order('sort_order');
+
+        const [prodRes, catRes] = await Promise.all([
+          supabase
+            .from('products')
+            .select('*, categories(id, name, slug)')
+            .eq('active', true)
+            .order('sort_order'),
+          supabase
+            .from('categories')
+            .select('*')
+            .eq('active', true)
+            .order('sort_order', { ascending: true })
+        ]);
         
-        if (data && data.length > 0) {
-          setProducts(data.map(mapProductFromDB));
+        if (prodRes.data && prodRes.data.length > 0) {
+          setProducts(prodRes.data.map(mapProductFromDB));
+        }
+
+        if (catRes.data && catRes.data.length > 0) {
+          setCategoriesList(catRes.data);
         }
       } catch (err) {
-        console.error("Erro ao carregar produtos:", err);
+        console.error("Erro ao carregar dados do catálogo:", err);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchProducts();
+    fetchData();
   }, []);
 
-  const getCategoryProducts = (slug: string, fallback?: Product[]): Product[] => {
+  // Retorna o nome atualizado da categoria pelo slug ou fallback
+  const getCategoryDisplayName = (slug: string, defaultName: string): string => {
+    const found = categoriesList.find(c => 
+      c.slug === slug || 
+      (slug === 'kits-casal' && (c.slug === 'kits' || c.slug === 'kits-casal')) ||
+      (slug === 'mamaes-e-bebes' && (c.slug === 'mamaes-bebes' || c.slug === 'mamaes-e-bebes')) ||
+      (slug === 'combos-promocionais' && (c.slug === 'combos' || c.slug === 'combos-promocionais')) ||
+      (slug === 'placas-acrilicas' && (c.slug === 'placas' || c.slug === 'placas-acrilicas')) ||
+      (slug === 'especial-maes' && (c.slug === 'maes' || c.slug === 'especial-maes')) ||
+      c.name?.toLowerCase() === defaultName.toLowerCase()
+    );
+    return found?.name || defaultName;
+  };
+
+  // Busca produtos vinculados à categoria por ID estável, por slug ou por aliases
+  const getCategoryProducts = (slugOrId: string, fallback?: Product[]): Product[] => {
     if (products && products.length > 0) {
-      const filtered = products.filter(p => p.categorySlug === slug);
+      const matchedCat = categoriesList.find(c => 
+        c.slug === slugOrId || 
+        c.id === slugOrId ||
+        (slugOrId === 'kits-casal' && (c.slug === 'kits' || c.slug === 'kits-casal')) ||
+        (slugOrId === 'mamaes-e-bebes' && (c.slug === 'mamaes-bebes' || c.slug === 'mamaes-e-bebes')) ||
+        (slugOrId === 'combos-promocionais' && (c.slug === 'combos' || c.slug === 'combos-promocionais')) ||
+        (slugOrId === 'placas-acrilicas' && (c.slug === 'placas' || c.slug === 'placas-acrilicas')) ||
+        (slugOrId === 'especial-maes' && (c.slug === 'maes' || c.slug === 'especial-maes'))
+      );
+
+      const targetCatId = matchedCat?.id;
+      const targetSlug = matchedCat?.slug || slugOrId;
+
+      const filtered = products.filter(p => {
+        // 1. Vínculo estável primário por ID da categoria (imune a edições de nome ou slug)
+        if (targetCatId && p.categoryId === targetCatId) return true;
+
+        // 2. Vínculo por slug
+        if (p.categorySlug === targetSlug || p.categorySlug === slugOrId) return true;
+
+        // 3. Aliases de compatibilidade histórica
+        if (slugOrId === 'kits-casal' && (p.categorySlug === 'kits' || p.categorySlug === 'kits-casal')) return true;
+        if (slugOrId === 'mamaes-e-bebes' && (p.categorySlug === 'mamaes-bebes' || p.categorySlug === 'mamaes-e-bebes')) return true;
+        if (slugOrId === 'combos-promocionais' && (p.categorySlug === 'combos' || p.categorySlug === 'combos-promocionais')) return true;
+        if (slugOrId === 'placas-acrilicas' && (p.categorySlug === 'placas' || p.categorySlug === 'placas-acrilicas')) return true;
+        if (slugOrId === 'especial-maes' && (p.categorySlug === 'maes' || p.categorySlug === 'especial-maes')) return true;
+
+        return false;
+      });
+
       if (filtered && filtered.length > 0) return filtered;
     }
     return fallback || [];
@@ -355,12 +412,59 @@ export default function Index() {
     }
   };
 
+  // Categorias ativas adicionais do Supabase que não estejam nas seções nativas fixas
+  const knownCategorySlugs = [
+    'destaques',
+    'cestas', 'cesta', 'cesta-cafe-da-manha', 'cesta-aniversario', 'cesta-cores',
+    'quadros-a4', 'quadro-a4', 'quadros-casal', 'quadros-aniversario',
+    'quadros-10x15', 'quadro-10x15', 'quadro-10x15-casal', 'quadro-10x15-aniversario',
+    'kits', 'kits-casal',
+    'mamaes-bebes', 'mamaes-e-bebes',
+    'produtos',
+    'placas', 'placas-acrilicas',
+    'combos', 'combos-promocionais',
+    'maes', 'especial-maes'
+  ];
+
+  const extraCategories = useMemo(() => {
+    return categoriesList.filter(c => 
+      c.active && 
+      !knownCategorySlugs.includes(c.slug)
+    );
+  }, [categoriesList]);
+
+  // Lista dinâmica de pills de navegação com nomes atualizados do banco
+  const dynamicCategoryPills = useMemo(() => {
+    const base = CATEGORY_PILLS.map(pill => ({
+      ...pill,
+      label: pill.id === 'destaques' ? 'Destaques' : getCategoryDisplayName(pill.id, pill.label)
+    }));
+    const extras = extraCategories.map(cat => ({
+      label: cat.name,
+      id: cat.slug || `cat-${cat.id}`
+    }));
+    return [...base, ...extras];
+  }, [categoriesList, extraCategories]);
+
+  // Lista dinâmica do menu lateral
+  const dynamicMenuItems = useMemo(() => {
+    const base = MENU_ITEMS.map(item => ({
+      ...item,
+      label: item.id === 'destaques' ? 'Destaques' : getCategoryDisplayName(item.id, item.label)
+    }));
+    const extras = extraCategories.map(cat => ({
+      label: cat.name,
+      id: cat.slug || `cat-${cat.id}`
+    }));
+    return [...base, ...extras];
+  }, [categoriesList, extraCategories]);
+
   useEffect(() => {
     const handleScroll = () => {
       if (isScrollingRef.current) return;
       const scrollPosition = window.scrollY + 140;
-      for (let i = CATEGORY_PILLS.length - 1; i >= 0; i--) {
-        const item = CATEGORY_PILLS[i];
+      for (let i = dynamicCategoryPills.length - 1; i >= 0; i--) {
+        const item = dynamicCategoryPills[i];
         const el = document.getElementById(item.id);
         if (el && scrollPosition >= el.offsetTop) {
           setActiveCategory(item.id);
@@ -374,7 +478,7 @@ export default function Index() {
       window.removeEventListener("scroll", handleScroll);
       if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     };
-  }, []);
+  }, [dynamicCategoryPills]);
 
   useEffect(() => {
     if (pillsContainerRef.current) {
@@ -424,7 +528,7 @@ export default function Index() {
                 </button>
               </div>
               <nav className="flex-1 overflow-y-auto py-4">
-                {MENU_ITEMS.map((item) => (
+                {dynamicMenuItems.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => scrollToSection(item.id)}
@@ -567,7 +671,7 @@ export default function Index() {
             ref={pillsContainerRef}
             className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-0.5 px-1 scroll-smooth"
           >
-            {CATEGORY_PILLS.map((pill) => {
+            {dynamicCategoryPills.map((pill) => {
               const isActive = activeCategory === pill.id;
               return (
                 <button
@@ -598,14 +702,17 @@ export default function Index() {
         ) : (
           <>
             {/* PRODUTOS EM DESTAQUE (ROLAGEM HORIZONTAL PARA A DIREITA) */}
-            <section id="destaques" className="w-full pb-4 sm:pb-8">
-              <div className="flex items-center justify-between mb-3 sm:mb-5 px-1 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-bold text-neutral-700 dark:text-neutral-200 tracking-tight">
-                  Produtos em destaque
-                </h2>
+            <section id="destaques" className="w-full pb-0">
+              <div className="flex items-end justify-between mb-4 sm:mb-6 px-1 sm:px-0">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-black dark:text-white">
+                    Produtos em destaque
+                  </h2>
+                  <div className="w-8 h-px bg-black dark:bg-white mt-2" />
+                </div>
 
                 {/* Controles de Navegação (Desktop/Tablet) */}
-                <div className="hidden sm:flex items-center gap-1.5">
+                <div className="hidden sm:flex items-center gap-1.5 pb-1">
                   <button
                     onClick={() => scrollFeatured('left')}
                     aria-label="Rolar para a esquerda"
@@ -626,7 +733,7 @@ export default function Index() {
               {/* Trilho com rolagem horizontal para a direita */}
               <div
                 ref={featuredScrollRef}
-                className="w-full overflow-x-auto overflow-y-visible pb-4 pt-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-hide no-scrollbar scroll-smooth snap-x snap-mandatory"
+                className="w-full overflow-x-auto overflow-y-visible pb-2 pt-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-hide no-scrollbar scroll-smooth snap-x snap-mandatory"
                 style={{ WebkitOverflowScrolling: "touch" }}
               >
                 <div className="flex gap-3 sm:gap-4.5 w-max pr-6 sm:pr-8">
@@ -638,9 +745,11 @@ export default function Index() {
             </section>
 
             {/* CESTAS */}
-            <section id="cestas" className="w-full">
+            <section id="cestas" className="w-full -mt-5 sm:-mt-8">
               <div className="mb-8 sm:mb-10 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Cestas</h2>
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                  {getCategoryDisplayName('cestas', 'Cestas')}
+                </h2>
                 <div className="w-8 h-px bg-black mt-2" />
               </div>
               <div className="mb-10 sm:mb-14 px-2 sm:px-0">
@@ -666,7 +775,9 @@ export default function Index() {
             {/* QUADRO A4 */}
             <section id="quadros-a4" className="w-full">
               <div className="mb-8 sm:mb-10 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Quadro A4</h2>
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                  {getCategoryDisplayName('quadros-a4', 'Quadro A4')}
+                </h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 dark:text-neutral-400 font-light tracking-wide mt-1">Escolha o tema, personalize cada detalhe e transforme uma memória.</p>
                 <div className="w-8 h-px bg-black mt-3" />
               </div>
@@ -683,7 +794,9 @@ export default function Index() {
             {/* QUADRO 10X15 */}
             <section id="quadros-10x15" className="w-full">
               <div className="mb-8 sm:mb-10 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Quadro 10x15</h2>
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                  {getCategoryDisplayName('quadros-10x15', 'Quadro 10x15')}
+                </h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 dark:text-neutral-400 font-light tracking-wide mt-1">Transforme momentos especiais em uma lembrança que fica para sempre.</p>
                 <div className="w-8 h-px bg-black mt-3" />
               </div>
@@ -700,7 +813,9 @@ export default function Index() {
             {/* KITS CASAL */}
             <section id="kits" className="w-full">
               <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Kits Casal</h2>
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                  {getCategoryDisplayName('kits-casal', 'Kits Casal')}
+                </h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Composições exclusivas criadas por especialistas</p>
                 <div className="w-8 h-px bg-black mt-3" />
               </div>
@@ -712,7 +827,9 @@ export default function Index() {
             {/* MAMÃES / BEBÊS */}
             <section id="mamaes-bebes" className="w-full">
               <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Mamães / Bebês</h2>
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                  {getCategoryDisplayName('mamaes-e-bebes', 'Mamães / Bebês')}
+                </h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Presentes especiais para mamãe e bebê</p>
                 <div className="w-8 h-px bg-black mt-3" />
               </div>
@@ -724,7 +841,9 @@ export default function Index() {
             {/* PRODUTOS AVULSOS */}
             <section id="produtos" className="w-full">
               <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Produtos</h2>
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                  {getCategoryDisplayName('produtos', 'Produtos')}
+                </h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Coleção principal com curadoria especial</p>
                 <div className="w-8 h-px bg-black mt-3" />
               </div>
@@ -740,7 +859,9 @@ export default function Index() {
             {/* PLACAS ACRÍLICAS */}
             <section id="placas" className="w-full">
               <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">Placas Acrílicas</h2>
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                  {getCategoryDisplayName('placas-acrilicas', 'Placas Acrílicas')}
+                </h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Placas decorativas incríveis</p>
                 <div className="w-8 h-px bg-black mt-3" />
               </div>
@@ -752,7 +873,9 @@ export default function Index() {
             {/* COMBOS PROMOCIONAIS */}
             <section id="combos" className="w-full">
               <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-neutral-900 dark:text-white">Combos Promocionais</h2>
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-neutral-900 dark:text-white">
+                  {getCategoryDisplayName('combos-promocionais', 'Combos Promocionais')}
+                </h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Ofertas imperdíveis por tempo limitado</p>
                 <div className="w-8 h-px bg-black mt-3" />
               </div>
@@ -764,7 +887,9 @@ export default function Index() {
             {/* ESPECIAL MÃES */}
             <section id="maes" className="w-full">
               <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-black">Especial Mães</h2>
+                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-black">
+                  {getCategoryDisplayName('especial-maes', 'Especial Mães')}
+                </h2>
                 <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Presentes inesquecíveis para quem você mais ama</p>
                 <div className="w-8 h-px bg-black mt-3" />
               </div>
@@ -772,6 +897,30 @@ export default function Index() {
                 {getCategoryProducts('especial-maes', CATEGORIES.MAES).map(product => <MiniCard key={product.id} product={product} />)}
               </div>
             </section>
+
+            {/* CATEGORIAS EXTRAS DINÂMICAS DO BANCO DE DADOS */}
+            {extraCategories.map(cat => {
+              const catProducts = getCategoryProducts(cat.id);
+              if (catProducts.length === 0) return null;
+              return (
+                <section key={cat.id} id={cat.slug || `cat-${cat.id}`} className="w-full">
+                  <div className="mb-8 sm:mb-12 px-2 sm:px-0">
+                    <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-black dark:text-white">
+                      {cat.name}
+                    </h2>
+                    {cat.description && (
+                      <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
+                        {cat.description}
+                      </p>
+                    )}
+                    <div className="w-8 h-px bg-black dark:bg-white mt-3" />
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                    {catProducts.map(product => <MiniCard key={product.id} product={product} />)}
+                  </div>
+                </section>
+              );
+            })}
           </>
         )}
 

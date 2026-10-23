@@ -12,4 +12,7 @@ export type Product = {
   detailedDescription: string;
   specifications: string[];
   observations: string;
+  categoryId?: string;
+  categoryName?: string;
+  categorySlug?: string;
 };

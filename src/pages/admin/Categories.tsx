@@ -84,17 +84,23 @@ export default function Categories() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name?.trim()) {
+      toast.error('O nome da categoria é obrigatório.');
+      return;
+    }
     setSaving(true);
 
-    const slug = formData.slug || generateSlug(formData.name || '');
+    // Na edição, preserva rigorosamente o slug original caso o usuário não tenha alterado intencionalmente
+    const originalCat = isEditing && formData.id ? categories.find(c => c.id === formData.id) : null;
+    const finalSlug = formData.slug?.trim() || originalCat?.slug || generateSlug(formData.name.trim());
     
     const payload = {
-      name: formData.name,
-      slug,
-      description: formData.description,
-      layout_type: formData.layout_type,
-      sort_order: formData.sort_order,
-      active: formData.active,
+      name: formData.name.trim(),
+      slug: finalSlug,
+      description: formData.description?.trim() || null,
+      layout_type: formData.layout_type || 'grid',
+      sort_order: formData.sort_order ?? 1,
+      active: formData.active !== undefined ? formData.active : true,
     };
 
     try {
@@ -102,10 +108,15 @@ export default function Categories() {
         const { error } = await supabase.from('categories').update(payload).eq('id', formData.id);
         if (error) throw error;
         toast.success('Categoria atualizada com sucesso!');
+        // Atualização otimista imediata do estado
+        setCategories(prev => prev.map(c => c.id === formData.id ? { ...c, ...payload, id: formData.id! } : c));
       } else {
-        const { error } = await supabase.from('categories').insert([payload]);
+        const { data, error } = await supabase.from('categories').insert([payload]).select().single();
         if (error) throw error;
         toast.success('Categoria criada com sucesso!');
+        if (data) {
+          setCategories(prev => [...prev, data]);
+        }
       }
       setIsOpen(false);
       fetchCategories();

@@ -59,6 +59,8 @@ export const mapProductFromDB = (dbProduct: any): Product & { categorySlug?: str
     detailedDescription: dbProduct.detailed_description || '',
     specifications: specs,
     observations: dbProduct.observations || '',
+    categoryId: dbProduct.category_id ? String(dbProduct.category_id) : (dbProduct.categories?.id ? String(dbProduct.categories.id) : undefined),
+    categoryName: dbProduct.categories?.name || undefined,
     categorySlug: dbProduct.categories?.slug || ''
   };
 };
