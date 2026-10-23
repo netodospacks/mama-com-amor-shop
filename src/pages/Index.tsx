@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Instagram, MoreHorizontal, X, ChevronRight, ChevronLeft, Menu, Gift, MapPin, Settings2 } from "lucide-react";
+import { Instagram, MoreHorizontal, X, ChevronRight, ChevronLeft, Menu, Gift, MapPin, Settings2, ArrowRight } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -31,67 +31,81 @@ const CATEGORY_PILLS = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FeaturedCard — card especial para "Produtos em destaque" (conforme referência)
+// FeaturedCard — card boutique premium para "Produtos em destaque"
 // ─────────────────────────────────────────────────────────────────────────────
 const FeaturedCard = ({ product }: { product: Product }) => {
   return (
     <Link
       to={`/product/${product.id}`}
-      className="block flex-shrink-0 w-[205px] sm:w-[240px] md:w-[270px] snap-start group h-full select-none"
+      className="block flex-shrink-0 w-[195px] sm:w-[230px] md:w-[260px] snap-start group h-full select-none"
     >
       <motion.div
         whileHover={{ y: -4 }}
         whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-        className="flex flex-col h-full bg-[#f2f3f5] dark:bg-neutral-800/80 rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300"
+        transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+        className="flex flex-col h-full bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 rounded-xl sm:rounded-2xl overflow-hidden hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-300"
       >
-        {/* Imagem do Produto */}
-        <div className="w-full aspect-[4/5] bg-neutral-200/60 dark:bg-neutral-700/50 relative overflow-hidden">
+        {/* Fotografia de Boutique com Proporção 4/5 desobstruída */}
+        <div className="w-full aspect-[4/5] bg-neutral-50 dark:bg-neutral-800/60 relative overflow-hidden">
           {product.image ? (
             <img
               src={product.image}
               alt={product.name}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out pointer-events-none"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out pointer-events-none"
             />
           ) : (
-            <div className="absolute inset-0 bg-neutral-200 dark:bg-neutral-700" />
-          )}
-
-          {product.isPromo && (
-            <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur-sm text-white text-[9px] sm:text-[10px] font-medium px-2 py-0.5 rounded-md uppercase tracking-wider z-10">
-              Promo
+            <div className="absolute inset-0 bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
+              <Gift size={24} className="text-neutral-300 dark:text-neutral-600" />
             </div>
           )}
 
-          {/* Botão Comprar flutuante no canto inferior direito da foto */}
-          <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 z-10">
-            <span className="inline-flex items-center justify-center bg-black text-white text-xs sm:text-[13px] font-medium px-3.5 py-1.5 sm:px-4 sm:py-1.5 rounded-lg sm:rounded-xl shadow-md group-hover:bg-neutral-800 group-hover:scale-105 transition-all duration-200">
-              Comprar
-            </span>
+          {/* Badges Discretas e Elegantes */}
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10 pointer-events-none">
+            {product.isPromo && (
+              <span className="inline-block bg-black/85 backdrop-blur-md text-white text-[8.5px] sm:text-[9.5px] font-medium px-2 py-0.5 rounded uppercase tracking-[0.16em] shadow-sm">
+                Promoção
+              </span>
+            )}
+            {product.isNew && (
+              <span className="inline-block bg-white/90 backdrop-blur-md text-black border border-neutral-200 text-[8.5px] sm:text-[9.5px] font-medium px-2 py-0.5 rounded uppercase tracking-[0.16em] shadow-sm">
+                Novidade
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Textos: Nome e Preço */}
-        <div className="p-3.5 sm:p-4 flex flex-col justify-between flex-grow">
-          <h3 className="text-xs sm:text-[13px] md:text-sm font-semibold text-neutral-600 dark:text-neutral-300 uppercase tracking-wide line-clamp-2 leading-snug mb-2 group-hover:text-black dark:group-hover:text-white transition-colors">
-            {product.name}
-          </h3>
+        {/* Textos: Hierarquia Editorial e Conversão */}
+        <div className="p-3 sm:p-4 flex flex-col justify-between flex-grow">
+          <div>
+            <h3 className="text-xs sm:text-[13px] font-medium text-neutral-800 dark:text-neutral-200 group-hover:text-black dark:group-hover:text-white transition-colors line-clamp-2 leading-snug mb-2">
+              {product.name}
+            </h3>
+          </div>
 
-          <div className="mt-auto">
-            {product.isPromo && product.promoPrice ? (
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-[11px] sm:text-xs text-neutral-400 line-through">
+          <div className="mt-auto pt-1">
+            {/* Preços com Clareza e Elegância */}
+            <div className="flex items-baseline gap-1.5 mb-2.5">
+              {product.isPromo && product.promoPrice ? (
+                <>
+                  <span className="text-[11px] sm:text-xs text-neutral-400 line-through font-normal">
+                    {product.price}
+                  </span>
+                  <span className="text-sm sm:text-base font-bold text-black dark:text-white tracking-tight">
+                    {product.promoPrice}
+                  </span>
+                </>
+              ) : (
+                <span className="text-sm sm:text-base font-bold text-black dark:text-white tracking-tight">
                   {product.price}
                 </span>
-                <span className="text-sm sm:text-base md:text-lg font-bold text-neutral-700 dark:text-neutral-100">
-                  {product.promoPrice}
-                </span>
-              </div>
-            ) : (
-              <span className="text-sm sm:text-base md:text-lg font-bold text-neutral-700 dark:text-neutral-100">
-                {product.price}
-              </span>
-            )}
+              )}
+            </div>
+
+            {/* Ação de Conversão: Botão Refinado de Boutique */}
+            <div className="w-full py-1.5 sm:py-2 px-3 rounded-lg bg-neutral-900 group-hover:bg-black dark:bg-white dark:group-hover:bg-neutral-100 text-white dark:text-black text-[10.5px] sm:text-xs font-medium uppercase tracking-[0.12em] flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+              <span>Personalizar</span>
+              <ArrowRight size={12} strokeWidth={2} className="transition-transform group-hover:translate-x-0.5" />
+            </div>
           </div>
         </div>
       </motion.div>

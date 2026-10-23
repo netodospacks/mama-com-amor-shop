@@ -17,6 +17,7 @@ export default function Product() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState<ProductType | null>(null);
+  const [mainImage, setMainImage] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const { addItem, isCartOpen, setIsCartOpen, setIsCheckoutOpen } = useCart();
 
