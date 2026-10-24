@@ -130,7 +130,13 @@ const MiniCard = ({ product }: { product: Product }) => {
       >
         <div className="w-full aspect-[4/5] bg-neutral-100 dark:bg-neutral-800 rounded-lg sm:rounded-xl overflow-hidden shadow-sm group-hover:shadow-lg transition-all duration-500 relative mb-2 sm:mb-3">
           {product.image ? (
-            <img src={product.image} alt={product.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+            <img 
+              src={product.image} 
+              alt={product.name} 
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
+            />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900 group-hover:scale-105 transition-transform duration-700 ease-out" />
           )}
@@ -187,7 +193,13 @@ const HScrollCard = ({ product }: { product: Product }) => {
       >
         <div className="w-full aspect-[4/5] bg-neutral-100 dark:bg-neutral-800 rounded-lg sm:rounded-xl overflow-hidden shadow-sm group-hover:shadow-lg transition-all duration-500 relative mb-2">
           {product.image ? (
-            <img src={product.image} alt={product.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+            <img 
+              src={product.image} 
+              alt={product.name} 
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
+            />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900" />
           )}
@@ -331,9 +343,42 @@ export default function Index() {
     return found?.name || defaultName;
   };
 
+  // Retorna a descrição atualizada da categoria pelo slug ou fallback
+  const getCategoryDescription = (slug: string, defaultDesc?: string): string | undefined => {
+    const found = categoriesList.find(c => 
+      c.slug === slug || 
+      (slug === 'kits-casal' && (c.slug === 'kits' || c.slug === 'kits-casal')) ||
+      (slug === 'mamaes-e-bebes' && (c.slug === 'mamaes-bebes' || c.slug === 'mamaes-e-bebes')) ||
+      (slug === 'combos-promocionais' && (c.slug === 'combos' || c.slug === 'combos-promocionais')) ||
+      (slug === 'placas-acrilicas' && (c.slug === 'placas' || c.slug === 'placas-acrilicas')) ||
+      (slug === 'especial-maes' && (c.slug === 'maes' || c.slug === 'especial-maes'))
+    );
+    return found?.description ?? defaultDesc;
+  };
+
+  // Verifica se a categoria está cadastrada e ativa no Supabase
+  const isCategoryActive = (slugOrId: string): boolean => {
+    if (!isSupabaseConfigured || categoriesList.length === 0) return true;
+    return categoriesList.some(c => 
+      c.active && (
+        c.slug === slugOrId || 
+        c.id === slugOrId ||
+        (slugOrId === 'kits-casal' && (c.slug === 'kits' || c.slug === 'kits-casal')) ||
+        (slugOrId === 'mamaes-e-bebes' && (c.slug === 'mamaes-bebes' || c.slug === 'mamaes-e-bebes')) ||
+        (slugOrId === 'combos-promocionais' && (c.slug === 'combos' || c.slug === 'combos-promocionais')) ||
+        (slugOrId === 'placas-acrilicas' && (c.slug === 'placas' || c.slug === 'placas-acrilicas')) ||
+        (slugOrId === 'especial-maes' && (c.slug === 'maes' || c.slug === 'especial-maes'))
+      )
+    );
+  };
+
   // Busca produtos vinculados à categoria por ID estável, por slug ou por aliases
   const getCategoryProducts = (slugOrId: string, fallback?: Product[]): Product[] => {
-    if (products && products.length > 0) {
+    if (isSupabaseConfigured && products && products.length > 0) {
+      if (!isCategoryActive(slugOrId)) {
+        return [];
+      }
+
       const matchedCat = categoriesList.find(c => 
         c.slug === slugOrId || 
         c.id === slugOrId ||
@@ -364,7 +409,7 @@ export default function Index() {
         return false;
       });
 
-      if (filtered && filtered.length > 0) return filtered;
+      return filtered;
     }
     return fallback || [];
   };
@@ -447,31 +492,62 @@ export default function Index() {
     );
   }, [categoriesList]);
 
-  // Lista dinâmica de pills de navegação com nomes atualizados do banco
+  // Seções com produtos computados
+  const cestasCafeProds = useMemo(() => getCategoryProducts('cesta-cafe-da-manha', CESTAS_CAFE_DA_MANHA), [products, categoriesList]);
+  const cestasAnivProds = useMemo(() => getCategoryProducts('cesta-aniversario', CESTAS_ANIVERSARIO), [products, categoriesList]);
+  const cestasCoresProds = useMemo(() => getCategoryProducts('cesta-cores', CESTAS_CORES), [products, categoriesList]);
+  const hasCestas = cestasCafeProds.length > 0 || cestasAnivProds.length > 0 || cestasCoresProds.length > 0;
+
+  const quadrosCasalProds = useMemo(() => getCategoryProducts('quadros-casal', QUADROS_A4_CASAL), [products, categoriesList]);
+  const quadrosAnivProds = useMemo(() => getCategoryProducts('quadros-aniversario', QUADROS_A4_ANIVERSARIO), [products, categoriesList]);
+  const hasQuadrosA4 = quadrosCasalProds.length > 0 || quadrosAnivProds.length > 0;
+
+  const quadro10x15CasalProds = useMemo(() => getCategoryProducts('quadro-10x15-casal', QUADROS_10x15_CASAL), [products, categoriesList]);
+  const quadro10x15AnivProds = useMemo(() => getCategoryProducts('quadro-10x15-aniversario', QUADROS_10x15_ANIVERSARIO), [products, categoriesList]);
+  const hasQuadros10x15 = quadro10x15CasalProds.length > 0 || quadro10x15AnivProds.length > 0;
+
+  const kitsProds = useMemo(() => getCategoryProducts('kits-casal', CATEGORIES.KITS), [products, categoriesList]);
+  const mamaesProds = useMemo(() => getCategoryProducts('mamaes-e-bebes', CATEGORIES.MAMAES_BEBES), [products, categoriesList]);
+  const produtosAvulsosProds = useMemo(() => getCategoryProducts('produtos', CATEGORIES.PRODUTOS), [products, categoriesList]);
+  const placasProds = useMemo(() => getCategoryProducts('placas-acrilicas', CATEGORIES.QUADROS_PLACAS), [products, categoriesList]);
+  const combosProds = useMemo(() => getCategoryProducts('combos-promocionais', CATEGORIES.COMBOS), [products, categoriesList]);
+  const maesProds = useMemo(() => getCategoryProducts('especial-maes', CATEGORIES.MAES), [products, categoriesList]);
+
+  // Lista dinâmica de pills de navegação com nomes atualizados do banco (oculta seções vazias ou inativas)
   const dynamicCategoryPills = useMemo(() => {
-    const base = CATEGORY_PILLS.map(pill => ({
-      ...pill,
-      label: pill.id === 'destaques' ? 'Destaques' : getCategoryDisplayName(pill.id, pill.label)
-    }));
-    const extras = extraCategories.map(cat => ({
-      label: cat.name,
-      id: cat.slug || `cat-${cat.id}`
-    }));
-    return [...base, ...extras];
-  }, [categoriesList, extraCategories]);
+    const pills: { label: string; id: string }[] = [{ label: "Destaques", id: "destaques" }];
+
+    if (hasCestas) pills.push({ label: getCategoryDisplayName('cestas', 'Cestas'), id: 'cestas' });
+    if (hasQuadrosA4) pills.push({ label: getCategoryDisplayName('quadros-a4', 'Quadros A4'), id: 'quadros-a4' });
+    if (hasQuadros10x15) pills.push({ label: getCategoryDisplayName('quadros-10x15', 'Quadros 10x15'), id: 'quadros-10x15' });
+    if (kitsProds.length > 0) pills.push({ label: getCategoryDisplayName('kits-casal', 'Kits Casal'), id: 'kits' });
+    if (mamaesProds.length > 0) pills.push({ label: getCategoryDisplayName('mamaes-e-bebes', 'Mamães / Bebês'), id: 'mamaes-bebes' });
+    if (produtosAvulsosProds.length > 0) pills.push({ label: getCategoryDisplayName('produtos', 'Produtos'), id: 'produtos' });
+    if (placasProds.length > 0) pills.push({ label: getCategoryDisplayName('placas-acrilicas', 'Placas Acrílicas'), id: 'placas' });
+    if (combosProds.length > 0) pills.push({ label: getCategoryDisplayName('combos-promocionais', 'Combos'), id: 'combos' });
+    if (maesProds.length > 0) pills.push({ label: getCategoryDisplayName('especial-maes', 'Especial Mães'), id: 'maes' });
+
+    extraCategories.forEach(cat => {
+      const catProds = getCategoryProducts(cat.id);
+      if (catProds.length > 0) {
+        pills.push({
+          label: cat.name,
+          id: cat.slug || `cat-${cat.id}`
+        });
+      }
+    });
+
+    return pills;
+  }, [
+    categoriesList, extraCategories, 
+    hasCestas, hasQuadrosA4, hasQuadros10x15, 
+    kitsProds, mamaesProds, produtosAvulsosProds, placasProds, combosProds, maesProds
+  ]);
 
   // Lista dinâmica do menu lateral
   const dynamicMenuItems = useMemo(() => {
-    const base = MENU_ITEMS.map(item => ({
-      ...item,
-      label: item.id === 'destaques' ? 'Destaques' : getCategoryDisplayName(item.id, item.label)
-    }));
-    const extras = extraCategories.map(cat => ({
-      label: cat.name,
-      id: cat.slug || `cat-${cat.id}`
-    }));
-    return [...base, ...extras];
-  }, [categoriesList, extraCategories]);
+    return dynamicCategoryPills;
+  }, [dynamicCategoryPills]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -759,158 +835,227 @@ export default function Index() {
             </section>
 
             {/* CESTAS */}
-            <section id="cestas" className="w-full -mt-5 sm:-mt-8">
-              <div className="mb-8 sm:mb-10 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                  {getCategoryDisplayName('cestas', 'Cestas')}
-                </h2>
-                <div className="w-8 h-px bg-black mt-2" />
-              </div>
-              <div className="mb-10 sm:mb-14 px-2 sm:px-0">
-                <SubSectionHeader title="Cesta Café da Manhã" description="Cada detalhe escolhido pensando em transformar uma manhã em uma lembrança inesquecível." />
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                  {getCategoryProducts('cesta-cafe-da-manha', CESTAS_CAFE_DA_MANHA).map(product => <MiniCard key={product.id} product={product} />)}
+            {hasCestas && (
+              <section id="cestas" className="w-full -mt-5 sm:-mt-8">
+                <div className="mb-8 sm:mb-10 px-2 sm:px-0">
+                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                    {getCategoryDisplayName('cestas', 'Cestas')}
+                  </h2>
+                  <div className="w-8 h-px bg-black mt-2" />
                 </div>
-              </div>
-              <div className="mb-10 sm:mb-14 px-2 sm:px-0">
-                <SubSectionHeader title="Cesta Aniversário" description="Um aniversário ainda mais especial, com carinho em cada detalhe." />
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                  {getCategoryProducts('cesta-aniversario', CESTAS_ANIVERSARIO).map(product => <MiniCard key={product.id} product={product} />)}
-                </div>
-              </div>
-              <div className="px-2 sm:px-0">
-                <SubSectionHeader title="Cesta Cores" description="Mais do que uma cesta, um carinho preparado em cada detalhe." />
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                  {getCategoryProducts('cesta-cores', CESTAS_CORES).map(product => <MiniCard key={product.id} product={product} />)}
-                </div>
-              </div>
-            </section>
+                {cestasCafeProds.length > 0 && (
+                  <div className="mb-10 sm:mb-14 px-2 sm:px-0">
+                    <SubSectionHeader 
+                      title={getCategoryDisplayName('cesta-cafe-da-manha', 'Cesta Café da Manhã')} 
+                      description={getCategoryDescription('cesta-cafe-da-manha', 'Cada detalhe escolhido pensando em transformar uma manhã em uma lembrança inesquecível.')} 
+                    />
+                    <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                      {cestasCafeProds.map(product => <MiniCard key={product.id} product={product} />)}
+                    </div>
+                  </div>
+                )}
+                {cestasAnivProds.length > 0 && (
+                  <div className="mb-10 sm:mb-14 px-2 sm:px-0">
+                    <SubSectionHeader 
+                      title={getCategoryDisplayName('cesta-aniversario', 'Cesta Aniversário')} 
+                      description={getCategoryDescription('cesta-aniversario', 'Um aniversário ainda mais especial, com carinho em cada detalhe.')} 
+                    />
+                    <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                      {cestasAnivProds.map(product => <MiniCard key={product.id} product={product} />)}
+                    </div>
+                  </div>
+                )}
+                {cestasCoresProds.length > 0 && (
+                  <div className="px-2 sm:px-0">
+                    <SubSectionHeader 
+                      title={getCategoryDisplayName('cesta-cores', 'Cesta Cores')} 
+                      description={getCategoryDescription('cesta-cores', 'Mais do que uma cesta, um carinho preparado em cada detalhe.')} 
+                    />
+                    <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                      {cestasCoresProds.map(product => <MiniCard key={product.id} product={product} />)}
+                    </div>
+                  </div>
+                )}
+              </section>
+            )}
 
             {/* QUADRO A4 */}
-            <section id="quadros-a4" className="w-full">
-              <div className="mb-8 sm:mb-10 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                  {getCategoryDisplayName('quadros-a4', 'Quadro A4')}
-                </h2>
-                <p className="text-[11px] sm:text-sm text-neutral-500 dark:text-neutral-400 font-light tracking-wide mt-1">Escolha o tema, personalize cada detalhe e transforme uma memória.</p>
-                <div className="w-8 h-px bg-black mt-3" />
-              </div>
-              <div className="mb-10 sm:mb-14 px-2 sm:px-0">
-                <SubSectionHeader title="Quadros Casal" />
-                <HScrollRow products={getCategoryProducts('quadros-casal', QUADROS_A4_CASAL)} />
-              </div>
-              <div className="px-2 sm:px-0">
-                <SubSectionHeader title="Quadros Aniversário" />
-                <HScrollRow products={getCategoryProducts('quadros-aniversario', QUADROS_A4_ANIVERSARIO)} />
-              </div>
-            </section>
+            {hasQuadrosA4 && (
+              <section id="quadros-a4" className="w-full">
+                <div className="mb-8 sm:mb-10 px-2 sm:px-0">
+                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                    {getCategoryDisplayName('quadros-a4', 'Quadro A4')}
+                  </h2>
+                  <p className="text-[11px] sm:text-sm text-neutral-500 dark:text-neutral-400 font-light tracking-wide mt-1">
+                    {getCategoryDescription('quadros-a4', 'Escolha o tema, personalize cada detalhe e transforme uma memória.')}
+                  </p>
+                  <div className="w-8 h-px bg-black mt-3" />
+                </div>
+                {quadrosCasalProds.length > 0 && (
+                  <div className="mb-10 sm:mb-14 px-2 sm:px-0">
+                    <SubSectionHeader 
+                      title={getCategoryDisplayName('quadros-casal', 'Quadros Casal')} 
+                      description={getCategoryDescription('quadros-casal')}
+                    />
+                    <HScrollRow products={quadrosCasalProds} />
+                  </div>
+                )}
+                {quadrosAnivProds.length > 0 && (
+                  <div className="px-2 sm:px-0">
+                    <SubSectionHeader 
+                      title={getCategoryDisplayName('quadros-aniversario', 'Quadros Aniversário')} 
+                      description={getCategoryDescription('quadros-aniversario')}
+                    />
+                    <HScrollRow products={quadrosAnivProds} />
+                  </div>
+                )}
+              </section>
+            )}
 
             {/* QUADRO 10X15 */}
-            <section id="quadros-10x15" className="w-full">
-              <div className="mb-8 sm:mb-10 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                  {getCategoryDisplayName('quadros-10x15', 'Quadro 10x15')}
-                </h2>
-                <p className="text-[11px] sm:text-sm text-neutral-500 dark:text-neutral-400 font-light tracking-wide mt-1">Transforme momentos especiais em uma lembrança que fica para sempre.</p>
-                <div className="w-8 h-px bg-black mt-3" />
-              </div>
-              <div className="mb-10 sm:mb-14 px-2 sm:px-0">
-                <SubSectionHeader title="Quadro 10x15 Casal" />
-                <HScrollRow products={getCategoryProducts('quadro-10x15-casal', QUADROS_10x15_CASAL)} />
-              </div>
-              <div className="px-2 sm:px-0">
-                <SubSectionHeader title="Quadro 10x15 Aniversário" />
-                <HScrollRow products={getCategoryProducts('quadro-10x15-aniversario', QUADROS_10x15_ANIVERSARIO)} />
-              </div>
-            </section>
+            {hasQuadros10x15 && (
+              <section id="quadros-10x15" className="w-full">
+                <div className="mb-8 sm:mb-10 px-2 sm:px-0">
+                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                    {getCategoryDisplayName('quadros-10x15', 'Quadro 10x15')}
+                  </h2>
+                  <p className="text-[11px] sm:text-sm text-neutral-500 dark:text-neutral-400 font-light tracking-wide mt-1">
+                    {getCategoryDescription('quadros-10x15', 'Transforme momentos especiais em uma lembrança que fica para sempre.')}
+                  </p>
+                  <div className="w-8 h-px bg-black mt-3" />
+                </div>
+                {quadro10x15CasalProds.length > 0 && (
+                  <div className="mb-10 sm:mb-14 px-2 sm:px-0">
+                    <SubSectionHeader 
+                      title={getCategoryDisplayName('quadro-10x15-casal', 'Quadro 10x15 Casal')} 
+                      description={getCategoryDescription('quadro-10x15-casal')}
+                    />
+                    <HScrollRow products={quadro10x15CasalProds} />
+                  </div>
+                )}
+                {quadro10x15AnivProds.length > 0 && (
+                  <div className="px-2 sm:px-0">
+                    <SubSectionHeader 
+                      title={getCategoryDisplayName('quadro-10x15-aniversario', 'Quadro 10x15 Aniversário')} 
+                      description={getCategoryDescription('quadro-10x15-aniversario')}
+                    />
+                    <HScrollRow products={quadro10x15AnivProds} />
+                  </div>
+                )}
+              </section>
+            )}
 
             {/* KITS CASAL */}
-            <section id="kits" className="w-full">
-              <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                  {getCategoryDisplayName('kits-casal', 'Kits Casal')}
-                </h2>
-                <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Composições exclusivas criadas por especialistas</p>
-                <div className="w-8 h-px bg-black mt-3" />
-              </div>
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                {getCategoryProducts('kits-casal', CATEGORIES.KITS).map(product => <MiniCard key={product.id} product={product} />)}
-              </div>
-            </section>
+            {kitsProds.length > 0 && (
+              <section id="kits" className="w-full">
+                <div className="mb-8 sm:mb-12 px-2 sm:px-0">
+                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                    {getCategoryDisplayName('kits-casal', 'Kits Casal')}
+                  </h2>
+                  <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
+                    {getCategoryDescription('kits-casal', 'Composições exclusivas criadas por especialistas')}
+                  </p>
+                  <div className="w-8 h-px bg-black mt-3" />
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                  {kitsProds.map(product => <MiniCard key={product.id} product={product} />)}
+                </div>
+              </section>
+            )}
 
             {/* MAMÃES / BEBÊS */}
-            <section id="mamaes-bebes" className="w-full">
-              <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                  {getCategoryDisplayName('mamaes-e-bebes', 'Mamães / Bebês')}
-                </h2>
-                <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Presentes especiais para mamãe e bebê</p>
-                <div className="w-8 h-px bg-black mt-3" />
-              </div>
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                {getCategoryProducts('mamaes-e-bebes', CATEGORIES.MAMAES_BEBES).map(product => <MiniCard key={product.id} product={product} />)}
-              </div>
-            </section>
+            {mamaesProds.length > 0 && (
+              <section id="mamaes-bebes" className="w-full">
+                <div className="mb-8 sm:mb-12 px-2 sm:px-0">
+                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                    {getCategoryDisplayName('mamaes-e-bebes', 'Mamães / Bebês')}
+                  </h2>
+                  <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
+                    {getCategoryDescription('mamaes-e-bebes', 'Presentes especiais para mamãe e bebê')}
+                  </p>
+                  <div className="w-8 h-px bg-black mt-3" />
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                  {mamaesProds.map(product => <MiniCard key={product.id} product={product} />)}
+                </div>
+              </section>
+            )}
 
             {/* PRODUTOS AVULSOS */}
-            <section id="produtos" className="w-full">
-              <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                  {getCategoryDisplayName('produtos', 'Produtos')}
-                </h2>
-                <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Coleção principal com curadoria especial</p>
-                <div className="w-8 h-px bg-black mt-3" />
-              </div>
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                {getCategoryProducts('produtos', CATEGORIES.PRODUTOS).map(product => (
-                  <div key={product.id} className="scale-[1.02] sm:scale-100">
-                    <MiniCard product={product} />
-                  </div>
-                ))}
-              </div>
-            </section>
+            {produtosAvulsosProds.length > 0 && (
+              <section id="produtos" className="w-full">
+                <div className="mb-8 sm:mb-12 px-2 sm:px-0">
+                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                    {getCategoryDisplayName('produtos', 'Produtos')}
+                  </h2>
+                  <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
+                    {getCategoryDescription('produtos', 'Coleção principal com curadoria especial')}
+                  </p>
+                  <div className="w-8 h-px bg-black mt-3" />
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                  {produtosAvulsosProds.map(product => (
+                    <div key={product.id} className="scale-[1.02] sm:scale-100">
+                      <MiniCard product={product} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
             
             {/* PLACAS ACRÍLICAS */}
-            <section id="placas" className="w-full">
-              <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                  {getCategoryDisplayName('placas-acrilicas', 'Placas Acrílicas')}
-                </h2>
-                <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Placas decorativas incríveis</p>
-                <div className="w-8 h-px bg-black mt-3" />
-              </div>
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                {getCategoryProducts('placas-acrilicas', CATEGORIES.QUADROS_PLACAS).map(product => <MiniCard key={product.id} product={product} />)}
-              </div>
-            </section>
+            {placasProds.length > 0 && (
+              <section id="placas" className="w-full">
+                <div className="mb-8 sm:mb-12 px-2 sm:px-0">
+                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
+                    {getCategoryDisplayName('placas-acrilicas', 'Placas Acrílicas')}
+                  </h2>
+                  <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
+                    {getCategoryDescription('placas-acrilicas', 'Placas decorativas incríveis')}
+                  </p>
+                  <div className="w-8 h-px bg-black mt-3" />
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                  {placasProds.map(product => <MiniCard key={product.id} product={product} />)}
+                </div>
+              </section>
+            )}
 
             {/* COMBOS PROMOCIONAIS */}
-            <section id="combos" className="w-full">
-              <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-neutral-900 dark:text-white">
-                  {getCategoryDisplayName('combos-promocionais', 'Combos Promocionais')}
-                </h2>
-                <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Ofertas imperdíveis por tempo limitado</p>
-                <div className="w-8 h-px bg-black mt-3" />
-              </div>
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                {getCategoryProducts('combos-promocionais', CATEGORIES.COMBOS).map(product => <MiniCard key={product.id} product={product} />)}
-              </div>
-            </section>
+            {combosProds.length > 0 && (
+              <section id="combos" className="w-full">
+                <div className="mb-8 sm:mb-12 px-2 sm:px-0">
+                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-neutral-900 dark:text-white">
+                    {getCategoryDisplayName('combos-promocionais', 'Combos Promocionais')}
+                  </h2>
+                  <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
+                    {getCategoryDescription('combos-promocionais', 'Ofertas imperdíveis por tempo limitado')}
+                  </p>
+                  <div className="w-8 h-px bg-black mt-3" />
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                  {combosProds.map(product => <MiniCard key={product.id} product={product} />)}
+                </div>
+              </section>
+            )}
             
             {/* ESPECIAL MÃES */}
-            <section id="maes" className="w-full">
-              <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-black">
-                  {getCategoryDisplayName('especial-maes', 'Especial Mães')}
-                </h2>
-                <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">Presentes inesquecíveis para quem você mais ama</p>
-                <div className="w-8 h-px bg-black mt-3" />
-              </div>
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                {getCategoryProducts('especial-maes', CATEGORIES.MAES).map(product => <MiniCard key={product.id} product={product} />)}
-              </div>
-            </section>
+            {maesProds.length > 0 && (
+              <section id="maes" className="w-full">
+                <div className="mb-8 sm:mb-12 px-2 sm:px-0">
+                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-black">
+                    {getCategoryDisplayName('especial-maes', 'Especial Mães')}
+                  </h2>
+                  <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
+                    {getCategoryDescription('especial-maes', 'Presentes inesquecíveis para quem você mais ama')}
+                  </p>
+                  <div className="w-8 h-px bg-black mt-3" />
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                  {maesProds.map(product => <MiniCard key={product.id} product={product} />)}
+                </div>
+              </section>
+            )}
 
             {/* CATEGORIAS EXTRAS DINÂMICAS DO BANCO DE DADOS */}
             {extraCategories.map(cat => {

@@ -23,6 +23,7 @@ interface Category {
 
 export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [productCounts, setProductCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
   // Form State
@@ -39,19 +40,51 @@ export default function Categories() {
     active: true,
   });
 
+  const getStoreGroupBadge = (slug: string) => {
+    if (['cesta-cafe-da-manha', 'cesta-aniversario', 'cesta-cores'].includes(slug)) {
+      return { label: 'Grupo: Cestas', color: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800' };
+    }
+    if (['quadros-casal', 'quadros-aniversario'].includes(slug)) {
+      return { label: 'Grupo: Quadros A4', color: 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800' };
+    }
+    if (['quadro-10x15-casal', 'quadro-10x15-aniversario'].includes(slug)) {
+      return { label: 'Grupo: Quadros 10x15', color: 'bg-indigo-50 text-indigo-800 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800' };
+    }
+    if (['kits-casal', 'mamaes-e-bebes', 'produtos', 'placas-acrilicas', 'combos-promocionais', 'especial-maes'].includes(slug)) {
+      return { label: 'Linha Direta', color: 'bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800' };
+    }
+    return { label: 'Personalizada', color: 'bg-neutral-100 text-neutral-700 border-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700' };
+  };
+
   const fetchCategories = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .order('sort_order', { ascending: true });
+    const [catRes, prodRes] = await Promise.all([
+      supabase
+        .from('categories')
+        .select('*')
+        .order('sort_order', { ascending: true }),
+      supabase
+        .from('products')
+        .select('category_id')
+    ]);
 
-    if (error) {
+    if (catRes.error) {
       toast.error('Erro ao buscar categorias');
-      console.error(error);
+      console.error(catRes.error);
     } else {
-      setCategories(data || []);
+      setCategories(catRes.data || []);
     }
+
+    if (prodRes.data) {
+      const counts: Record<string, number> = {};
+      prodRes.data.forEach((p: { category_id: string | null }) => {
+        if (p.category_id) {
+          counts[p.category_id] = (counts[p.category_id] || 0) + 1;
+        }
+      });
+      setProductCounts(counts);
+    }
+
     setLoading(false);
   };
 
@@ -138,12 +171,17 @@ export default function Categories() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta categoria? Produtos vinculados podem ficar sem categoria.')) return;
+  const handleDelete = async (cat: Category) => {
+    const count = productCounts[cat.id] || 0;
+    if (count > 0) {
+      toast.error(`Não é possível excluir a categoria "${cat.name}" pois existem ${count} produto(s) vinculado(s) a ela. Mova os produtos para outra categoria ou apenas desative-a.`);
+      return;
+    }
+    if (!confirm(`Tem certeza que deseja excluir a categoria "${cat.name}"? Esta ação é irreversível.`)) return;
     try {
-      const { error } = await supabase.from('categories').delete().eq('id', id);
+      const { error } = await supabase.from('categories').delete().eq('id', cat.id);
       if (error) throw error;
-      toast.success('Categoria excluída!');
+      toast.success('Categoria excluída com sucesso!');
       fetchCategories();
     } catch (error: any) {
       toast.error('Erro ao excluir: ' + error.message);
@@ -155,7 +193,7 @@ export default function Categories() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Categorias</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm">Gerencie os grupos de produtos do seu catálogo.</p>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm">Gerencie os grupos de produtos do seu catálogo e acompanhe sua exibição na loja.</p>
         </div>
         
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -261,73 +299,92 @@ export default function Categories() {
           <table className="w-full text-sm text-left">
             <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-500 dark:text-neutral-400 font-medium border-b border-neutral-200 dark:border-neutral-800">
               <tr>
-                <th className="px-6 py-4">Nome</th>
-                <th className="px-6 py-4">Layout</th>
-                <th className="px-6 py-4">Ordem</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Ações</th>
+                <th className="px-5 py-4">Nome</th>
+                <th className="px-4 py-4">Grupo na Loja</th>
+                <th className="px-4 py-4 text-center">Produtos</th>
+                <th className="px-4 py-4">Layout</th>
+                <th className="px-4 py-4">Ordem</th>
+                <th className="px-4 py-4">Status</th>
+                <th className="px-5 py-4 text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-neutral-500">
+                  <td colSpan={7} className="px-6 py-8 text-center text-neutral-500">
                     <Loader2 size={24} className="animate-spin mx-auto mb-2" />
                     Carregando...
                   </td>
                 </tr>
               ) : categories.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-neutral-500">
+                  <td colSpan={7} className="px-6 py-8 text-center text-neutral-500">
                     Nenhuma categoria encontrada.
                   </td>
                 </tr>
               ) : (
-                categories.map((cat) => (
-                  <tr key={cat.id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-800/20 transition-colors">
-                    <td className="px-6 py-4 font-medium">
-                      {cat.name}
-                      {cat.description && <p className="text-xs text-neutral-500 font-normal mt-0.5 line-clamp-1">{cat.description}</p>}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
-                        {cat.layout_type === 'grid' ? 'Grade' : 'Carrossel'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">{cat.sort_order}</td>
-                    <td className="px-6 py-4">
-                      <button 
-                        onClick={() => toggleActive(cat)}
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-                          cat.active 
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-200' 
-                            : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400 hover:bg-neutral-200'
-                        }`}
-                      >
-                        {cat.active ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
-                        {cat.active ? 'Ativa' : 'Inativa'}
-                      </button>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                categories.map((cat) => {
+                  const groupBadge = getStoreGroupBadge(cat.slug);
+                  const count = productCounts[cat.id] || 0;
+                  return (
+                    <tr key={cat.id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-800/20 transition-colors">
+                      <td className="px-5 py-4 font-medium">
+                        <div className="flex flex-col">
+                          <span className="text-neutral-900 dark:text-white font-semibold">{cat.name}</span>
+                          <span className="text-xs text-neutral-400 font-mono">{cat.slug}</span>
+                          {cat.description && <p className="text-xs text-neutral-500 font-normal mt-0.5 line-clamp-1">{cat.description}</p>}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${groupBadge.color}`}>
+                          {groupBadge.label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-xs font-semibold bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200">
+                          {count}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
+                          {cat.layout_type === 'grid' ? 'Grade' : 'Carrossel'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 font-mono text-xs">{cat.sort_order}</td>
+                      <td className="px-4 py-4">
                         <button 
-                          onClick={() => handleOpenEdit(cat)}
-                          className="p-2 text-neutral-500 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
-                          title="Editar"
+                          onClick={() => toggleActive(cat)}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                            cat.active 
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-200' 
+                              : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400 hover:bg-neutral-200'
+                          }`}
                         >
-                          <Pencil size={16} />
+                          {cat.active ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+                          {cat.active ? 'Ativa' : 'Inativa'}
                         </button>
-                        <button 
-                          onClick={() => handleDelete(cat.id)}
-                          className="p-2 text-neutral-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                          title="Excluir"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button 
+                            onClick={() => handleOpenEdit(cat)}
+                            className="p-2 text-neutral-500 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
+                            title="Editar"
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(cat)}
+                            className="p-2 text-neutral-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            title={count > 0 ? "Esta categoria possui produtos vinculados" : "Excluir"}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

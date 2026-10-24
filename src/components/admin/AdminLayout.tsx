@@ -11,6 +11,7 @@ import {
   LogOut, 
   Menu, 
   X,
+  ArrowLeft,
   Store
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -76,7 +77,14 @@ export function AdminLayout() {
           <NavLinks />
         </nav>
 
-        <div className="p-4 border-t border-neutral-100 dark:border-neutral-800">
+        <div className="p-4 border-t border-neutral-100 dark:border-neutral-800 space-y-1.5">
+          <Link
+            to="/"
+            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl transition-all font-medium text-sm text-neutral-600 hover:text-black hover:bg-neutral-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800"
+          >
+            <ArrowLeft size={18} />
+            Voltar para o site
+          </Link>
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-3 w-full rounded-xl transition-all font-medium text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
@@ -102,13 +110,20 @@ export function AdminLayout() {
           </div>
 
           <div className="hidden lg:block">
-            {/* Espaço para breadcrumbs ou título da página no desktop se quiser */}
+            {/* Espaço para breadcrumbs ou título da página no desktop */}
             <span className="font-medium text-neutral-500">
               {ADMIN_LINKS.find(l => l.path === location.pathname)?.label || 'Painel'}
             </span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Link
+              to="/"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-neutral-700 hover:text-black dark:text-neutral-300 dark:hover:text-white border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+            >
+              <ArrowLeft size={16} />
+              <span>Voltar ao site</span>
+            </Link>
             <div className="w-8 h-8 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center text-xs font-bold">
               AD
             </div>
@@ -155,7 +170,15 @@ export function AdminLayout() {
                 <NavLinks onClick={() => setIsMobileMenuOpen(false)} />
               </nav>
 
-              <div className="p-4 border-t border-neutral-100 dark:border-neutral-800">
+              <div className="p-4 border-t border-neutral-100 dark:border-neutral-800 space-y-1.5">
+                <Link
+                  to="/"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 w-full rounded-xl transition-all font-medium text-sm text-neutral-600 hover:text-black hover:bg-neutral-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800"
+                >
+                  <ArrowLeft size={18} />
+                  Voltar para o site
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-3 px-4 py-3 w-full rounded-xl transition-all font-medium text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"

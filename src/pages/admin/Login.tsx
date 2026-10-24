@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Login() {
@@ -97,6 +97,16 @@ export default function Login() {
             {loading ? <Loader2 className="animate-spin" size={20} /> : 'Entrar'}
           </button>
         </form>
+
+        <div className="mt-6 pt-4 border-t border-neutral-100 dark:border-neutral-700/60 text-center">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-black dark:hover:text-white transition-colors"
+          >
+            <ArrowLeft size={16} />
+            Voltar para o site
+          </Link>
+        </div>
       </div>
     </div>
   );

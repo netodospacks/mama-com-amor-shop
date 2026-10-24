@@ -73,7 +73,7 @@ export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: (
     
     message += "*PRODUTOS:*\n\n";
     items.forEach(item => {
-      const categoria = getCategoryForProduct(item.product.id);
+      const categoria = item.product.categoryName || getCategoryForProduct(item.product.id);
       const isOnPromo = item.product.isPromo && item.product.promoPrice;
       const priceStr = isOnPromo
         ? `${item.product.promoPrice} (em promoção, antes: ${item.product.price})`

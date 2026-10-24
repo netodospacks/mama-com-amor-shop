@@ -97,18 +97,26 @@ export function SubproductsManager({
 
   // Upload de imagem do subproduto para o bucket product-images
   const handleImageFile = async (file: File) => {
+    if (!file) return;
+
+    // Validação resiliente de formato (por MIME type e por extensão)
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
+    const fileExt = (file.name.split('.').pop() || '').toLowerCase();
+    const isAllowedExt = ['jpg', 'jpeg', 'png', 'webp'].includes(fileExt);
+    const isAllowedMime = allowedTypes.includes(file.type) || (file.type === '' && isAllowedExt);
+
+    if (!isAllowedMime) {
       toast.error('Formato não suportado. Use JPG, PNG ou WEBP.');
       return;
     }
+
     if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
       toast.error(`A imagem deve ter menos de ${MAX_FILE_SIZE_MB}MB.`);
       return;
     }
 
     if (!isSupabaseConfigured) {
-      // Cria blob URL local para preview em modo teste
+      // Cria blob URL local para preview em modo teste/local
       const localUrl = URL.createObjectURL(file);
       setImage(localUrl);
       toast.success('Imagem selecionada (modo local)!');
@@ -117,25 +125,106 @@ export function SubproductsManager({
 
     setImageUploading(true);
     try {
-      const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 6)}.${ext}`;
-      const path = `subproducts/${productId}/${fileName}`;
+      // 1. Verificar se a sessão do administrador está ativa
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        console.warn('[SubproductsManager] Sessão ausente ao tentar upload:', sessionError);
+        toast.error('Sessão expirada ou não autenticada. Faça login novamente no painel.');
+        return;
+      }
 
-      const { error: uploadError } = await supabase.storage
+      // 2. Gerar nome de arquivo limpo, seguro e único
+      const cleanExt = (fileExt === 'jpeg' ? 'jpg' : fileExt) || 'jpg';
+      const rawBase = file.name.replace(/\.[^/.]+$/, '').toLowerCase();
+      const safeBase = rawBase
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9_-]/g, '_')
+        .replace(/_+/g, '_')
+        .slice(0, 30) || 'sub';
+
+      const uniqueSuffix = Math.random().toString(36).substring(2, 8);
+      const fileName = `${Date.now()}_${safeBase}_${uniqueSuffix}.${cleanExt}`;
+
+      // 3. Caminho organizado e seguro no bucket product-images sob 'subproducts/'
+      const cleanProductId = (productId && productId !== 'undefined' && productId.trim() !== '')
+        ? productId.trim().replace(/[^a-zA-Z0-9_-]/g, '')
+        : '';
+      const primaryPath = cleanProductId
+        ? `subproducts/${cleanProductId}/${fileName}`
+        : `subproducts/${fileName}`;
+
+      // 4. Upload no bucket product-images com mime type e upsert false (evita exigir permissão de UPDATE do RLS em arquivos novos)
+      const mimeType = file.type || (cleanExt === 'png' ? 'image/png' : cleanExt === 'webp' ? 'image/webp' : 'image/jpeg');
+
+      let finalPath = primaryPath;
+      let { error: uploadError } = await supabase.storage
         .from('product-images')
-        .upload(path, file, { upsert: false });
+        .upload(primaryPath, file, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: mimeType,
+        });
 
-      if (uploadError) throw uploadError;
+      // Se falhar por RLS na pasta subproducts/, tenta fallback para a pasta products/ (pasta padrão com permissões de produto)
+      if (uploadError && (uploadError.message?.includes('row-level security') || (uploadError as any).statusCode === '403')) {
+        const fallbackPath = cleanProductId
+          ? `products/${cleanProductId}/sub_${fileName}`
+          : `products/sub_${fileName}`;
 
+        console.warn(`[SubproductsManager] Tentando fallback para caminho seguro: ${fallbackPath}`);
+        const fallbackResult = await supabase.storage
+          .from('product-images')
+          .upload(fallbackPath, file, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: mimeType,
+          });
+
+        if (!fallbackResult.error) {
+          uploadError = null;
+          finalPath = fallbackPath;
+        } else {
+          uploadError = fallbackResult.error;
+        }
+      }
+
+      if (uploadError) {
+        console.error('[SubproductsManager] Erro retornado pelo Supabase Storage:', {
+          message: uploadError.message,
+          name: uploadError.name,
+          details: (uploadError as any).error || (uploadError as any).statusCode,
+          finalPath,
+        });
+
+        let userMsg = uploadError.message || 'Erro desconhecido no envio.';
+        if (userMsg.includes('row-level security') || (uploadError as any).statusCode === '403') {
+          userMsg = 'Permissão negada pelo Storage (RLS). Verifique se o seu usuário possui perfil de administrador ativo.';
+        } else if (userMsg.includes('Payload too large') || (uploadError as any).statusCode === '413') {
+          userMsg = `A imagem excede o tamanho máximo suportado (${MAX_FILE_SIZE_MB}MB).`;
+        } else if (userMsg.includes('Bucket not found') || (uploadError as any).statusCode === '404') {
+          userMsg = 'O bucket "product-images" não foi localizado no Supabase.';
+        }
+
+        toast.error(`Não foi possível enviar a imagem: ${userMsg}`);
+        return;
+      }
+
+      // 5. Obter URL pública gerada
       const { data: publicData } = supabase.storage
         .from('product-images')
-        .getPublicUrl(path);
+        .getPublicUrl(finalPath);
+
+      if (!publicData?.publicUrl) {
+        throw new Error('Não foi possível obter a URL pública da imagem após o upload.');
+      }
 
       setImage(publicData.publicUrl);
       toast.success('Imagem do adicional enviada com sucesso!');
     } catch (e: any) {
-      console.error(e);
-      toast.error('Não foi possível enviar a imagem do subproduto.');
+      console.error('[SubproductsManager] Exceção durante upload de imagem:', e);
+      const detail = e?.message ? `: ${e.message}` : '';
+      toast.error(`Não foi possível enviar a imagem do subproduto${detail}.`);
     } finally {
       setImageUploading(false);
     }

@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { supabase } from "@/lib/supabase";
 import { Product } from "@/types/product";
 import { Subproduct } from "@/types/subproduct";
 import {
@@ -71,6 +72,27 @@ describe("Sistema de Subprodutos e Adicionais — Virtual Store", () => {
   });
 
   it("2. Salva e atualiza subprodutos no modo de serviço", async () => {
+    const fromSpy = vi.spyOn(supabase, 'from').mockImplementation((table: string) => {
+      if (table === 'subproducts') {
+        return {
+          insert: () => ({
+            select: () => ({
+              single: async () => ({ data: { id: "mock-sub-uuid-1" }, error: null })
+            })
+          }),
+          update: () => ({
+            eq: async () => ({ error: null })
+          })
+        } as any;
+      }
+      if (table === 'product_subproducts') {
+        return {
+          upsert: async () => ({ error: null })
+        } as any;
+      }
+      return {} as any;
+    });
+
     const saved = await saveSubproduct(
       {
         name: "Caixa de Bombons",
@@ -87,6 +109,8 @@ describe("Sistema de Subprodutos e Adicionais — Virtual Store", () => {
     expect(saved.price).toBe(19.9);
     expect(saved.formattedPrice).toContain("19,90");
     expect(saved.active).toBe(true);
+
+    fromSpy.mockRestore();
   });
 
   it("3. Calcula total e subtotais com precisão matemática (exemplo ilustrativo do documento)", () => {

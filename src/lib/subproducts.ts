@@ -260,9 +260,12 @@ export async function saveSubproduct(
     savedId = data.id;
   }
 
-  // Se houver produto principal alvo, cria o vínculo associativo na tabela product_subproducts
+  // Se houver produto principal alvo válido, cria o vínculo associativo na tabela product_subproducts
   if (targetProductId && savedId) {
-    await linkSubproductToProduct(targetProductId, savedId, payload.sort_order);
+    const isValidUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    if (isValidUUID(targetProductId) && isValidUUID(savedId)) {
+      await linkSubproductToProduct(targetProductId, savedId, payload.sort_order);
+    }
   }
 
   return {
@@ -287,6 +290,12 @@ export async function linkSubproductToProduct(
   sortOrder: number = 1
 ): Promise<void> {
   if (!isSupabaseConfigured) return;
+
+  const isValidUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  if (!isValidUUID(productId) || !isValidUUID(subproductId)) {
+    console.warn('[linkSubproductToProduct] IDs inválidos (não são UUIDs):', { productId, subproductId });
+    return;
+  }
 
   const { error } = await supabase
     .from('product_subproducts')
