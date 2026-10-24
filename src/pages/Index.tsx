@@ -339,6 +339,84 @@ const SubSectionCarousel = ({
   );
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SectionCarousel — carrossel horizontal independente para seções completas (Kits, Mamães, etc.)
+// ─────────────────────────────────────────────────────────────────────────────
+const SectionCarousel = ({
+  id,
+  title,
+  description,
+  products,
+}: {
+  id: string;
+  title: string;
+  description?: string;
+  products: Product[];
+}) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = direction === 'left' ? -280 : 280;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  if (!products || products.length === 0) return null;
+
+  return (
+    <section id={id} className="w-full mb-10 sm:mb-14">
+      <div className="flex items-end justify-between mb-4 sm:mb-6 px-2 sm:px-0">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-neutral-900 dark:text-white">
+            {title}
+          </h2>
+          {description && (
+            <p className="text-[11px] sm:text-sm text-neutral-500 dark:text-neutral-400 font-light tracking-wide mt-1">
+              {description}
+            </p>
+          )}
+          <div className="w-8 h-px bg-black dark:bg-white mt-3" />
+        </div>
+
+        {/* Controles de Navegação no Desktop */}
+        {products.length > 1 && (
+          <div className="hidden sm:flex items-center gap-1.5 pb-1">
+            <button
+              onClick={() => scroll('left')}
+              aria-label={`Rolar ${title} para a esquerda`}
+              className="w-8 h-8 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => scroll('right')}
+              aria-label={`Rolar ${title} para a direita`}
+              className="w-8 h-8 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Trilho de rolagem horizontal com snap e peeking para smartphone */}
+      <div
+        ref={scrollRef}
+        className="w-full overflow-x-auto overflow-y-visible pb-2 pt-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-hide no-scrollbar scroll-smooth snap-x snap-mandatory"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
+        <div className="flex gap-3 sm:gap-4.5 w-max pr-6 sm:pr-8">
+          {products.map((product) => (
+            <FeaturedCard key={product.id} product={product} lazy={true} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Menu
@@ -955,22 +1033,18 @@ export default function Index() {
                   <div className="w-8 h-px bg-black mt-3" />
                 </div>
                 {quadrosCasalProds.length > 0 && (
-                  <div className="mb-10 sm:mb-14 px-2 sm:px-0">
-                    <SubSectionHeader 
-                      title={getCategoryDisplayName('quadros-casal', 'Quadros Casal')} 
-                      description={getCategoryDescription('quadros-casal')}
-                    />
-                    <HScrollRow products={quadrosCasalProds} />
-                  </div>
+                  <SubSectionCarousel 
+                    title={getCategoryDisplayName('quadros-casal', 'Quadros Casal')} 
+                    description={getCategoryDescription('quadros-casal')}
+                    products={quadrosCasalProds}
+                  />
                 )}
                 {quadrosAnivProds.length > 0 && (
-                  <div className="px-2 sm:px-0">
-                    <SubSectionHeader 
-                      title={getCategoryDisplayName('quadros-aniversario', 'Quadros Aniversário')} 
-                      description={getCategoryDescription('quadros-aniversario')}
-                    />
-                    <HScrollRow products={quadrosAnivProds} />
-                  </div>
+                  <SubSectionCarousel 
+                    title={getCategoryDisplayName('quadros-aniversario', 'Quadros Aniversário')} 
+                    description={getCategoryDescription('quadros-aniversario')}
+                    products={quadrosAnivProds}
+                  />
                 )}
               </section>
             )}
@@ -988,136 +1062,80 @@ export default function Index() {
                   <div className="w-8 h-px bg-black mt-3" />
                 </div>
                 {quadro10x15CasalProds.length > 0 && (
-                  <div className="mb-10 sm:mb-14 px-2 sm:px-0">
-                    <SubSectionHeader 
-                      title={getCategoryDisplayName('quadro-10x15-casal', 'Quadro 10x15 Casal')} 
-                      description={getCategoryDescription('quadro-10x15-casal')}
-                    />
-                    <HScrollRow products={quadro10x15CasalProds} />
-                  </div>
+                  <SubSectionCarousel 
+                    title={getCategoryDisplayName('quadro-10x15-casal', 'Quadro 10x15 Casal')} 
+                    description={getCategoryDescription('quadro-10x15-casal')}
+                    products={quadro10x15CasalProds}
+                  />
                 )}
                 {quadro10x15AnivProds.length > 0 && (
-                  <div className="px-2 sm:px-0">
-                    <SubSectionHeader 
-                      title={getCategoryDisplayName('quadro-10x15-aniversario', 'Quadro 10x15 Aniversário')} 
-                      description={getCategoryDescription('quadro-10x15-aniversario')}
-                    />
-                    <HScrollRow products={quadro10x15AnivProds} />
-                  </div>
+                  <SubSectionCarousel 
+                    title={getCategoryDisplayName('quadro-10x15-aniversario', 'Quadro 10x15 Aniversário')} 
+                    description={getCategoryDescription('quadro-10x15-aniversario')}
+                    products={quadro10x15AnivProds}
+                  />
                 )}
               </section>
             )}
 
             {/* KITS CASAL */}
             {kitsProds.length > 0 && (
-              <section id="kits" className="w-full">
-                <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                    {getCategoryDisplayName('kits-casal', 'Kits Casal')}
-                  </h2>
-                  <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
-                    {getCategoryDescription('kits-casal', 'Composições exclusivas criadas por especialistas')}
-                  </p>
-                  <div className="w-8 h-px bg-black mt-3" />
-                </div>
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                  {kitsProds.map(product => <MiniCard key={product.id} product={product} />)}
-                </div>
-              </section>
+              <SectionCarousel
+                id="kits"
+                title={getCategoryDisplayName('kits-casal', 'Kits Casal')}
+                description={getCategoryDescription('kits-casal', 'Composições exclusivas criadas por especialistas')}
+                products={kitsProds}
+              />
             )}
 
             {/* MAMÃES / BEBÊS */}
             {mamaesProds.length > 0 && (
-              <section id="mamaes-bebes" className="w-full">
-                <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                    {getCategoryDisplayName('mamaes-e-bebes', 'Mamães / Bebês')}
-                  </h2>
-                  <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
-                    {getCategoryDescription('mamaes-e-bebes', 'Presentes especiais para mamãe e bebê')}
-                  </p>
-                  <div className="w-8 h-px bg-black mt-3" />
-                </div>
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                  {mamaesProds.map(product => <MiniCard key={product.id} product={product} />)}
-                </div>
-              </section>
+              <SectionCarousel
+                id="mamaes-bebes"
+                title={getCategoryDisplayName('mamaes-e-bebes', 'Mamães / Bebês')}
+                description={getCategoryDescription('mamaes-e-bebes', 'Presentes especiais para mamãe e bebê')}
+                products={mamaesProds}
+              />
             )}
 
             {/* PRODUTOS AVULSOS */}
             {produtosAvulsosProds.length > 0 && (
-              <section id="produtos" className="w-full">
-                <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                    {getCategoryDisplayName('produtos', 'Produtos')}
-                  </h2>
-                  <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
-                    {getCategoryDescription('produtos', 'Coleção principal com curadoria especial')}
-                  </p>
-                  <div className="w-8 h-px bg-black mt-3" />
-                </div>
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                  {produtosAvulsosProds.map(product => (
-                    <div key={product.id} className="scale-[1.02] sm:scale-100">
-                      <MiniCard product={product} />
-                    </div>
-                  ))}
-                </div>
-              </section>
+              <SectionCarousel
+                id="produtos"
+                title={getCategoryDisplayName('produtos', 'Produtos')}
+                description={getCategoryDescription('produtos', 'Coleção principal com curadoria especial')}
+                products={produtosAvulsosProds}
+              />
             )}
             
             {/* PLACAS ACRÍLICAS */}
             {placasProds.length > 0 && (
-              <section id="placas" className="w-full">
-                <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                    {getCategoryDisplayName('placas-acrilicas', 'Placas Acrílicas')}
-                  </h2>
-                  <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
-                    {getCategoryDescription('placas-acrilicas', 'Placas decorativas incríveis')}
-                  </p>
-                  <div className="w-8 h-px bg-black mt-3" />
-                </div>
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                  {placasProds.map(product => <MiniCard key={product.id} product={product} />)}
-                </div>
-              </section>
+              <SectionCarousel
+                id="placas"
+                title={getCategoryDisplayName('placas-acrilicas', 'Placas Acrílicas')}
+                description={getCategoryDescription('placas-acrilicas', 'Placas decorativas incríveis')}
+                products={placasProds}
+              />
             )}
 
             {/* COMBOS PROMOCIONAIS */}
             {combosProds.length > 0 && (
-              <section id="combos" className="w-full">
-                <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-neutral-900 dark:text-white">
-                    {getCategoryDisplayName('combos-promocionais', 'Combos Promocionais')}
-                  </h2>
-                  <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
-                    {getCategoryDescription('combos-promocionais', 'Ofertas imperdíveis por tempo limitado')}
-                  </p>
-                  <div className="w-8 h-px bg-black mt-3" />
-                </div>
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                  {combosProds.map(product => <MiniCard key={product.id} product={product} />)}
-                </div>
-              </section>
+              <SectionCarousel
+                id="combos"
+                title={getCategoryDisplayName('combos-promocionais', 'Combos Promocionais')}
+                description={getCategoryDescription('combos-promocionais', 'Ofertas imperdíveis por tempo limitado')}
+                products={combosProds}
+              />
             )}
             
             {/* ESPECIAL MÃES */}
             {maesProds.length > 0 && (
-              <section id="maes" className="w-full">
-                <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-black">
-                    {getCategoryDisplayName('especial-maes', 'Especial Mães')}
-                  </h2>
-                  <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
-                    {getCategoryDescription('especial-maes', 'Presentes inesquecíveis para quem você mais ama')}
-                  </p>
-                  <div className="w-8 h-px bg-black mt-3" />
-                </div>
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                  {maesProds.map(product => <MiniCard key={product.id} product={product} />)}
-                </div>
-              </section>
+              <SectionCarousel
+                id="maes"
+                title={getCategoryDisplayName('especial-maes', 'Especial Mães')}
+                description={getCategoryDescription('especial-maes', 'Presentes inesquecíveis para quem você mais ama')}
+                products={maesProds}
+              />
             )}
 
             {/* CATEGORIAS EXTRAS DINÂMICAS DO BANCO DE DADOS */}
@@ -1125,22 +1143,13 @@ export default function Index() {
               const catProducts = getCategoryProducts(cat.id);
               if (catProducts.length === 0) return null;
               return (
-                <section key={cat.id} id={cat.slug || `cat-${cat.id}`} className="w-full">
-                  <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                    <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-black dark:text-white">
-                      {cat.name}
-                    </h2>
-                    {cat.description && (
-                      <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
-                        {cat.description}
-                      </p>
-                    )}
-                    <div className="w-8 h-px bg-black dark:bg-white mt-3" />
-                  </div>
-                  <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                    {catProducts.map(product => <MiniCard key={product.id} product={product} />)}
-                  </div>
-                </section>
+                <SectionCarousel
+                  key={cat.id}
+                  id={cat.slug || `cat-${cat.id}`}
+                  title={cat.name}
+                  description={cat.description}
+                  products={catProducts}
+                />
               );
             })}
           </>
