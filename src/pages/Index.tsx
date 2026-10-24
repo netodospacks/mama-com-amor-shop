@@ -33,7 +33,7 @@ const CATEGORY_PILLS = [
 // ─────────────────────────────────────────────────────────────────────────────
 // FeaturedCard — card boutique premium para "Produtos em destaque"
 // ─────────────────────────────────────────────────────────────────────────────
-const FeaturedCard = ({ product }: { product: Product }) => {
+const FeaturedCard = ({ product, lazy = false }: { product: Product; lazy?: boolean }) => {
   return (
     <Link
       to={`/product/${product.id}`}
@@ -51,6 +51,8 @@ const FeaturedCard = ({ product }: { product: Product }) => {
             <img
               src={product.image}
               alt={product.name}
+              loading={lazy ? "lazy" : "eager"}
+              decoding="async"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out pointer-events-none"
             />
           ) : (
@@ -264,6 +266,79 @@ const SubSectionHeader = ({ title, description }: { title: string; description?:
     )}
   </div>
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SubSectionCarousel — carrossel horizontal independente para subseções (Cestas)
+// ─────────────────────────────────────────────────────────────────────────────
+const SubSectionCarousel = ({
+  title,
+  description,
+  products,
+}: {
+  title: string;
+  description?: string;
+  products: Product[];
+}) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = direction === 'left' ? -280 : 280;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <div className="mb-10 sm:mb-14 px-2 sm:px-0">
+      <div className="flex items-end justify-between mb-3 sm:mb-4">
+        <div>
+          <h3 className="text-sm sm:text-base font-semibold tracking-[0.12em] uppercase text-black dark:text-white mb-1">
+            {title}
+          </h3>
+          {description && (
+            <p className="text-[11px] sm:text-xs text-neutral-600 dark:text-neutral-400 font-light leading-relaxed max-w-sm">
+              {description}
+            </p>
+          )}
+        </div>
+
+        {/* Controles de Navegação no Desktop/Tablet com o mesmo estilo da vitrine de destaques */}
+        {products.length > 1 && (
+          <div className="hidden sm:flex items-center gap-1.5 pb-1">
+            <button
+              onClick={() => scroll('left')}
+              aria-label={`Rolar ${title} para a esquerda`}
+              className="w-8 h-8 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => scroll('right')}
+              aria-label={`Rolar ${title} para a direita`}
+              className="w-8 h-8 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Trilho de rolagem horizontal com snap e peeking para smartphone */}
+      <div
+        ref={scrollRef}
+        className="w-full overflow-x-auto overflow-y-visible pb-2 pt-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-hide no-scrollbar scroll-smooth snap-x snap-mandatory"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
+        <div className="flex gap-3 sm:gap-4.5 w-max pr-6 sm:pr-8">
+          {products.map((product) => (
+            <FeaturedCard key={product.id} product={product} lazy={true} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Menu
@@ -844,37 +919,25 @@ export default function Index() {
                   <div className="w-8 h-px bg-black mt-2" />
                 </div>
                 {cestasCafeProds.length > 0 && (
-                  <div className="mb-10 sm:mb-14 px-2 sm:px-0">
-                    <SubSectionHeader 
-                      title={getCategoryDisplayName('cesta-cafe-da-manha', 'Cesta Café da Manhã')} 
-                      description={getCategoryDescription('cesta-cafe-da-manha', 'Cada detalhe escolhido pensando em transformar uma manhã em uma lembrança inesquecível.')} 
-                    />
-                    <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                      {cestasCafeProds.map(product => <MiniCard key={product.id} product={product} />)}
-                    </div>
-                  </div>
+                  <SubSectionCarousel 
+                    title={getCategoryDisplayName('cesta-cafe-da-manha', 'Cesta Café da Manhã')} 
+                    description={getCategoryDescription('cesta-cafe-da-manha', 'Cada detalhe escolhido pensando em transformar uma manhã em uma lembrança inesquecível.')} 
+                    products={cestasCafeProds}
+                  />
                 )}
                 {cestasAnivProds.length > 0 && (
-                  <div className="mb-10 sm:mb-14 px-2 sm:px-0">
-                    <SubSectionHeader 
-                      title={getCategoryDisplayName('cesta-aniversario', 'Cesta Aniversário')} 
-                      description={getCategoryDescription('cesta-aniversario', 'Um aniversário ainda mais especial, com carinho em cada detalhe.')} 
-                    />
-                    <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                      {cestasAnivProds.map(product => <MiniCard key={product.id} product={product} />)}
-                    </div>
-                  </div>
+                  <SubSectionCarousel 
+                    title={getCategoryDisplayName('cesta-aniversario', 'Cesta Aniversário')} 
+                    description={getCategoryDescription('cesta-aniversario', 'Um aniversário ainda mais especial, com carinho em cada detalhe.')} 
+                    products={cestasAnivProds}
+                  />
                 )}
                 {cestasCoresProds.length > 0 && (
-                  <div className="px-2 sm:px-0">
-                    <SubSectionHeader 
-                      title={getCategoryDisplayName('cesta-cores', 'Cesta Cores')} 
-                      description={getCategoryDescription('cesta-cores', 'Mais do que uma cesta, um carinho preparado em cada detalhe.')} 
-                    />
-                    <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                      {cestasCoresProds.map(product => <MiniCard key={product.id} product={product} />)}
-                    </div>
-                  </div>
+                  <SubSectionCarousel 
+                    title={getCategoryDisplayName('cesta-cores', 'Cesta Cores')} 
+                    description={getCategoryDescription('cesta-cores', 'Mais do que uma cesta, um carinho preparado em cada detalhe.')} 
+                    products={cestasCoresProds}
+                  />
                 )}
               </section>
             )}
