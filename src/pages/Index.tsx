@@ -33,11 +33,20 @@ const CATEGORY_PILLS = [
 // ─────────────────────────────────────────────────────────────────────────────
 // FeaturedCard — card boutique premium para "Produtos em destaque"
 // ─────────────────────────────────────────────────────────────────────────────
-const FeaturedCard = ({ product, lazy = false }: { product: Product; lazy?: boolean }) => {
+const FeaturedCard = ({ 
+  product, 
+  lazy = false,
+  buttonText = "Personalizar"
+}: { 
+  product: Product; 
+  lazy?: boolean;
+  buttonText?: string;
+}) => {
   return (
     <Link
       to={`/product/${product.id}`}
-      className="block flex-shrink-0 w-[195px] sm:w-[230px] md:w-[260px] snap-start group h-full select-none"
+      onDragStart={(e) => e.preventDefault()}
+      className="block flex-shrink-0 w-[72vw] max-w-[260px] min-w-[195px] sm:w-[230px] md:w-[260px] snap-start group h-full select-none"
     >
       <motion.div
         whileHover={{ y: -4 }}
@@ -53,7 +62,8 @@ const FeaturedCard = ({ product, lazy = false }: { product: Product; lazy?: bool
               alt={product.name}
               loading={lazy ? "lazy" : "eager"}
               decoding="async"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out pointer-events-none"
+              draggable={false}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out pointer-events-none select-none"
             />
           ) : (
             <div className="absolute inset-0 bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
@@ -105,7 +115,7 @@ const FeaturedCard = ({ product, lazy = false }: { product: Product; lazy?: bool
 
             {/* Ação de Conversão: Botão Refinado de Boutique */}
             <div className="w-full py-1.5 sm:py-2 px-3 rounded-lg bg-neutral-900 group-hover:bg-black dark:bg-white dark:group-hover:bg-neutral-100 text-white dark:text-black text-[10.5px] sm:text-xs font-medium uppercase tracking-[0.12em] flex items-center justify-center gap-1.5 transition-colors shadow-sm">
-              <span>Personalizar</span>
+              <span>{buttonText}</span>
               <ArrowRight size={12} strokeWidth={2} className="transition-transform group-hover:translate-x-0.5" />
             </div>
           </div>
@@ -268,18 +278,81 @@ const SubSectionHeader = ({ title, description }: { title: string; description?:
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Hook para rolagem por arraste do mouse no desktop sem interferir no clique
+// ─────────────────────────────────────────────────────────────────────────────
+const useCarouselDrag = (scrollRef: React.RefObject<HTMLDivElement>) => {
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+  const hasMovedRef = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0 || !scrollRef.current) return;
+    isDraggingRef.current = true;
+    hasMovedRef.current = false;
+    startXRef.current = e.pageX - scrollRef.current.offsetLeft;
+    scrollLeftRef.current = scrollRef.current.scrollLeft;
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current || !scrollRef.current) return;
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = x - startXRef.current;
+    if (Math.abs(walk) > 5) {
+      if (!hasMovedRef.current) {
+        hasMovedRef.current = true;
+        setIsDragging(true);
+      }
+      scrollRef.current.scrollLeft = scrollLeftRef.current - walk;
+    }
+  };
+
+  const onMouseUpOrLeave = () => {
+    if (isDraggingRef.current) {
+      isDraggingRef.current = false;
+      setTimeout(() => {
+        setIsDragging(false);
+        hasMovedRef.current = false;
+      }, 50);
+    }
+  };
+
+  const onClickCapture = (e: React.MouseEvent) => {
+    if (hasMovedRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  return {
+    isDragging,
+    dragProps: {
+      onMouseDown,
+      onMouseMove,
+      onMouseUp: onMouseUpOrLeave,
+      onMouseLeave: onMouseUpOrLeave,
+      onClickCapture,
+    },
+  };
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SubSectionCarousel — carrossel horizontal independente para subseções (Cestas)
 // ─────────────────────────────────────────────────────────────────────────────
 const SubSectionCarousel = ({
   title,
   description,
   products,
+  buttonText = "Comprar",
 }: {
   title: string;
   description?: string;
   products: Product[];
+  buttonText?: string;
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { isDragging, dragProps } = useCarouselDrag(scrollRef);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -326,12 +399,15 @@ const SubSectionCarousel = ({
       {/* Trilho de rolagem horizontal com snap e peeking para smartphone */}
       <div
         ref={scrollRef}
-        className="w-full overflow-x-auto overflow-y-visible pb-2 pt-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-hide no-scrollbar scroll-smooth snap-x snap-mandatory"
+        {...dragProps}
+        className={`w-full overflow-x-auto overflow-y-visible pb-2 pt-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-hide no-scrollbar snap-x snap-mandatory overscroll-x-contain touch-pan-x touch-pan-y ${
+          isDragging ? 'cursor-grabbing select-none snap-none' : 'cursor-grab'
+        }`}
         style={{ WebkitOverflowScrolling: "touch" }}
       >
-        <div className="flex gap-3 sm:gap-4.5 w-max pr-6 sm:pr-8">
+        <div className="flex gap-3 sm:gap-4.5 w-max min-w-full pr-6 sm:pr-8">
           {products.map((product) => (
-            <FeaturedCard key={product.id} product={product} lazy={true} />
+            <FeaturedCard key={product.id} product={product} lazy={true} buttonText={buttonText} />
           ))}
         </div>
       </div>
@@ -354,6 +430,7 @@ const SectionCarousel = ({
   products: Product[];
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { isDragging, dragProps } = useCarouselDrag(scrollRef);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -403,10 +480,13 @@ const SectionCarousel = ({
       {/* Trilho de rolagem horizontal com snap e peeking para smartphone */}
       <div
         ref={scrollRef}
-        className="w-full overflow-x-auto overflow-y-visible pb-2 pt-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-hide no-scrollbar scroll-smooth snap-x snap-mandatory"
+        {...dragProps}
+        className={`w-full overflow-x-auto overflow-y-visible pb-2 pt-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-hide no-scrollbar snap-x snap-mandatory overscroll-x-contain touch-pan-x touch-pan-y ${
+          isDragging ? 'cursor-grabbing select-none snap-none' : 'cursor-grab'
+        }`}
         style={{ WebkitOverflowScrolling: "touch" }}
       >
-        <div className="flex gap-3 sm:gap-4.5 w-max pr-6 sm:pr-8">
+        <div className="flex gap-3 sm:gap-4.5 w-max min-w-full pr-6 sm:pr-8">
           {products.map((product) => (
             <FeaturedCard key={product.id} product={product} lazy={true} />
           ))}
@@ -1001,6 +1081,7 @@ export default function Index() {
                     title={getCategoryDisplayName('cesta-cafe-da-manha', 'Cesta Café da Manhã')} 
                     description={getCategoryDescription('cesta-cafe-da-manha', 'Cada detalhe escolhido pensando em transformar uma manhã em uma lembrança inesquecível.')} 
                     products={cestasCafeProds}
+                    buttonText="Comprar"
                   />
                 )}
                 {cestasAnivProds.length > 0 && (
@@ -1008,6 +1089,7 @@ export default function Index() {
                     title={getCategoryDisplayName('cesta-aniversario', 'Cesta Aniversário')} 
                     description={getCategoryDescription('cesta-aniversario', 'Um aniversário ainda mais especial, com carinho em cada detalhe.')} 
                     products={cestasAnivProds}
+                    buttonText="Comprar"
                   />
                 )}
                 {cestasCoresProds.length > 0 && (
@@ -1015,6 +1097,7 @@ export default function Index() {
                     title={getCategoryDisplayName('cesta-cores', 'Cesta Cores')} 
                     description={getCategoryDescription('cesta-cores', 'Mais do que uma cesta, um carinho preparado em cada detalhe.')} 
                     products={cestasCoresProds}
+                    buttonText="Comprar"
                   />
                 )}
               </section>
@@ -1037,6 +1120,7 @@ export default function Index() {
                     title={getCategoryDisplayName('quadros-casal', 'Quadros Casal')} 
                     description={getCategoryDescription('quadros-casal')}
                     products={quadrosCasalProds}
+                    buttonText="Personalizar"
                   />
                 )}
                 {quadrosAnivProds.length > 0 && (
@@ -1044,6 +1128,7 @@ export default function Index() {
                     title={getCategoryDisplayName('quadros-aniversario', 'Quadros Aniversário')} 
                     description={getCategoryDescription('quadros-aniversario')}
                     products={quadrosAnivProds}
+                    buttonText="Personalizar"
                   />
                 )}
               </section>
@@ -1066,6 +1151,7 @@ export default function Index() {
                     title={getCategoryDisplayName('quadro-10x15-casal', 'Quadro 10x15 Casal')} 
                     description={getCategoryDescription('quadro-10x15-casal')}
                     products={quadro10x15CasalProds}
+                    buttonText="Personalizar"
                   />
                 )}
                 {quadro10x15AnivProds.length > 0 && (
@@ -1073,6 +1159,7 @@ export default function Index() {
                     title={getCategoryDisplayName('quadro-10x15-aniversario', 'Quadro 10x15 Aniversário')} 
                     description={getCategoryDescription('quadro-10x15-aniversario')}
                     products={quadro10x15AnivProds}
+                    buttonText="Personalizar"
                   />
                 )}
               </section>
@@ -1120,12 +1207,20 @@ export default function Index() {
 
             {/* COMBOS PROMOCIONAIS */}
             {combosProds.length > 0 && (
-              <SectionCarousel
-                id="combos"
-                title={getCategoryDisplayName('combos-promocionais', 'Combos Promocionais')}
-                description={getCategoryDescription('combos-promocionais', 'Ofertas imperdíveis por tempo limitado')}
-                products={combosProds}
-              />
+              <section id="combos" className="w-full">
+                <div className="mb-8 sm:mb-12 px-2 sm:px-0">
+                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-neutral-900 dark:text-white">
+                    {getCategoryDisplayName('combos-promocionais', 'Combos Promocionais')}
+                  </h2>
+                  <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
+                    {getCategoryDescription('combos-promocionais', 'Ofertas imperdíveis por tempo limitado')}
+                  </p>
+                  <div className="w-8 h-px bg-black dark:bg-white mt-3" />
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
+                  {combosProds.map(product => <MiniCard key={product.id} product={product} />)}
+                </div>
+              </section>
             )}
             
             {/* ESPECIAL MÃES */}
