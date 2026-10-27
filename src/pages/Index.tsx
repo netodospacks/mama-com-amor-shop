@@ -36,12 +36,14 @@ const CATEGORY_PILLS = [
 const FeaturedCard = ({ 
   product, 
   lazy = false,
-  buttonText = "Personalizar"
+  buttonText
 }: { 
   product: Product; 
   lazy?: boolean;
   buttonText?: string;
 }) => {
+  const resolvedButtonText = buttonText || "Comprar";
+
   return (
     <Link
       to={`/product/${product.id}`}
@@ -115,7 +117,7 @@ const FeaturedCard = ({
 
             {/* Ação de Conversão: Botão Refinado de Boutique */}
             <div className="w-full py-1.5 sm:py-2 px-3 rounded-lg bg-neutral-900 group-hover:bg-black dark:bg-white dark:group-hover:bg-neutral-100 text-white dark:text-black text-[10.5px] sm:text-xs font-medium uppercase tracking-[0.12em] flex items-center justify-center gap-1.5 transition-colors shadow-sm">
-              <span>{buttonText}</span>
+              <span>{resolvedButtonText}</span>
               <ArrowRight size={12} strokeWidth={2} className="transition-transform group-hover:translate-x-0.5" />
             </div>
           </div>
@@ -1120,7 +1122,7 @@ export default function Index() {
                     title={getCategoryDisplayName('quadros-casal', 'Quadros Casal')} 
                     description={getCategoryDescription('quadros-casal')}
                     products={quadrosCasalProds}
-                    buttonText="Personalizar"
+                    buttonText="Comprar"
                   />
                 )}
                 {quadrosAnivProds.length > 0 && (
@@ -1128,7 +1130,7 @@ export default function Index() {
                     title={getCategoryDisplayName('quadros-aniversario', 'Quadros Aniversário')} 
                     description={getCategoryDescription('quadros-aniversario')}
                     products={quadrosAnivProds}
-                    buttonText="Personalizar"
+                    buttonText="Comprar"
                   />
                 )}
               </section>
@@ -1151,7 +1153,7 @@ export default function Index() {
                     title={getCategoryDisplayName('quadro-10x15-casal', 'Quadro 10x15 Casal')} 
                     description={getCategoryDescription('quadro-10x15-casal')}
                     products={quadro10x15CasalProds}
-                    buttonText="Personalizar"
+                    buttonText="Comprar"
                   />
                 )}
                 {quadro10x15AnivProds.length > 0 && (
@@ -1159,7 +1161,7 @@ export default function Index() {
                     title={getCategoryDisplayName('quadro-10x15-aniversario', 'Quadro 10x15 Aniversário')} 
                     description={getCategoryDescription('quadro-10x15-aniversario')}
                     products={quadro10x15AnivProds}
-                    buttonText="Personalizar"
+                    buttonText="Comprar"
                   />
                 )}
               </section>

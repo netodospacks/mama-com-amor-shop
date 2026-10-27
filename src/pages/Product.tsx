@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowLeft, ShoppingBag, ShieldCheck, Truck, MessageCircle, Gift, Check, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, ShoppingBag, ShieldCheck, Truck, MessageCircle, Gift, Check, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { FormattedDescription } from "@/components/FormattedDescription";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -17,7 +17,6 @@ export default function Product() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState<ProductType | null>(null);
-  const [mainImage, setMainImage] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const { addItem, isCartOpen, setIsCartOpen, setIsCheckoutOpen } = useCart();
 
@@ -39,7 +38,6 @@ export default function Product() {
           if (data) {
             const mappedProduct = mapProductFromDB(data);
             setProduct(mappedProduct);
-            setMainImage(mappedProduct.gallery?.[0] || mappedProduct.image);
             setIsLoading(false);
 
             // Carregar adicionais vinculados a este produto
@@ -63,7 +61,6 @@ export default function Product() {
       const local = getProductById(id);
       if (local) {
         setProduct(local);
-        setMainImage(local.gallery?.[0] || local.image);
         try {
           const subs = await fetchSubproductsForProduct(id);
           setAddons(subs);
@@ -80,6 +77,89 @@ export default function Product() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Lista unificada e sem duplicidades de imagens do produto
+  const images = useMemo(() => {
+    if (!product) return [];
+    const list: string[] = [];
+    if (product.image && typeof product.image === "string" && product.image.trim()) {
+      list.push(product.image.trim());
+    }
+    if (Array.isArray(product.gallery)) {
+      product.gallery.forEach((img) => {
+        if (img && typeof img === "string" && img.trim() && !list.includes(img.trim())) {
+          list.push(img.trim());
+        }
+      });
+    }
+    return list;
+  }, [product]);
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [slideDirection, setSlideDirection] = useState<number>(1);
+
+  // Reiniciar índice ao trocar de produto
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [product?.id]);
+
+  const goToNextImage = () => {
+    if (images.length <= 1) return;
+    setSlideDirection(1);
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const goToPrevImage = () => {
+    if (images.length <= 1) return;
+    setSlideDirection(-1);
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  // Suporte a swipe no celular (mantendo a rolagem vertical 100% natural)
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (images.length <= 1) return;
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (images.length <= 1 || touchStartX.current === null || touchStartY.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+
+    // Apenas se o movimento horizontal for predominante e perceptível (> 35px)
+    if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY) * 1.3) {
+      if (deltaX < 0) {
+        goToNextImage();
+      } else {
+        goToPrevImage();
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
+  // Suporte a drag com mouse no desktop
+  const mouseStartX = useRef<number | null>(null);
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (images.length <= 1 || e.button !== 0) return;
+    mouseStartX.current = e.clientX;
+  };
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (images.length <= 1 || mouseStartX.current === null) return;
+    const deltaX = e.clientX - mouseStartX.current;
+    if (Math.abs(deltaX) > 40) {
+      if (deltaX < 0) {
+        goToNextImage();
+      } else {
+        goToPrevImage();
+      }
+    }
+    mouseStartX.current = null;
+  };
 
   const toggleSelectAddon = (addon: Subproduct) => {
     setSelectedAddons((prev) => {
@@ -157,45 +237,117 @@ export default function Product() {
       <main className="w-full max-w-[1400px] mx-auto px-0 md:px-8 pt-16 md:pt-32">
         <div className="flex flex-col md:flex-row gap-0 md:gap-16 lg:gap-24">
           
-          {/* Esquerda: Imagem do Produto */}
+          {/* Esquerda: Imagem do Produto com Galeria Deslizante */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
             className="w-full md:w-1/2"
           >
-            {/* Mobile: Full bleed image without extreme rounding on sides. Desktop: Rounded image with shadow. */}
-            <div className="w-full aspect-[4/5] md:aspect-square bg-neutral-100 dark:bg-neutral-800 md:rounded-2xl overflow-hidden relative shadow-sm md:shadow-xl mb-4">
+            {/* Imagem Principal Grande e Limpa com suporte a Swipe */}
+            <div 
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              className={`w-full aspect-[4/5] md:aspect-square bg-neutral-100 dark:bg-neutral-800 md:rounded-2xl overflow-hidden relative shadow-sm md:shadow-xl mb-4 touch-pan-y ${
+                images.length > 1 ? "cursor-grab active:cursor-grabbing select-none" : ""
+              }`}
+            >
               <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900" />
-              {mainImage && (
-                 <img src={mainImage} alt={product.name} className="absolute inset-0 w-full h-full object-cover" /> 
+              
+              {images.length > 0 ? (
+                <AnimatePresence initial={false} custom={slideDirection}>
+                  <motion.img
+                    key={currentImageIndex}
+                    src={images[currentImageIndex]}
+                    alt={`${product.name} - Imagem ${currentImageIndex + 1}`}
+                    custom={slideDirection}
+                    variants={{
+                      enter: (dir: number) => ({
+                        x: dir > 0 ? "100%" : "-100%",
+                        opacity: 0,
+                      }),
+                      center: {
+                        x: 0,
+                        opacity: 1,
+                      },
+                      exit: (dir: number) => ({
+                        x: dir > 0 ? "-100%" : "100%",
+                        opacity: 0,
+                      }),
+                    }}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { type: "spring", stiffness: 300, damping: 30 },
+                      opacity: { duration: 0.2 },
+                    }}
+                    draggable={false}
+                    className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
+                  />
+                </AnimatePresence>
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center text-neutral-400">
+                  <Gift size={32} />
+                </div>
               )}
+
+              {/* Badges de Promoção / Novidade */}
               {product.isPromo && (
-                <div className="absolute top-4 right-4 bg-black text-white text-[10px] md:text-xs font-medium px-3 py-1 rounded-sm backdrop-blur-md bg-black/80 uppercase tracking-widest z-10 shadow-lg">
+                <div className="absolute top-4 right-4 bg-black text-white text-[10px] md:text-xs font-medium px-3 py-1 rounded-sm backdrop-blur-md bg-black/80 uppercase tracking-widest z-10 shadow-lg pointer-events-none">
                   Promoção
                 </div>
               )}
               {product.isNew && (
-                <div className="absolute top-4 left-4 bg-rose-600 text-white text-[10px] md:text-xs font-medium px-3 py-1 rounded-sm backdrop-blur-md bg-rose-600/90 uppercase tracking-widest z-10 shadow-lg">
+                <div className="absolute top-4 left-4 bg-rose-600 text-white text-[10px] md:text-xs font-medium px-3 py-1 rounded-sm backdrop-blur-md bg-rose-600/90 uppercase tracking-widest z-10 shadow-lg pointer-events-none">
                   Novidade
                 </div>
               )}
-            </div>
 
-            {/* Galeria de Fotos */}
-            {product.gallery && product.gallery.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2 px-4 md:px-0 scrollbar-hide">
-                {product.gallery.map((img, idx) => (
-                  <button 
-                    key={idx} 
-                    onClick={() => setMainImage(img)}
-                    className={`relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${mainImage === img ? 'border-black dark:border-white opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
+              {/* Controles de Navegação no Desktop (apenas se houver mais de uma foto) */}
+              {images.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      goToPrevImage();
+                    }}
+                    aria-label="Imagem anterior"
+                    className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 dark:bg-black/70 hover:bg-white dark:hover:bg-black text-black dark:text-white backdrop-blur-md shadow-md items-center justify-center transition-all opacity-80 hover:opacity-100 hover:scale-105 z-20"
                   >
-                    <img src={img} alt={`${product.name} - Foto ${idx + 1}`} className="w-full h-full object-cover" />
+                    <ChevronLeft size={18} strokeWidth={2} />
                   </button>
-                ))}
-              </div>
-            )}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      goToNextImage();
+                    }}
+                    aria-label="Próxima imagem"
+                    className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 dark:bg-black/70 hover:bg-white dark:hover:bg-black text-black dark:text-white backdrop-blur-md shadow-md items-center justify-center transition-all opacity-80 hover:opacity-100 hover:scale-105 z-20"
+                  >
+                    <ChevronRight size={18} strokeWidth={2} />
+                  </button>
+
+                  {/* Indicadores elegantes de paginação na própria foto */}
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 pointer-events-none">
+                    {images.map((_, idx) => (
+                      <span
+                        key={idx}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                          idx === currentImageIndex 
+                            ? "w-5 bg-white shadow-sm" 
+                            : "w-1.5 bg-white/60 backdrop-blur-sm"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </motion.div>
 
           {/* Direita: Informações */}
