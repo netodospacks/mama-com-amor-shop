@@ -874,13 +874,13 @@ export default function Index() {
                   <span>Falar no WhatsApp</span>
                 </a>
                 <a
-                  href="https://instagram.com/larissagouveiaaa"
+                  href="https://instagram.com/virtualstore_3"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-xs text-neutral-500 hover:text-black dark:hover:text-white transition-colors pt-1"
                 >
                   <Instagram size={16} strokeWidth={1.5} />
-                  <span className="tracking-wider">@larissagouveiaaa</span>
+                  <span className="tracking-wider">@virtualstore_3</span>
                 </a>
                 <Link
                   to="/admin/login"
@@ -927,7 +927,7 @@ export default function Index() {
           {/* Ações Direitas: Instagram + Botão WhatsApp no Header */}
           <div className="flex items-center gap-1.5 sm:gap-2 -mr-2">
             <a
-              href="https://instagram.com/larissagouveiaaa"
+              href="https://instagram.com/virtualstore_3"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram da loja"
