@@ -1166,7 +1166,7 @@ export default function Index() {
           onClick={() => scrollTo("top")}
           className="flex flex-col items-center justify-center gap-1 text-[10px] text-neutral-900 py-1 cursor-pointer font-semibold"
         >
-          <img src="/vs_logo.png" alt="Início" className="w-4 h-4 rounded-sm object-contain" />
+          <Gift size={17} strokeWidth={1.8} />
           <span>Início</span>
         </button>
 

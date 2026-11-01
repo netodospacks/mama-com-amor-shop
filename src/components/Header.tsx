@@ -1,6 +1,7 @@
 import { ShoppingCart, CreditCard, Banknote, Wallet, Smartphone, Instagram } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Link } from "react-router-dom";
+import { VSBrandMark } from "@/components/VSBrandMark";
 
 export function Header() {
   const { totalItems } = useCart();
@@ -17,16 +18,8 @@ export function Header() {
       {/* Main Header */}
       <header className="bg-white py-3 px-4 shadow-sm border-b border-gray-100">
         <div className="container max-w-lg mx-auto flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-2.5">
-            <img src="/vs_logo.png" alt="Virtual Store" className="w-8 h-8 rounded-lg object-contain shadow-sm" />
-            <div>
-              <h1 className="text-base font-extrabold text-gray-900 tracking-tight leading-none uppercase">
-                VIRTUAL STORE
-              </h1>
-              <p className="text-gray-400 text-[9px] uppercase tracking-widest mt-0.5 leading-none">
-                Presentes Personalizados
-              </p>
-            </div>
+          <Link to="/">
+            <VSBrandMark size="sm" variant="horizontal" subtitle="Presentes Personalizados" />
           </Link>
           
           <div className="flex items-center gap-2">

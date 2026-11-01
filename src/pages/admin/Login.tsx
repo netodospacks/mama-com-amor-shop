@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, Gift } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Login() {
@@ -52,7 +52,9 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900 px-4 font-sans text-neutral-900 dark:text-neutral-100">
       <div className="max-w-md w-full bg-white dark:bg-neutral-800 p-8 rounded-2xl shadow-xl border border-neutral-100 dark:border-neutral-700">
         <div className="text-center mb-8 flex flex-col items-center">
-          <img src="/vs_logo.png" alt="Virtual Store Logo" className="w-14 h-14 rounded-2xl shadow-md mb-3 object-contain" />
+          <div className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center mb-3 shadow-sm">
+            <Gift size={22} />
+          </div>
           <h1 className="text-2xl font-bold tracking-tight mb-1">Painel Administrativo</h1>
           <p className="text-sm text-neutral-500 dark:text-neutral-400">
             Faça login para gerenciar o catálogo Virtual Store

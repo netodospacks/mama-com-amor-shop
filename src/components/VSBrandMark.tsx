@@ -1,22 +1,22 @@
+import { Gift } from "lucide-react";
+
 interface VSBrandMarkProps {
   variant?: "horizontal" | "stacked" | "icon-only";
   size?: "sm" | "md" | "lg";
   className?: string;
   subtitle?: string;
-  badgeStyle?: "solid-black" | "transparent-dark" | "transparent-white";
 }
 
 export function VSBrandMark({
-  variant = "horizontal",
+  variant = "stacked",
   size = "md",
   className = "",
   subtitle = "Presentes Personalizados",
-  badgeStyle = "solid-black",
 }: VSBrandMarkProps) {
   const iconSizes = {
-    sm: "w-8 h-8 rounded-lg",
-    md: "w-10 h-10 sm:w-11 sm:h-11 rounded-xl",
-    lg: "w-14 h-14 sm:w-16 sm:h-16 rounded-2xl",
+    sm: 14,
+    md: 17,
+    lg: 22,
   };
 
   const titleSizes = {
@@ -26,50 +26,29 @@ export function VSBrandMark({
   };
 
   const subtitleSizes = {
-    sm: "text-[8px] tracking-[0.25em]",
-    md: "text-[9px] sm:text-[10px] tracking-[0.26em]",
-    lg: "text-[11px] sm:text-xs tracking-[0.28em]",
+    sm: "text-[8px] tracking-[0.24em]",
+    md: "text-[8.5px] sm:text-[9.5px] tracking-[0.26em]",
+    lg: "text-[10px] sm:text-[11px] tracking-[0.28em]",
   };
 
-  // Imagem do logotipo oficial extraída dos ativos do projeto
-  const logoSrc = badgeStyle === "transparent-white"
-    ? "/vs_logo_white.png"
-    : badgeStyle === "transparent-dark"
-    ? "/vs_logo_dark.png"
-    : "/vs_logo.png";
-
-  const IconGraphic = (
-    <div
-      className={`relative overflow-hidden flex items-center justify-center shrink-0 select-none shadow-sm ${
-        badgeStyle === "solid-black" 
-          ? "bg-black border border-neutral-800" 
-          : "bg-transparent"
-      } ${iconSizes[size]}`}
-    >
-      <img
-        src={logoSrc}
-        alt="Virtual Store Logo"
-        className="w-full h-full object-contain p-1"
-        loading="eager"
-        decoding="sync"
-      />
-    </div>
-  );
-
   if (variant === "icon-only") {
-    return <div className={`inline-flex items-center ${className}`}>{IconGraphic}</div>;
+    return (
+      <div className={`inline-flex items-center text-neutral-900 dark:text-white ${className}`}>
+        <Gift size={iconSizes[size]} strokeWidth={1.75} />
+      </div>
+    );
   }
 
   if (variant === "horizontal") {
     return (
-      <div className={`inline-flex items-center gap-2.5 sm:gap-3 select-none ${className}`}>
-        {IconGraphic}
-        <div className="flex flex-col text-left">
-          <span className={`font-extrabold uppercase text-neutral-900 dark:text-white font-sans leading-none ${titleSizes[size]}`}>
+      <div className={`flex items-center gap-2 text-left select-none ${className}`}>
+        <Gift size={iconSizes[size]} strokeWidth={1.8} className="text-neutral-900 dark:text-white shrink-0" />
+        <div className="flex flex-col leading-none">
+          <span className={`font-bold uppercase text-neutral-900 dark:text-white font-sans ${titleSizes[size]}`}>
             VIRTUAL STORE
           </span>
           {subtitle && (
-            <span className={`font-semibold uppercase text-neutral-400 dark:text-neutral-400 mt-1 leading-none ${subtitleSizes[size]}`}>
+            <span className={`font-normal uppercase text-neutral-400 dark:text-neutral-500 mt-0.5 ${subtitleSizes[size]}`}>
               {subtitle}
             </span>
           )}
@@ -78,17 +57,17 @@ export function VSBrandMark({
     );
   }
 
-  // Variant "stacked" (centralizado)
+  // Variant "stacked" (marca centralizada idêntica à original)
   return (
     <div className={`flex flex-col items-center justify-center text-center select-none ${className}`}>
-      <div className="mb-2">
-        {IconGraphic}
+      <div className="flex items-center gap-1.5 mb-0.5">
+        <Gift size={iconSizes[size]} strokeWidth={1.75} className="text-neutral-900 dark:text-white shrink-0" />
+        <span className={`font-bold tracking-[0.22em] text-neutral-900 dark:text-white uppercase leading-tight font-sans ${titleSizes[size]}`}>
+          VIRTUAL STORE
+        </span>
       </div>
-      <span className={`font-extrabold uppercase text-neutral-900 dark:text-white font-sans leading-none ${titleSizes[size]}`}>
-        VIRTUAL STORE
-      </span>
       {subtitle && (
-        <span className={`font-semibold uppercase text-neutral-400 dark:text-neutral-400 mt-1 leading-none ${subtitleSizes[size]}`}>
+        <span className={`font-normal tracking-[0.26em] text-neutral-400 dark:text-neutral-500 uppercase leading-none ${subtitleSizes[size]}`}>
           {subtitle}
         </span>
       )}
