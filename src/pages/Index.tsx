@@ -278,13 +278,50 @@ export default function Index() {
     <div className="min-h-screen bg-[#faf8f6] text-neutral-900 font-sans selection:bg-[#ff8da1] selection:text-neutral-900">
       
       {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* 1. BARRA SUPERIOR DE ANÚNCIO (TOPBAR INSTITUCIONAL)                */}
+      {/* 1. BARRA SUPERIOR DE ANÚNCIO (TICKER SLIM EM LOOP PARA A ESQUERDA)   */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="bg-[#111111] text-white py-2 px-4 text-center text-[10.5px] sm:text-xs font-medium tracking-wider flex items-center justify-center gap-2">
-        <Sparkles size={13} className="text-[#ff8da1] shrink-0 animate-pulse" />
-        <span>
-          Presentes Personalizados com Afeto • Entregas em <strong>Santa Rita, João Pessoa e Região</strong>
-        </span>
+      <div 
+        role="region"
+        aria-label="Aviso institucional"
+        className="bg-[#111111] text-white py-1 sm:py-1.5 overflow-hidden w-full border-b border-neutral-900 select-none relative z-30"
+      >
+        <div className="animate-ticker-marquee flex items-center whitespace-nowrap">
+          {/* Lote 1 */}
+          <div className="flex items-center gap-6 sm:gap-8 px-4 text-[9.5px] sm:text-[10px] tracking-[0.18em] uppercase font-medium">
+            <span className="inline-flex items-center gap-1.5">
+              <Sparkles size={11} className="text-[#ff8da1] shrink-0 animate-pulse" />
+              <span>Presentes Personalizados com Afeto</span>
+            </span>
+            <span className="text-[#ff8da1]/60">•</span>
+            <span>Entregas em <strong className="font-semibold text-white">Santa Rita, João Pessoa e Região</strong></span>
+            <span className="text-neutral-500">•</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Sparkles size={11} className="text-[#ff8da1] shrink-0" />
+              <span>Presentes Personalizados com Afeto</span>
+            </span>
+            <span className="text-[#ff8da1]/60">•</span>
+            <span>Entregas em <strong className="font-semibold text-white">Santa Rita, João Pessoa e Região</strong></span>
+            <span className="text-neutral-500">•</span>
+          </div>
+
+          {/* Lote 2 (Duplicado idêntico para loop infinito perfeito sem interrupções) */}
+          <div className="flex items-center gap-6 sm:gap-8 px-4 text-[9.5px] sm:text-[10px] tracking-[0.18em] uppercase font-medium" aria-hidden="true">
+            <span className="inline-flex items-center gap-1.5">
+              <Sparkles size={11} className="text-[#ff8da1] shrink-0 animate-pulse" />
+              <span>Presentes Personalizados com Afeto</span>
+            </span>
+            <span className="text-[#ff8da1]/60">•</span>
+            <span>Entregas em <strong className="font-semibold text-white">Santa Rita, João Pessoa e Região</strong></span>
+            <span className="text-neutral-500">•</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Sparkles size={11} className="text-[#ff8da1] shrink-0" />
+              <span>Presentes Personalizados com Afeto</span>
+            </span>
+            <span className="text-[#ff8da1]/60">•</span>
+            <span>Entregas em <strong className="font-semibold text-white">Santa Rita, João Pessoa e Região</strong></span>
+            <span className="text-neutral-500">•</span>
+          </div>
+        </div>
       </div>
 
       {/* ─────────────────────────────────────────────────────────────────── */}
