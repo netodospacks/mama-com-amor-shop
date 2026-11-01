@@ -22,7 +22,7 @@ export function SnowEffect() {
   // Estado da neve (com persistência no localStorage)
   const [isSnowing, setIsSnowing] = useState<boolean>(() => {
     if (prefersReducedMotion) return false;
-    const saved = localStorage.getItem("vs_snow_enabled");
+    const saved = typeof window !== "undefined" ? localStorage.getItem("vs_snow_enabled") : null;
     return saved !== null ? saved === "true" : true;
   });
 
@@ -61,19 +61,21 @@ export function SnowEffect() {
     if (!ctx) return;
 
     let animationFrameId: number;
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    const parent = canvas.parentElement;
+    let width = (canvas.width = parent ? parent.clientWidth : window.innerWidth);
+    let height = (canvas.height = parent ? parent.clientHeight : 700);
 
     const handleResize = () => {
       if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      const p = canvas.parentElement;
+      width = canvas.width = p ? p.clientWidth : window.innerWidth;
+      height = canvas.height = p ? p.clientHeight : 700;
     };
 
     window.addEventListener("resize", handleResize);
 
-    // Quantidade de flocos otimizada (leve para celulares)
-    const flakeCount = width < 768 ? 32 : 55;
+    // Quantidade de flocos equilibrada para a área do header
+    const flakeCount = width < 768 ? 26 : 46;
     const flakes: Flake[] = [];
 
     for (let i = 0; i < flakeCount; i++) {
@@ -81,9 +83,9 @@ export function SnowEffect() {
         x: Math.random() * width,
         y: Math.random() * height,
         radius: Math.random() * 2.2 + 0.8, // Flocos delicados entre 0.8px e 3px
-        speedY: Math.random() * 1.1 + 0.5, // Queda suave
-        speedX: (Math.random() - 0.5) * 0.4,
-        opacity: Math.random() * 0.55 + 0.35, // Transparência suave
+        speedY: Math.random() * 0.9 + 0.45, // Queda suave
+        speedX: (Math.random() - 0.5) * 0.35,
+        opacity: Math.random() * 0.5 + 0.3, // Transparência suave
         swaySpeed: Math.random() * 0.02 + 0.01,
         swayOffset: Math.random() * Math.PI * 2,
       });
@@ -100,9 +102,9 @@ export function SnowEffect() {
         
         // Movimento senoidal de oscilação suave lateral
         flake.y += flake.speedY;
-        flake.x += Math.sin(angle + flake.swayOffset) * 0.5 + flake.speedX;
+        flake.x += Math.sin(angle + flake.swayOffset) * 0.45 + flake.speedX;
 
-        // Se sair da tela, ressurge no topo
+        // Se sair da área do header, ressurge no topo do header
         if (flake.y > height + 5) {
           flake.y = -5;
           flake.x = Math.random() * width;
@@ -132,50 +134,19 @@ export function SnowEffect() {
     };
   }, [isSnowing]);
 
-  return (
-    <>
-      {/* Canvas da Neve (invisível para cliques, não bloqueia nenhuma interação) */}
-      {isSnowing && (
-        <canvas
-          ref={canvasRef}
-          aria-hidden="true"
-          className="fixed inset-0 pointer-events-none z-[35] w-full h-full"
-        />
-      )}
+  if (!isSnowing) return null;
 
-      {/* Botão de Controle Flutuante Discreto e Elegante (Mobile & Desktop) */}
-      <div className="fixed bottom-20 sm:bottom-6 left-4 z-40 select-none">
-        <button
-          onClick={toggleSnow}
-          title={isSnowing ? "Pausar efeito de neve natalina" : "Ativar efeito de neve natalina"}
-          aria-label={isSnowing ? "Pausar neve natalina" : "Ativar neve natalina"}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wider uppercase transition-all shadow-md backdrop-blur-md border ${
-            isSnowing
-              ? "bg-white/90 text-neutral-800 border-neutral-200/90 hover:bg-white"
-              : "bg-neutral-900/90 text-white/80 border-neutral-700/80 hover:bg-neutral-900"
-          }`}
-        >
-          <Snowflake
-            size={13}
-            className={`transition-transform duration-700 ${
-              isSnowing ? "text-sky-500 animate-spin" : "text-neutral-400"
-            }`}
-            style={{ animationDuration: "8s" }}
-          />
-          <span className="hidden sm:inline">
-            {isSnowing ? "Neve Ativa" : "Neve Pausada"}
-          </span>
-          <span className="sm:hidden">
-            {isSnowing ? "Neve" : "Pausada"}
-          </span>
-        </button>
-      </div>
-    </>
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      className="absolute inset-0 pointer-events-none z-[5] w-full h-full"
+    />
   );
 }
 
-// Botão adicional opcional para o Cabeçalho
-export function SnowHeaderButton() {
+// Botão integrado ao Header Natalino (Sem position fixed, rola naturalmente com a seção do header)
+export function SnowToggleBadge({ className = "" }: { className?: string }) {
   const [isSnowing, setIsSnowing] = useState<boolean>(() => {
     const saved = typeof window !== "undefined" ? localStorage.getItem("vs_snow_enabled") : null;
     return saved !== null ? saved === "true" : true;
@@ -198,16 +169,23 @@ export function SnowHeaderButton() {
   return (
     <button
       onClick={handleToggle}
-      title={isSnowing ? "Pausar neve de Natal" : "Ativar neve de Natal"}
-      aria-label={isSnowing ? "Pausar neve" : "Ativar neve"}
-      className="p-2 text-neutral-600 hover:text-black hover:bg-neutral-100 rounded-lg transition-colors focus:outline-none flex items-center justify-center"
+      type="button"
+      title={isSnowing ? "Pausar neve natalina" : "Ativar neve natalina"}
+      aria-label={isSnowing ? "Pausar neve natalina" : "Ativar neve natalina"}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wider uppercase transition-all backdrop-blur-md border shadow-sm cursor-pointer select-none ${
+        isSnowing
+          ? "bg-white/15 text-white border-white/25 hover:bg-white/25"
+          : "bg-black/60 text-neutral-300 border-white/15 hover:bg-black/80"
+      } ${className}`}
     >
-      <Snowflake 
-        size={19} 
-        strokeWidth={1.8} 
-        className={isSnowing ? "text-sky-500 animate-spin" : "text-neutral-400"}
+      <Snowflake
+        size={12}
+        className={`transition-transform duration-700 shrink-0 ${
+          isSnowing ? "text-sky-300 animate-spin" : "text-neutral-400"
+        }`}
         style={{ animationDuration: "8s" }}
       />
+      <span>{isSnowing ? "Neve Ativa" : "Pausar Neve"}</span>
     </button>
   );
 }

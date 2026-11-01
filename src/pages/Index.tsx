@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { VSBrandMark } from "@/components/VSBrandMark";
-import { SnowEffect, SnowHeaderButton } from "@/components/SnowEffect";
+import { SnowEffect, SnowToggleBadge } from "@/components/SnowEffect";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Product } from "@/types/product";
@@ -279,11 +279,6 @@ export default function Index() {
     <div className="min-h-screen bg-[#faf8f6] text-neutral-900 font-sans selection:bg-[#ff8da1] selection:text-neutral-900">
       
       {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* CAMADA TEMÁTICA DE NATAL — NEVE INTERATIVA LEVE                     */}
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      <SnowEffect />
-      
-      {/* ─────────────────────────────────────────────────────────────────── */}
       {/* 1. BARRA SUPERIOR DE ANÚNCIO (TICKER SLIM EM LOOP PARA A ESQUERDA)   */}
       {/* ─────────────────────────────────────────────────────────────────── */}
       <div 
@@ -362,9 +357,6 @@ export default function Index() {
 
           {/* Direita: Ações e Botão da Sacola */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Controle da Neve de Natal no Cabeçalho */}
-            <SnowHeaderButton />
-
             <a
               href="https://instagram.com/virtualstore_3"
               target="_blank"
@@ -515,46 +507,61 @@ export default function Index() {
         {/* ─────────────────────────────────────────────────────────────────── */}
         {/* 3. HERO SECTION — VIRTUAL STORE (EXPERIÊNCIA NATALINA ACONCHEGANTE) */}
         {/* ─────────────────────────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden bg-[#0c1410] border-b border-neutral-900 py-12 sm:py-20 px-4 sm:px-8">
-          {/* Imagem de Fundo Temática de Natal com Enquadramento Mobile & Desktop */}
+        <section className="relative overflow-hidden bg-[#0a100d] border-b border-neutral-900 py-12 sm:py-20 px-4 sm:px-8">
+          {/* Imagem de Fundo Temática de Natal Exclusiva do Header */}
           <div className="absolute inset-0 z-0">
             <img 
               src="/hero-natal.jpg" 
               alt="Ambiente Natalino Virtual Store" 
-              className="w-full h-full object-cover object-center lg:object-right select-none"
+              className="w-full h-full object-cover object-[center_right] sm:object-right select-none"
               loading="eager"
             />
-            {/* Camada gradiente nobre para 100% de contraste e legibilidade impecável */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/92 via-black/82 to-black/55 sm:from-black/88 sm:via-black/75 sm:to-black/45" />
-            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/85 to-transparent pointer-events-none" />
+            {/* Camada 1: Escurecimento base uniforme (55%) para suavizar pontos brilhantes */}
+            <div className="absolute inset-0 bg-black/55" />
+
+            {/* Camada 2: Gradiente direcional estratégico */}
+            {/* Mobile: escurecimento vertical mais profundo no topo/centro onde ficam título e descrições */}
+            {/* Desktop: escurecimento horizontal com 95% atrás do texto, abrindo suavemente à direita para exibir a árvore de Natal */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/75 to-black/85 lg:bg-gradient-to-r lg:from-black/95 lg:via-black/75 lg:to-black/30" />
+
+            {/* Camada 3: Transição escura na base para conexão perfeita com o catálogo */}
+            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-neutral-900 via-neutral-900/60 to-transparent pointer-events-none" />
           </div>
+
+          {/* Animação de Neve Restrita ao Header (Sem transbordar para as outras seções) */}
+          <SnowEffect />
 
           <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
             
             {/* Texto de Impacto Editorial */}
             <div className="lg:col-span-7 flex flex-col items-start text-left">
               
-              {/* Badge Oficial com Toque Natalino */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#ff8da1] text-xs font-semibold tracking-wider uppercase mb-4 sm:mb-5 shadow-sm">
-                <Sparkles size={13} className="text-[#f9d342] animate-pulse" />
-                <span>Especial de Natal • Edição Limitada</span>
+              {/* Badges de Topo (Selo Natalino + Botão de Neve Integrado) */}
+              <div className="flex flex-wrap items-center gap-2.5 mb-4 sm:mb-5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#ff8da1] text-xs font-semibold tracking-wider uppercase shadow-sm">
+                  <Sparkles size={13} className="text-[#f9d342] animate-pulse" />
+                  <span>Especial de Natal • Edição Limitada</span>
+                </div>
+
+                {/* Botão de Neve Integrado (Sem position fixed, rola naturalmente com o header) */}
+                <SnowToggleBadge />
               </div>
 
-              {/* Slogan com a Fonte Anton Consagrada */}
-              <h1 className="font-anton text-[38px] sm:text-[58px] md:text-[70px] lg:text-[78px] font-normal tracking-[-0.01em] leading-[0.96] text-white uppercase mb-5 select-none drop-shadow-md">
+              {/* Slogan com a Fonte Anton Consagrada com Contraste Aprimorado */}
+              <h1 className="font-anton text-[38px] sm:text-[58px] md:text-[70px] lg:text-[78px] font-normal tracking-[-0.01em] leading-[0.96] text-white uppercase mb-5 select-none drop-shadow-[0_2px_14px_rgba(0,0,0,0.9)]">
                 Transformamos <br />
                 sentimentos em <br />
-                <span className="text-[#ff8da1]">presentes inesquecíveis.</span>
+                <span className="text-[#ff8da1] drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">presentes inesquecíveis.</span>
               </h1>
 
               {/* Localização Oficial */}
-              <div className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-semibold tracking-[0.14em] text-neutral-300 uppercase mb-6">
+              <div className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-semibold tracking-[0.14em] text-neutral-200 uppercase mb-6 drop-shadow-[0_1px_5px_rgba(0,0,0,0.9)]">
                 <MapPin size={14} className="text-[#ff8da1] shrink-0" />
                 <span>Santa Rita, João Pessoa e Região</span>
               </div>
 
               {/* Breve Descrição Comercial */}
-              <p className="text-sm sm:text-base text-neutral-200 max-w-lg leading-relaxed font-light mb-8 drop-shadow-sm">
+              <p className="text-sm sm:text-base text-neutral-100 max-w-lg leading-relaxed font-normal mb-8 drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)]">
                 Cestas natalinas especiais, quadros afetivos, kits personalizados e memórias eternizadas com todo o carinho e aconchego do Natal.
               </p>
 
