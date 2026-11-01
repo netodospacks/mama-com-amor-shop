@@ -469,13 +469,6 @@ export default function Index() {
             </button>
           </div>
 
-          {/* Selos de Confiança */}
-          <div className="mt-8 pt-6 border-t border-white/15 flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-neutral-300 font-medium">
-            <span className="flex items-center gap-1.5"><Check size={14} className="text-[#25D366]" /> Feito por encomenda</span>
-            <span className="flex items-center gap-1.5"><Check size={14} className="text-[#25D366]" /> Fotos & Nomes exclusivos</span>
-            <span className="flex items-center gap-1.5"><Check size={14} className="text-[#25D366]" /> Entrega cuidadosa</span>
-          </div>
-
         </div>
 
       </header>
