@@ -158,76 +158,107 @@
     font-family: Georgia, 'Playfair Display', serif;
   }
 
-  .btn-sublime-primary {
+  /* Cores e Botões da Identidade Autêntica Virtual Store */
+  .btn-vs-primary {
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     font-size: 11px;
-    font-weight: 500;
-    padding: 14px 22px;
-    background: #0b2239;
-    border: 1px solid #0b2239;
-    color: #fcfaf6;
-    transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 13px 24px;
+    background: #111111;
+    border: 1px solid #111111;
+    color: #ffffff;
+    border-radius: 9999px;
+    transition: transform 0.25s, box-shadow 0.25s, background 0.25s;
   }
-  .btn-sublime-primary::before {
+  .btn-vs-primary::before {
     content: '';
     position: absolute;
     inset: -60% -130%;
     pointer-events: none;
     z-index: -1;
-    background: linear-gradient(110deg, transparent 44%, #ffffff26 49%, #ffffff0c 53%, transparent 58%);
+    background: linear-gradient(110deg, transparent 44%, rgba(255, 255, 255, 0.22) 49%, rgba(255, 255, 255, 0.08) 53%, transparent 58%);
     transform: translateX(-45%);
     transition: transform 0.7s;
   }
-  .btn-sublime-primary:hover::before,
-  .btn-sublime-primary:focus-visible::before {
+  .btn-vs-primary:hover::before,
+  .btn-vs-primary:focus-visible::before {
     transform: translateX(45%);
   }
-  .btn-sublime-primary:hover {
+  .btn-vs-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 7px 18px rgba(11, 34, 57, 0.18);
-    background: #173c50;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    background: #000000;
   }
 
-  .btn-sublime-gold {
+  .btn-vs-whatsapp {
     position: relative;
     isolation: isolate;
     overflow: hidden;
     letter-spacing: 0.08em;
     font-size: 11px;
-    font-weight: 500;
-    padding: 13px 22px;
-    background: #e5c798;
-    color: #0b2239;
-    border: 1px solid #e5c798;
-    transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 12px 22px;
+    background: #25D366;
+    color: #ffffff;
+    border: 1px solid #20ba59;
+    border-radius: 9999px;
+    box-shadow: 0 4px 16px rgba(37, 211, 102, 0.28);
+    transition: transform 0.25s, box-shadow 0.25s, background 0.25s;
   }
-  .btn-sublime-gold:hover {
-    background: #ecd6b4;
+  .btn-vs-whatsapp:hover {
+    background: #20ba59;
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(198, 161, 107, 0.25);
+    box-shadow: 0 6px 22px rgba(37, 211, 102, 0.4);
   }
 
-  .eyebrow-sublime {
-    font-size: 9px;
-    letter-spacing: 0.22em;
+  .btn-vs-gold {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    letter-spacing: 0.08em;
+    font-size: 11px;
+    font-weight: 600;
     text-transform: uppercase;
-    color: #c6a16b;
+    padding: 12px 22px;
+    background: #d4af37;
+    color: #111111;
+    border: 1px solid #c29d2b;
+    border-radius: 9999px;
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.25);
+    transition: transform 0.25s, box-shadow 0.25s, background 0.25s;
+  }
+  .btn-vs-gold:hover {
+    background: #dfbc49;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
+  }
+
+  .eyebrow-vs {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #d15b70;
     font-weight: 600;
   }
 
-  .brand-seal-vs {
-    display: grid;
-    place-items: center;
-    border: 1px solid #c6a16b;
-    border-radius: 50%;
-    box-shadow: inset 0 0 0 3px #fcfaf6, inset 0 0 0 4px rgba(198, 161, 107, 0.4);
-    color: #a37c45;
-    font-family: Georgia, 'Playfair Display', serif;
-    font-style: italic;
-    flex-shrink: 0;
+  .badge-vs-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    background: #fff0f3;
+    border: 1px solid #ffd1dc;
+    color: #d15b70;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
   }
 }
 
