@@ -54,6 +54,18 @@
 
     --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 
+    /* Cores da Nova Identidade Visual Story (Conceito Sublime) */
+    --navy: 211 68% 13%; /* #0b2239 */
+    --navy-deep: 200 49% 16%; /* #142f3b */
+    --forest: 161 45% 16%; /* #173d30 */
+    --wine: 338 40% 25%; /* #592638 */
+    --ivory: 40 43% 98%; /* #fcfaf6 */
+    --ivory-warm: 43 45% 96%; /* #faf8f2 */
+    --sand: 36 26% 87%; /* #e8dfd2 */
+    --border-sublime: 35 22% 86%; /* #e5ded4 */
+    --gold-sublime: 36 45% 60%; /* #c6a16b */
+    --gold-light: 36 60% 75%; /* #e5c798 */
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -141,6 +153,98 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  /* Utilitários Visuais — Conceito Sublime / Visual Story */
+  .font-serif-sublime {
+    font-family: Georgia, 'Playfair Display', serif;
+  }
+
+  .btn-sublime-primary {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    letter-spacing: 0.1em;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 14px 22px;
+    background: #0b2239;
+    border: 1px solid #0b2239;
+    color: #fcfaf6;
+    transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+  }
+  .btn-sublime-primary::before {
+    content: '';
+    position: absolute;
+    inset: -60% -130%;
+    pointer-events: none;
+    z-index: -1;
+    background: linear-gradient(110deg, transparent 44%, #ffffff26 49%, #ffffff0c 53%, transparent 58%);
+    transform: translateX(-45%);
+    transition: transform 0.7s;
+  }
+  .btn-sublime-primary:hover::before,
+  .btn-sublime-primary:focus-visible::before {
+    transform: translateX(45%);
+  }
+  .btn-sublime-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 18px rgba(11, 34, 57, 0.18);
+    background: #173c50;
+  }
+
+  .btn-sublime-gold {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    letter-spacing: 0.08em;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 13px 22px;
+    background: #e5c798;
+    color: #0b2239;
+    border: 1px solid #e5c798;
+    transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+  }
+  .btn-sublime-gold:hover {
+    background: #ecd6b4;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(198, 161, 107, 0.25);
+  }
+
+  .eyebrow-sublime {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #c6a16b;
+    font-weight: 600;
+  }
+
+  .brand-seal-vs {
+    display: grid;
+    place-items: center;
+    border: 1px solid #c6a16b;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 3px #fcfaf6, inset 0 0 0 4px rgba(198, 161, 107, 0.4);
+    color: #a37c45;
+    font-family: Georgia, 'Playfair Display', serif;
+    font-style: italic;
+    flex-shrink: 0;
+  }
+}
+
+/* Animações Sublime */
+@keyframes hero-reveal {
+  from { opacity: 0; transform: scale(1.04); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes copy-reveal {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes cta-lustre {
+  from { opacity: 0.4; transform: translateY(5px); }
+  to { opacity: 1; transform: none; }
 }
 
 /* Impede scroll horizontal na página toda */
@@ -148,4 +252,3 @@ html, body {
   overflow-x: hidden;
   max-width: 100vw;
 }
-

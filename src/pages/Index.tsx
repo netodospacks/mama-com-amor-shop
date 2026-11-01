@@ -1,11 +1,30 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Instagram, MoreHorizontal, X, ChevronRight, ChevronLeft, Menu, Gift, MapPin, Settings2, ArrowRight } from "lucide-react";
+import { 
+  Instagram, 
+  X, 
+  ChevronRight, 
+  ChevronLeft, 
+  Gift, 
+  ArrowRight, 
+  Search, 
+  ShoppingBag, 
+  Sparkles, 
+  Heart, 
+  Award, 
+  Briefcase, 
+  Clock, 
+  ShieldCheck, 
+  Check, 
+  HelpCircle,
+  Menu as MenuIcon
+} from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Product } from "@/types/product";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { mapProductFromDB } from "@/lib/mapper";
+import { useCart } from "@/context/CartContext";
 import { 
   CATEGORIES, 
   CESTAS_CAFE_DA_MANHA, 
@@ -16,268 +35,6 @@ import {
   QUADROS_10x15_CASAL,
   QUADROS_10x15_ANIVERSARIO
 } from "@/data/catalog";
-
-const CATEGORY_PILLS = [
-  { label: "Destaques", id: "destaques" },
-  { label: "Cestas", id: "cestas" },
-  { label: "Quadros A4", id: "quadros-a4" },
-  { label: "Quadros 10x15", id: "quadros-10x15" },
-  { label: "Kits Casal", id: "kits" },
-  { label: "Mamães / Bebês", id: "mamaes-bebes" },
-  { label: "Produtos", id: "produtos" },
-  { label: "Placas Acrílicas", id: "placas" },
-  { label: "Combos", id: "combos" },
-  { label: "Especial Mães", id: "maes" },
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FeaturedCard — card boutique premium para "Produtos em destaque"
-// ─────────────────────────────────────────────────────────────────────────────
-const FeaturedCard = ({ 
-  product, 
-  lazy = false,
-  buttonText
-}: { 
-  product: Product; 
-  lazy?: boolean;
-  buttonText?: string;
-}) => {
-  const resolvedButtonText = buttonText || "Comprar";
-
-  return (
-    <Link
-      to={`/product/${product.id}`}
-      onDragStart={(e) => e.preventDefault()}
-      className="block flex-shrink-0 w-[72vw] max-w-[260px] min-w-[195px] sm:w-[230px] md:w-[260px] snap-start group h-full select-none"
-    >
-      <motion.div
-        whileHover={{ y: -4 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-        className="flex flex-col h-full bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 rounded-xl sm:rounded-2xl overflow-hidden hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-300"
-      >
-        {/* Fotografia de Boutique com Proporção 4/5 desobstruída */}
-        <div className="w-full aspect-[4/5] bg-neutral-50 dark:bg-neutral-800/60 relative overflow-hidden">
-          {product.image ? (
-            <img
-              src={product.image}
-              alt={product.name}
-              loading={lazy ? "lazy" : "eager"}
-              decoding="async"
-              draggable={false}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out pointer-events-none select-none"
-            />
-          ) : (
-            <div className="absolute inset-0 bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
-              <Gift size={24} className="text-neutral-300 dark:text-neutral-600" />
-            </div>
-          )}
-
-          {/* Badges Discretas e Elegantes */}
-          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10 pointer-events-none">
-            {product.isPromo && (
-              <span className="inline-block bg-black/85 backdrop-blur-md text-white text-[8.5px] sm:text-[9.5px] font-medium px-2 py-0.5 rounded uppercase tracking-[0.16em] shadow-sm">
-                Promoção
-              </span>
-            )}
-            {product.isNew && (
-              <span className="inline-block bg-white/90 backdrop-blur-md text-black border border-neutral-200 text-[8.5px] sm:text-[9.5px] font-medium px-2 py-0.5 rounded uppercase tracking-[0.16em] shadow-sm">
-                Novidade
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Textos: Hierarquia Editorial e Conversão */}
-        <div className="p-3 sm:p-4 flex flex-col justify-between flex-grow">
-          <div>
-            <h3 className="text-xs sm:text-[13px] font-medium text-neutral-800 dark:text-neutral-200 group-hover:text-black dark:group-hover:text-white transition-colors line-clamp-2 leading-snug mb-2">
-              {product.name}
-            </h3>
-          </div>
-
-          <div className="mt-auto pt-1">
-            {/* Preços com Clareza e Elegância */}
-            <div className="flex items-baseline gap-1.5 mb-2.5">
-              {product.isPromo && product.promoPrice ? (
-                <>
-                  <span className="text-[11px] sm:text-xs text-neutral-400 line-through font-normal">
-                    {product.price}
-                  </span>
-                  <span className="text-sm sm:text-base font-bold text-black dark:text-white tracking-tight">
-                    {product.promoPrice}
-                  </span>
-                </>
-              ) : (
-                <span className="text-sm sm:text-base font-bold text-black dark:text-white tracking-tight">
-                  {product.price}
-                </span>
-              )}
-            </div>
-
-            {/* Ação de Conversão: Botão Refinado de Boutique */}
-            <div className="w-full py-1.5 sm:py-2 px-3 rounded-lg bg-neutral-900 group-hover:bg-black dark:bg-white dark:group-hover:bg-neutral-100 text-white dark:text-black text-[10.5px] sm:text-xs font-medium uppercase tracking-[0.12em] flex items-center justify-center gap-1.5 transition-colors shadow-sm">
-              <span>{resolvedButtonText}</span>
-              <ArrowRight size={12} strokeWidth={2} className="transition-transform group-hover:translate-x-0.5" />
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </Link>
-  );
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// MiniCard — card padrão para grades normais (cestas, kits, etc.)
-// ─────────────────────────────────────────────────────────────────────────────
-const MiniCard = ({ product }: { product: Product }) => {
-  return (
-    <Link to={`/product/${product.id}`} className="block">
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-10%" }}
-        whileHover={{ y: -4 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-        className="flex flex-col group relative cursor-pointer h-full"
-      >
-        <div className="w-full aspect-[4/5] bg-neutral-100 dark:bg-neutral-800 rounded-lg sm:rounded-xl overflow-hidden shadow-sm group-hover:shadow-lg transition-all duration-500 relative mb-2 sm:mb-3">
-          {product.image ? (
-            <img 
-              src={product.image} 
-              alt={product.name} 
-              loading="lazy"
-              decoding="async"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900 group-hover:scale-105 transition-transform duration-700 ease-out" />
-          )}
-
-          {product.isPromo && (
-            <div className="absolute top-1 right-1 sm:top-2 sm:right-2 bg-black text-white text-[8px] sm:text-[10px] font-medium px-1.5 py-0.5 rounded-sm backdrop-blur-md bg-black/80 uppercase tracking-wider z-10">
-              Promo
-            </div>
-          )}
-          {product.isNew && (
-            <div className="absolute top-1 left-1 sm:top-2 sm:left-2 bg-black text-white text-[8px] sm:text-[10px] font-medium px-1.5 py-0.5 rounded-sm uppercase tracking-wider z-10">
-              Novidade
-            </div>
-          )}
-        </div>
-
-        <div className="px-0.5 mt-auto">
-          <h3 className="text-[10px] sm:text-[12px] md:text-sm font-medium text-neutral-900 dark:text-neutral-100 truncate mb-0.5 sm:mb-1 transition-colors group-hover:text-black dark:group-hover:text-white">
-            {product.name}
-          </h3>
-          <div className="flex flex-col leading-none gap-0.5 pb-1">
-            {product.isPromo && product.promoPrice ? (
-              <>
-                <span className="text-[9px] sm:text-[10px] md:text-[11px] text-neutral-400 line-through font-normal">
-                  {product.price}
-                </span>
-                <span className="text-[10px] sm:text-[12px] md:text-sm font-bold text-black dark:text-white tracking-tight">
-                  {product.promoPrice}
-                </span>
-              </>
-            ) : (
-              <span className="text-[10px] sm:text-[12px] md:text-sm font-semibold text-neutral-900 dark:text-white tracking-tight">
-                {product.price}
-              </span>
-            )}
-          </div>
-        </div>
-      </motion.div>
-    </Link>
-  );
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// HScrollCard — card para containers com rolagem horizontal (quadros)
-// ─────────────────────────────────────────────────────────────────────────────
-const HScrollCard = ({ product }: { product: Product }) => {
-  return (
-    <Link to={`/product/${product.id}`} className="block flex-shrink-0 w-[140px] sm:w-[180px] md:w-[200px]">
-      <motion.div
-        whileHover={{ y: -4 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-        className="flex flex-col group cursor-pointer"
-      >
-        <div className="w-full aspect-[4/5] bg-neutral-100 dark:bg-neutral-800 rounded-lg sm:rounded-xl overflow-hidden shadow-sm group-hover:shadow-lg transition-all duration-500 relative mb-2">
-          {product.image ? (
-            <img 
-              src={product.image} 
-              alt={product.name} 
-              loading="lazy"
-              decoding="async"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900" />
-          )}
-          {product.isPromo && (
-            <div className="absolute top-1 right-1 bg-black text-white text-[8px] font-medium px-1.5 py-0.5 rounded-sm uppercase tracking-wider z-10">
-              Promo
-            </div>
-          )}
-        </div>
-        <div className="px-0.5 mt-2">
-          <h3 className="text-[10px] sm:text-[12px] font-medium text-neutral-800 dark:text-neutral-200 truncate mb-0.5 transition-colors group-hover:text-black dark:group-hover:text-white">
-            {product.name}
-          </h3>
-          <div className="flex flex-col leading-none gap-0.5 pb-1">
-            {product.isPromo && product.promoPrice ? (
-              <>
-                <span className="text-[9px] sm:text-[10px] text-neutral-400 line-through font-normal">
-                  {product.price}
-                </span>
-                <span className="text-[10px] sm:text-[12px] font-bold text-black dark:text-white tracking-tight">
-                  {product.promoPrice}
-                </span>
-              </>
-            ) : (
-              <span className="text-[10px] sm:text-[12px] font-semibold text-neutral-900 dark:text-white tracking-tight">
-                {product.price}
-              </span>
-            )}
-          </div>
-        </div>
-      </motion.div>
-    </Link>
-  );
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// HScrollRow — linha de produtos com rolagem horizontal (somente quadros)
-// ─────────────────────────────────────────────────────────────────────────────
-const HScrollRow = ({ products }: { products: Product[] }) => (
-  <div className="w-full overflow-x-auto overflow-y-visible pb-3 -mx-2 px-2 scrollbar-hide"
-       style={{ WebkitOverflowScrolling: "touch" }}>
-    <div className="flex gap-3 sm:gap-4 w-max">
-      {products.map(product => (
-        <HScrollCard key={product.id} product={product} />
-      ))}
-    </div>
-  </div>
-);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SubSectionHeader — cabeçalho de subcategoria (alinhado à esquerda)
-// ─────────────────────────────────────────────────────────────────────────────
-const SubSectionHeader = ({ title, description }: { title: string; description?: string }) => (
-  <div className="mb-4 sm:mb-6">
-    <h3 className="text-sm sm:text-base font-semibold tracking-[0.12em] uppercase text-black mb-1">
-      {title}
-    </h3>
-    {description && (
-      <p className="text-[11px] sm:text-xs text-neutral-600 font-light leading-relaxed max-w-sm">
-        {description}
-      </p>
-    )}
-  </div>
-);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Hook para rolagem por arraste do mouse no desktop sem interferir no clique
@@ -340,193 +97,111 @@ const useCarouselDrag = (scrollRef: React.RefObject<HTMLDivElement>) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SubSectionCarousel — carrossel horizontal independente para subseções (Cestas)
+// Card de Produto Sublime / Visual Story
 // ─────────────────────────────────────────────────────────────────────────────
-const SubSectionCarousel = ({
-  title,
-  description,
-  products,
-  buttonText = "Comprar",
-}: {
-  title: string;
-  description?: string;
-  products: Product[];
+const SublimeProductCard = ({ 
+  product, 
+  badge = "SELEÇÃO ESPECIAL",
+  buttonText = "Conhecer e personalizar"
+}: { 
+  product: Product; 
+  badge?: string;
   buttonText?: string;
 }) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const { isDragging, dragProps } = useCarouselDrag(scrollRef);
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const scrollAmount = direction === 'left' ? -280 : 280;
-      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
-
   return (
-    <div className="mb-10 sm:mb-14 px-2 sm:px-0">
-      <div className="flex items-end justify-between mb-3 sm:mb-4">
-        <div>
-          <h3 className="text-sm sm:text-base font-semibold tracking-[0.12em] uppercase text-black dark:text-white mb-1">
-            {title}
+    <article className="group bg-[#fffdfa] rounded-[2px] border border-[#e5ded4] p-3 sm:p-3.5 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(11,34,57,0.06)]">
+      <Link 
+        to={`/product/${product.id}`}
+        className="block relative overflow-hidden bg-[#f1ece3] aspect-[4/5] rounded-[2px]"
+      >
+        {product.image ? (
+          <img 
+            src={product.image} 
+            alt={product.name}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover p-2.5 transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-[#c6a16b]">
+            <Gift size={32} strokeWidth={1.5} />
+          </div>
+        )}
+
+        {/* Tag Sublime */}
+        <div className="absolute left-2.5 bottom-2.5 bg-[#fcfaf6ec] text-[#7d663f] text-[8px] font-sans font-medium px-2 py-0.5 border border-[#c6a16b45] uppercase tracking-[0.12em]">
+          {product.isPromo ? "PROMOÇÃO" : (product.isNew ? "NOVIDADE" : badge)}
+        </div>
+      </Link>
+
+      <div className="pt-3 pb-1 flex flex-col flex-grow">
+        <Link to={`/product/${product.id}`}>
+          <h3 className="font-serif-sublime text-[17px] sm:text-[19px] text-[#0b2239] line-clamp-1 leading-snug mb-1 group-hover:text-[#8b693b] transition-colors">
+            {product.name}
           </h3>
-          {description && (
-            <p className="text-[11px] sm:text-xs text-neutral-600 dark:text-neutral-400 font-light leading-relaxed max-w-sm">
-              {description}
-            </p>
-          )}
-        </div>
+        </Link>
 
-        {/* Controles de Navegação no Desktop/Tablet com o mesmo estilo da vitrine de destaques */}
-        {products.length > 1 && (
-          <div className="hidden sm:flex items-center gap-1.5 pb-1">
-            <button
-              onClick={() => scroll('left')}
-              aria-label={`Rolar ${title} para a esquerda`}
-              className="w-8 h-8 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => scroll('right')}
-              aria-label={`Rolar ${title} para a direita`}
-              className="w-8 h-8 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+        {product.shortDescription && (
+          <p className="text-[11px] text-[#6d757a] line-clamp-2 leading-relaxed mb-2 font-sans">
+            {product.shortDescription}
+          </p>
         )}
-      </div>
 
-      {/* Trilho de rolagem horizontal com snap e peeking para smartphone */}
-      <div
-        ref={scrollRef}
-        {...dragProps}
-        className={`w-full overflow-x-auto overflow-y-visible pb-2 pt-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-hide no-scrollbar snap-x snap-mandatory overscroll-x-contain touch-pan-x touch-pan-y ${
-          isDragging ? 'cursor-grabbing select-none snap-none' : 'cursor-grab'
-        }`}
-        style={{ WebkitOverflowScrolling: "touch" }}
-      >
-        <div className="flex gap-3 sm:gap-4.5 w-max min-w-full pr-6 sm:pr-8">
-          {products.map((product) => (
-            <FeaturedCard key={product.id} product={product} lazy={true} buttonText={buttonText} />
-          ))}
+        <div className="mt-auto pt-1">
+          <div className="flex items-baseline gap-2 mb-2.5">
+            {product.isPromo && product.promoPrice ? (
+              <>
+                <span className="text-xs text-[#a0a6aa] line-through font-sans">
+                  {product.price}
+                </span>
+                <span className="text-[16px] sm:text-[18px] font-sans font-semibold text-[#0b2239] tracking-tight">
+                  {product.promoPrice}
+                </span>
+              </>
+            ) : (
+              <span className="text-[15px] sm:text-[17px] font-sans font-medium text-[#0b2239]">
+                {product.price}
+              </span>
+            )}
+          </div>
+
+          <Link
+            to={`/product/${product.id}`}
+            className="w-full inline-flex items-center justify-between py-2.5 px-3 bg-transparent border-b border-[#c7b18e] hover:border-[#0b2239] text-[#0b2239] hover:text-[#8b693b] text-[11px] font-sans font-medium tracking-[0.03em] transition-all group/btn"
+          >
+            <span>{buttonText}</span>
+            <ArrowRight size={13} className="transition-transform group-hover/btn:translate-x-1" />
+          </Link>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SectionCarousel — carrossel horizontal independente para seções completas (Kits, Mamães, etc.)
-// ─────────────────────────────────────────────────────────────────────────────
-const SectionCarousel = ({
-  id,
-  title,
-  description,
-  products,
-}: {
-  id: string;
-  title: string;
-  description?: string;
-  products: Product[];
-}) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const { isDragging, dragProps } = useCarouselDrag(scrollRef);
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const scrollAmount = direction === 'left' ? -280 : 280;
-      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
-
-  if (!products || products.length === 0) return null;
-
-  return (
-    <section id={id} className="w-full mb-10 sm:mb-14">
-      <div className="flex items-end justify-between mb-4 sm:mb-6 px-2 sm:px-0">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-neutral-900 dark:text-white">
-            {title}
-          </h2>
-          {description && (
-            <p className="text-[11px] sm:text-sm text-neutral-500 dark:text-neutral-400 font-light tracking-wide mt-1">
-              {description}
-            </p>
-          )}
-          <div className="w-8 h-px bg-black dark:bg-white mt-3" />
-        </div>
-
-        {/* Controles de Navegação no Desktop */}
-        {products.length > 1 && (
-          <div className="hidden sm:flex items-center gap-1.5 pb-1">
-            <button
-              onClick={() => scroll('left')}
-              aria-label={`Rolar ${title} para a esquerda`}
-              className="w-8 h-8 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => scroll('right')}
-              aria-label={`Rolar ${title} para a direita`}
-              className="w-8 h-8 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Trilho de rolagem horizontal com snap e peeking para smartphone */}
-      <div
-        ref={scrollRef}
-        {...dragProps}
-        className={`w-full overflow-x-auto overflow-y-visible pb-2 pt-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-hide no-scrollbar snap-x snap-mandatory overscroll-x-contain touch-pan-x touch-pan-y ${
-          isDragging ? 'cursor-grabbing select-none snap-none' : 'cursor-grab'
-        }`}
-        style={{ WebkitOverflowScrolling: "touch" }}
-      >
-        <div className="flex gap-3 sm:gap-4.5 w-max min-w-full pr-6 sm:pr-8">
-          {products.map((product) => (
-            <FeaturedCard key={product.id} product={product} lazy={true} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Menu
-// ─────────────────────────────────────────────────────────────────────────────
-const MENU_ITEMS = [
-  { label: "Destaques", id: "destaques" },
-  { label: "Cestas", id: "cestas" },
-  { label: "Quadro A4", id: "quadros-a4" },
-  { label: "Quadro 10x15", id: "quadros-10x15" },
-  { label: "Kits Casal", id: "kits" },
-  { label: "Mamães / Bebês", id: "mamaes-bebes" },
-  { label: "Produtos", id: "produtos" },
-  { label: "Placas Acrílicas", id: "placas" },
-  { label: "Combos Promocionais", id: "combos" },
-  { label: "Especial Mães", id: "maes" },
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Page
+// COMPONENTE PRINCIPAL: Index (Visual Story — Conceito Sublime)
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Index() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<string>("destaques");
-  const pillsContainerRef = useRef<HTMLDivElement>(null);
+  const { totalItems, setIsCartOpen } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [categoriesList, setCategoriesList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Filtros interativos da vitrine "Queridinhos"
+  const [favoritesFilter, setFavoritesFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Categoria ativa do Catálogo Completo
+  const [activeCategorySlug, setActiveCategorySlug] = useState<string>("all");
+
+  // Ordenação do catálogo
+  const [catalogSort, setCatalogSort] = useState<"featured" | "low" | "high">("featured");
+
+  // Modal / Dropdown "Presente para"
+  const [isGiftGuideOpen, setIsGiftGuideOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  // Busca de dados do Supabase
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -547,7 +222,7 @@ export default function Index() {
             .eq('active', true)
             .order('sort_order', { ascending: true })
         ]);
-        
+
         if (prodRes.data && prodRes.data.length > 0) {
           setProducts(prodRes.data.map(mapProductFromDB));
         }
@@ -564,705 +239,1002 @@ export default function Index() {
     fetchData();
   }, []);
 
-  // Retorna o nome atualizado da categoria pelo slug ou fallback
-  const getCategoryDisplayName = (slug: string, defaultName: string): string => {
-    const found = categoriesList.find(c => 
-      c.slug === slug || 
-      (slug === 'kits-casal' && (c.slug === 'kits' || c.slug === 'kits-casal')) ||
-      (slug === 'mamaes-e-bebes' && (c.slug === 'mamaes-bebes' || c.slug === 'mamaes-e-bebes')) ||
-      (slug === 'combos-promocionais' && (c.slug === 'combos' || c.slug === 'combos-promocionais')) ||
-      (slug === 'placas-acrilicas' && (c.slug === 'placas' || c.slug === 'placas-acrilicas')) ||
-      (slug === 'especial-maes' && (c.slug === 'maes' || c.slug === 'especial-maes')) ||
-      c.name?.toLowerCase() === defaultName.toLowerCase()
-    );
-    return found?.name || defaultName;
-  };
+  // Produto de destaque para a Hero Section (obtido dinamicamente do Supabase)
+  const heroFeaturedProduct = useMemo(() => {
+    if (products.length === 0) return null;
+    return products.find(p => p.isFeatured) || products.find(p => p.isPromo) || products[0];
+  }, [products]);
 
-  // Retorna a descrição atualizada da categoria pelo slug ou fallback
-  const getCategoryDescription = (slug: string, defaultDesc?: string): string | undefined => {
-    const found = categoriesList.find(c => 
-      c.slug === slug || 
-      (slug === 'kits-casal' && (c.slug === 'kits' || c.slug === 'kits-casal')) ||
-      (slug === 'mamaes-e-bebes' && (c.slug === 'mamaes-bebes' || c.slug === 'mamaes-e-bebes')) ||
-      (slug === 'combos-promocionais' && (c.slug === 'combos' || c.slug === 'combos-promocionais')) ||
-      (slug === 'placas-acrilicas' && (c.slug === 'placas' || c.slug === 'placas-acrilicas')) ||
-      (slug === 'especial-maes' && (c.slug === 'maes' || c.slug === 'especial-maes'))
-    );
-    return found?.description ?? defaultDesc;
-  };
-
-  // Verifica se a categoria está cadastrada e ativa no Supabase
-  const isCategoryActive = (slugOrId: string): boolean => {
-    if (!isSupabaseConfigured || categoriesList.length === 0) return true;
-    return categoriesList.some(c => 
-      c.active && (
-        c.slug === slugOrId || 
-        c.id === slugOrId ||
-        (slugOrId === 'kits-casal' && (c.slug === 'kits' || c.slug === 'kits-casal')) ||
-        (slugOrId === 'mamaes-e-bebes' && (c.slug === 'mamaes-bebes' || c.slug === 'mamaes-e-bebes')) ||
-        (slugOrId === 'combos-promocionais' && (c.slug === 'combos' || c.slug === 'combos-promocionais')) ||
-        (slugOrId === 'placas-acrilicas' && (c.slug === 'placas' || c.slug === 'placas-acrilicas')) ||
-        (slugOrId === 'especial-maes' && (c.slug === 'maes' || c.slug === 'especial-maes'))
-      )
-    );
-  };
-
-  // Busca produtos vinculados à categoria por ID estável, por slug ou por aliases
-  const getCategoryProducts = (slugOrId: string, fallback?: Product[]): Product[] => {
-    if (isSupabaseConfigured && products && products.length > 0) {
-      if (!isCategoryActive(slugOrId)) {
-        return [];
-      }
-
-      const matchedCat = categoriesList.find(c => 
-        c.slug === slugOrId || 
-        c.id === slugOrId ||
-        (slugOrId === 'kits-casal' && (c.slug === 'kits' || c.slug === 'kits-casal')) ||
-        (slugOrId === 'mamaes-e-bebes' && (c.slug === 'mamaes-bebes' || c.slug === 'mamaes-e-bebes')) ||
-        (slugOrId === 'combos-promocionais' && (c.slug === 'combos' || c.slug === 'combos-promocionais')) ||
-        (slugOrId === 'placas-acrilicas' && (c.slug === 'placas' || c.slug === 'placas-acrilicas')) ||
-        (slugOrId === 'especial-maes' && (c.slug === 'maes' || c.slug === 'especial-maes'))
-      );
-
-      const targetCatId = matchedCat?.id;
-      const targetSlug = matchedCat?.slug || slugOrId;
-
-      const filtered = products.filter(p => {
-        // 1. Vínculo estável primário por ID da categoria (imune a edições de nome ou slug)
-        if (targetCatId && p.categoryId === targetCatId) return true;
-
-        // 2. Vínculo por slug
-        if (p.categorySlug === targetSlug || p.categorySlug === slugOrId) return true;
-
-        // 3. Aliases de compatibilidade histórica
-        if (slugOrId === 'kits-casal' && (p.categorySlug === 'kits' || p.categorySlug === 'kits-casal')) return true;
-        if (slugOrId === 'mamaes-e-bebes' && (p.categorySlug === 'mamaes-bebes' || p.categorySlug === 'mamaes-e-bebes')) return true;
-        if (slugOrId === 'combos-promocionais' && (p.categorySlug === 'combos' || p.categorySlug === 'combos-promocionais')) return true;
-        if (slugOrId === 'placas-acrilicas' && (p.categorySlug === 'placas' || p.categorySlug === 'placas-acrilicas')) return true;
-        if (slugOrId === 'especial-maes' && (p.categorySlug === 'maes' || p.categorySlug === 'especial-maes')) return true;
-
-        return false;
+  // Produtos filtrados para a vitrine "Queridinhos"
+  const favoriteProducts = useMemo(() => {
+    let list = products.length > 0 ? products : [];
+    
+    // Filtro por categoria da aba
+    if (favoritesFilter !== "all") {
+      list = list.filter(p => {
+        const slug = (p.categorySlug || '').toLowerCase();
+        const name = (p.name || '').toLowerCase();
+        if (favoritesFilter === "cestas") return slug.includes("cesta") || name.includes("cesta");
+        if (favoritesFilter === "quadros") return slug.includes("quadro") || name.includes("quadro");
+        if (favoritesFilter === "amor") return slug.includes("casal") || slug.includes("amor") || name.includes("casal");
+        if (favoritesFilter === "combos") return slug.includes("combo") || name.includes("combo") || p.isPromo;
+        return true;
       });
-
-      return filtered;
     }
-    return fallback || [];
-  };
 
-  const featuredScrollRef = useRef<HTMLDivElement>(null);
-
-  const scrollFeatured = (direction: 'left' | 'right') => {
-    if (featuredScrollRef.current) {
-      const scrollAmount = direction === 'left' ? -280 : 280;
-      featuredScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    // Busca textual
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(p => 
+        p.name.toLowerCase().includes(q) || 
+        p.shortDescription.toLowerCase().includes(q) ||
+        (p.categoryName && p.categoryName.toLowerCase().includes(q))
+      );
     }
-  };
 
-  const getFeaturedProducts = (): Product[] => {
-    if (products && products.length > 0) {
-      const fromDb = products.filter(p => p.isFeatured);
-      if (fromDb.length > 0) return fromDb;
+    return list.slice(0, 8);
+  }, [products, favoritesFilter, searchQuery]);
+
+  // Produtos para a seção de catálogo por categoria selecionada
+  const catalogProducts = useMemo(() => {
+    let list = [...products];
+
+    if (activeCategorySlug !== "all") {
+      list = list.filter(p => 
+        p.categorySlug === activeCategorySlug || 
+        p.categoryId === activeCategorySlug
+      );
     }
-    // Fallback inicial para curadoria em destaque com rolagem horizontal
-    const fallbackList = [
-      CESTAS_CAFE_DA_MANHA?.[0],
-      QUADROS_A4_CASAL?.[0],
-      CATEGORIES.KITS?.[0],
-      CATEGORIES.COMBOS?.[0],
-      CESTAS_ANIVERSARIO?.[0],
-      QUADROS_10x15_CASAL?.[0],
-      CATEGORIES.MAMAES_BEBES?.[0],
-      CATEGORIES.PRODUTOS?.[0],
-    ].filter(Boolean) as Product[];
 
-    return fallbackList.map(p => ({ ...p, isFeatured: true }));
-  };
+    if (catalogSort === "low") {
+      list.sort((a, b) => {
+        const pA = parseFloat(a.price.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+        const pB = parseFloat(b.price.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+        return pA - pB;
+      });
+    } else if (catalogSort === "high") {
+      list.sort((a, b) => {
+        const pA = parseFloat(a.price.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+        const pB = parseFloat(b.price.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+        return pB - pA;
+      });
+    }
 
-  const isScrollingRef = useRef(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    return list;
+  }, [products, activeCategorySlug, catalogSort]);
 
-  const scrollToSection = (id: string) => {
-    setActiveCategory(id);
-    setMenuOpen(false);
-    isScrollingRef.current = true;
-    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-
+  // Rolar suavemente para elemento
+  const scrollTo = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
-      const navHeight = 70;
-      const elementPosition = el.getBoundingClientRect().top + window.scrollY;
-      const offsetPosition = Math.max(0, elementPosition - navHeight);
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth"
-      });
-
-      scrollTimeoutRef.current = setTimeout(() => {
-        isScrollingRef.current = false;
-      }, 800);
-    } else {
-      isScrollingRef.current = false;
+      el.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  // Categorias ativas adicionais do Supabase que não estejam nas seções nativas fixas
-  const knownCategorySlugs = [
-    'destaques',
-    'cestas', 'cesta', 'cesta-cafe-da-manha', 'cesta-aniversario', 'cesta-cores',
-    'quadros-a4', 'quadro-a4', 'quadros-casal', 'quadros-aniversario',
-    'quadros-10x15', 'quadro-10x15', 'quadro-10x15-casal', 'quadro-10x15-aniversario',
-    'kits', 'kits-casal',
-    'mamaes-bebes', 'mamaes-e-bebes',
-    'produtos',
-    'placas', 'placas-acrilicas',
-    'combos', 'combos-promocionais',
-    'maes', 'especial-maes'
-  ];
-
-  const extraCategories = useMemo(() => {
-    return categoriesList.filter(c => 
-      c.active && 
-      !knownCategorySlugs.includes(c.slug)
-    );
-  }, [categoriesList]);
-
-  // Seções com produtos computados
-  const cestasCafeProds = useMemo(() => getCategoryProducts('cesta-cafe-da-manha', CESTAS_CAFE_DA_MANHA), [products, categoriesList]);
-  const cestasAnivProds = useMemo(() => getCategoryProducts('cesta-aniversario', CESTAS_ANIVERSARIO), [products, categoriesList]);
-  const cestasCoresProds = useMemo(() => getCategoryProducts('cesta-cores', CESTAS_CORES), [products, categoriesList]);
-  const hasCestas = cestasCafeProds.length > 0 || cestasAnivProds.length > 0 || cestasCoresProds.length > 0;
-
-  const quadrosCasalProds = useMemo(() => getCategoryProducts('quadros-casal', QUADROS_A4_CASAL), [products, categoriesList]);
-  const quadrosAnivProds = useMemo(() => getCategoryProducts('quadros-aniversario', QUADROS_A4_ANIVERSARIO), [products, categoriesList]);
-  const hasQuadrosA4 = quadrosCasalProds.length > 0 || quadrosAnivProds.length > 0;
-
-  const quadro10x15CasalProds = useMemo(() => getCategoryProducts('quadro-10x15-casal', QUADROS_10x15_CASAL), [products, categoriesList]);
-  const quadro10x15AnivProds = useMemo(() => getCategoryProducts('quadro-10x15-aniversario', QUADROS_10x15_ANIVERSARIO), [products, categoriesList]);
-  const hasQuadros10x15 = quadro10x15CasalProds.length > 0 || quadro10x15AnivProds.length > 0;
-
-  const kitsProds = useMemo(() => getCategoryProducts('kits-casal', CATEGORIES.KITS), [products, categoriesList]);
-  const mamaesProds = useMemo(() => getCategoryProducts('mamaes-e-bebes', CATEGORIES.MAMAES_BEBES), [products, categoriesList]);
-  const produtosAvulsosProds = useMemo(() => getCategoryProducts('produtos', CATEGORIES.PRODUTOS), [products, categoriesList]);
-  const placasProds = useMemo(() => getCategoryProducts('placas-acrilicas', CATEGORIES.QUADROS_PLACAS), [products, categoriesList]);
-  const combosProds = useMemo(() => getCategoryProducts('combos-promocionais', CATEGORIES.COMBOS), [products, categoriesList]);
-  const maesProds = useMemo(() => getCategoryProducts('especial-maes', CATEGORIES.MAES), [products, categoriesList]);
-
-  // Lista dinâmica de pills de navegação com nomes atualizados do banco (oculta seções vazias ou inativas)
-  const dynamicCategoryPills = useMemo(() => {
-    const pills: { label: string; id: string }[] = [{ label: "Destaques", id: "destaques" }];
-
-    if (hasCestas) pills.push({ label: getCategoryDisplayName('cestas', 'Cestas'), id: 'cestas' });
-    if (hasQuadrosA4) pills.push({ label: getCategoryDisplayName('quadros-a4', 'Quadros A4'), id: 'quadros-a4' });
-    if (hasQuadros10x15) pills.push({ label: getCategoryDisplayName('quadros-10x15', 'Quadros 10x15'), id: 'quadros-10x15' });
-    if (kitsProds.length > 0) pills.push({ label: getCategoryDisplayName('kits-casal', 'Kits Casal'), id: 'kits' });
-    if (mamaesProds.length > 0) pills.push({ label: getCategoryDisplayName('mamaes-e-bebes', 'Mamães / Bebês'), id: 'mamaes-bebes' });
-    if (produtosAvulsosProds.length > 0) pills.push({ label: getCategoryDisplayName('produtos', 'Produtos'), id: 'produtos' });
-    if (placasProds.length > 0) pills.push({ label: getCategoryDisplayName('placas-acrilicas', 'Placas Acrílicas'), id: 'placas' });
-    if (combosProds.length > 0) pills.push({ label: getCategoryDisplayName('combos-promocionais', 'Combos'), id: 'combos' });
-    if (maesProds.length > 0) pills.push({ label: getCategoryDisplayName('especial-maes', 'Especial Mães'), id: 'maes' });
-
-    extraCategories.forEach(cat => {
-      const catProds = getCategoryProducts(cat.id);
-      if (catProds.length > 0) {
-        pills.push({
-          label: cat.name,
-          id: cat.slug || `cat-${cat.id}`
-        });
-      }
-    });
-
-    return pills;
-  }, [
-    categoriesList, extraCategories, 
-    hasCestas, hasQuadrosA4, hasQuadros10x15, 
-    kitsProds, mamaesProds, produtosAvulsosProds, placasProds, combosProds, maesProds
-  ]);
-
-  // Lista dinâmica do menu lateral
-  const dynamicMenuItems = useMemo(() => {
-    return dynamicCategoryPills;
-  }, [dynamicCategoryPills]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (isScrollingRef.current) return;
-      const scrollPosition = window.scrollY + 140;
-      for (let i = dynamicCategoryPills.length - 1; i >= 0; i--) {
-        const item = dynamicCategoryPills[i];
-        const el = document.getElementById(item.id);
-        if (el && scrollPosition >= el.offsetTop) {
-          setActiveCategory(item.id);
-          break;
-        }
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-    };
-  }, [dynamicCategoryPills]);
-
-  useEffect(() => {
-    if (pillsContainerRef.current) {
-      const container = pillsContainerRef.current;
-      const activeButton = container.querySelector<HTMLButtonElement>(`[data-pill-id="${activeCategory}"]`);
-      if (activeButton) {
-        const buttonLeft = activeButton.offsetLeft;
-        const buttonWidth = activeButton.offsetWidth;
-        const containerWidth = container.offsetWidth;
-        const targetScroll = buttonLeft - (containerWidth / 2) + (buttonWidth / 2);
-        container.scrollTo({
-          left: Math.max(0, targetScroll),
-          behavior: "smooth"
-        });
-      }
-    }
-  }, [activeCategory]);
-
   return (
-    <div className="min-h-screen bg-white text-black font-sans selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-[#fcfaf6] text-[#0b2239] font-sans antialiased selection:bg-[#c6a16b] selection:text-white pb-20 sm:pb-0">
       
-      {/* Menu Lateral */}
-      <AnimatePresence>
-        {menuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMenuOpen(false)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200]"
-            />
-            <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 28, stiffness: 220 }}
-              className="fixed top-0 left-0 h-full w-72 bg-white dark:bg-[#0A0A0A] z-[210] shadow-2xl flex flex-col"
-            >
-              <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100 dark:border-neutral-800">
-                <span className="text-xs font-semibold tracking-[0.25em] uppercase">Menu</span>
-                <button
-                  onClick={() => setMenuOpen(false)}
-                  className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-              <nav className="flex-1 overflow-y-auto py-4">
-                {dynamicMenuItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => scrollToSection(item.id)}
-                    className="w-full text-left px-6 py-4 text-sm font-medium tracking-widest uppercase text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:text-black dark:hover:text-white transition-all border-b border-neutral-50 dark:border-neutral-900"
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </nav>
-              <div className="px-6 py-5 border-t border-neutral-100 dark:border-neutral-800 flex flex-col gap-3">
-                <a
-                  href="https://wa.me/5583993032780?text=Ol%C3%A1%2C%20gostaria%20de%20um%20atendimento%20pelo%20WhatsApp!"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-xl bg-[#25D366] hover:bg-[#128C7E] text-white text-xs font-semibold uppercase tracking-wider shadow-sm hover:shadow-md active:scale-[0.98] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#25D366]/50"
-                >
-                  <WhatsAppIcon size={18} className="text-white shrink-0" />
-                  <span>Falar no WhatsApp</span>
-                </a>
-                <a
-                  href="https://instagram.com/virtualstore_3"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-xs text-neutral-500 hover:text-black dark:hover:text-white transition-colors pt-1"
-                >
-                  <Instagram size={16} strokeWidth={1.5} />
-                  <span className="tracking-wider">@virtualstore_3</span>
-                </a>
-                <Link
-                  to="/admin/login"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 text-sm text-neutral-400 hover:text-black dark:hover:text-white transition-colors"
-                >
-                  <Settings2 size={16} strokeWidth={1.5} />
-                  <span className="tracking-wider text-xs">Painel Admin</span>
-                </Link>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* 1. TOP ANNOUNCEMENT BAR                                            */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      <aside className="bg-[#0b2239] text-[#e9d8ba] py-2 px-4 text-center text-[10.5px] sm:text-[11px] tracking-[0.16em] uppercase font-sans border-b border-[#c6a16b30]">
+        São Paulo & Região · Presentes finos personalizados, feitos por encomenda
+      </aside>
 
-      {/* ========================================================== */}
-      {/* CABEÇALHO E HERO PROFISSIONAL — VIRTUAL STORE              */}
-      {/* ========================================================== */}
-      <header className="relative w-full bg-white text-neutral-900 border-b border-neutral-100">
-        {/* Barra Superior: Menu + Marca Central + Ações (Instagram + WhatsApp) */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between border-b border-neutral-100">
-          {/* Menu Hambúrguer */}
-          <button
-            onClick={() => setMenuOpen(true)}
-            aria-label="Abrir Menu"
-            className="p-2 -ml-2 text-neutral-700 hover:text-black hover:bg-neutral-100/80 rounded-lg transition-colors focus:outline-none"
-          >
-            <Menu size={22} strokeWidth={1.75} />
-          </button>
-
-          {/* Marca Centralizada */}
-          <div className="flex flex-col items-center justify-center text-center">
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <Gift size={16} strokeWidth={1.75} className="text-neutral-900" />
-              <span className="text-sm sm:text-base font-semibold tracking-[0.22em] text-neutral-900 uppercase leading-tight font-sans">
-                VIRTUAL STORE
-              </span>
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* 2. HEADER SUBLIME / VISUAL STORY                                   */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-40 bg-[#fcfaf6f5] backdrop-blur-md border-b border-[#c6a16b40] px-4 sm:px-8 py-3.5 sm:py-4 transition-all">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          
+          {/* Marca / Brand */}
+          <Link to="/" className="flex items-center gap-3 text-decoration-none group">
+            {/* Monograma Circular Exclusivo VS */}
+            <div className="brand-seal-vs w-11 h-11 sm:w-12 sm:h-12 text-2xl group-hover:scale-105 transition-transform">
+              <span>VS</span>
             </div>
-            <span className="text-[8.5px] sm:text-[9.5px] font-normal tracking-[0.26em] text-neutral-400 uppercase">
-              Presentes Personalizados
-            </span>
-          </div>
+            <div>
+              <span className="block font-serif-sublime text-xl sm:text-2xl tracking-[0.14em] text-[#0b2239] leading-tight font-normal">
+                VISUAL STORY
+              </span>
+              <small className="block text-[8px] sm:text-[9px] tracking-[0.28em] text-[#8e744e] uppercase font-sans font-medium -mt-0.5">
+                Presentes Finos & Afeto
+              </small>
+            </div>
+          </Link>
 
-          {/* Ações Direitas: Instagram + Botão WhatsApp no Header */}
-          <div className="flex items-center gap-1.5 sm:gap-2 -mr-2">
-            <a
-              href="https://instagram.com/virtualstore_3"
+          {/* Navegação Desktop */}
+          <nav className="hidden md:flex items-center gap-6 text-[12px] font-sans tracking-[0.05em] text-[#0b2239]">
+            {/* Dropdown "Presente para" */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsGiftGuideOpen(!isGiftGuideOpen)}
+                className="flex items-center gap-1.5 py-1.5 hover:text-[#8b693b] transition-colors cursor-pointer"
+              >
+                <span>Presente para</span>
+                <span className="text-[#9c7b4b] text-[10px]">⌄</span>
+              </button>
+
+              {isGiftGuideOpen && (
+                <div 
+                  className="absolute right-0 top-full mt-2 w-[460px] bg-[#fcfaf6] border border-[#c6a16b70] shadow-[0_20px_50px_rgba(11,34,57,0.15)] p-5 z-50 grid grid-cols-2 gap-5 rounded-[2px]"
+                  onMouseLeave={() => setIsGiftGuideOpen(false)}
+                >
+                  <div>
+                    <h4 className="text-[10px] uppercase tracking-[0.18em] text-[#987440] font-sans font-semibold mb-2.5">
+                      Ocasiões
+                    </h4>
+                    <ul className="space-y-1.5 text-[12px] text-[#283c49]">
+                      <li>
+                        <button onClick={() => { setActiveCategorySlug("all"); scrollTo("categorias"); setIsGiftGuideOpen(false); }} className="hover:text-[#916a32] text-left">
+                          Aniversário
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => { setActiveCategorySlug("cesta-cafe-da-manha"); scrollTo("categorias"); setIsGiftGuideOpen(false); }} className="hover:text-[#916a32] text-left">
+                          Café da Manhã & Carinho
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => { setActiveCategorySlug("quadros-casal"); scrollTo("categorias"); setIsGiftGuideOpen(false); }} className="hover:text-[#916a32] text-left">
+                          Pedido de Namoro / Casamento
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => { setActiveCategorySlug("all"); scrollTo("categorias"); setIsGiftGuideOpen(false); }} className="hover:text-[#916a32] text-left">
+                          Formatura & Conquistas
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => { setActiveCategorySlug("all"); scrollTo("categorias"); setIsGiftGuideOpen(false); }} className="hover:text-[#916a32] text-left">
+                          Maternidade & Bebê
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className="text-[10px] uppercase tracking-[0.18em] text-[#987440] font-sans font-semibold mb-2.5">
+                      Destinatários
+                    </h4>
+                    <ul className="space-y-1.5 text-[12px] text-[#283c49]">
+                      <li>
+                        <button onClick={() => { scrollTo("categorias"); setIsGiftGuideOpen(false); }} className="hover:text-[#916a32] text-left">
+                          Meu Amor
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => { scrollTo("categorias"); setIsGiftGuideOpen(false); }} className="hover:text-[#916a32] text-left">
+                          Mãe & Família
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => { scrollTo("categorias"); setIsGiftGuideOpen(false); }} className="hover:text-[#916a32] text-left">
+                          Amigos & Colegas
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => { scrollTo("empresas"); setIsGiftGuideOpen(false); }} className="hover:text-[#916a32] text-left">
+                          Equipe & Empresas
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button onClick={() => scrollTo("universos")} className="hover:text-[#8b693b] transition-colors cursor-pointer">
+              Coleções
+            </button>
+            <button onClick={() => scrollTo("queridinhos")} className="hover:text-[#8b693b] transition-colors cursor-pointer">
+              Os Presentes
+            </button>
+            <button onClick={() => scrollTo("empresas")} className="hover:text-[#8b693b] transition-colors cursor-pointer">
+              Para Empresas
+            </button>
+
+            <a 
+              href="https://wa.me/5583993032780?text=Ol%C3%A1!%20Gostaria%20de%20consultar%20meus%20pedidos%20na%20Visual%20Story."
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Instagram da loja"
-              className="p-2 text-neutral-700 hover:text-black hover:bg-neutral-100/80 rounded-lg transition-colors focus:outline-none"
+              className="text-[#6d757a] hover:text-[#0b2239] transition-colors"
             >
-              <Instagram size={20} strokeWidth={1.75} />
+              Meus Pedidos
             </a>
-            <a
-              href="https://wa.me/5583993032780?text=Ol%C3%A1%2C%20gostaria%20de%20um%20atendimento%20pelo%20WhatsApp!"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Falar no WhatsApp"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#25D366]/10 hover:bg-[#25D366] text-[#128C7E] hover:text-white border border-[#25D366]/30 transition-all duration-200 text-[11px] sm:text-xs font-semibold tracking-wider uppercase focus:outline-none"
+
+            {/* Botão da Sacola / Carrinho */}
+            <button 
+              onClick={() => setIsCartOpen(true)}
+              className="border border-[#c6a16b80] hover:border-[#0b2239] bg-transparent text-[#0b2239] px-4 py-2 rounded-[2px] flex items-center gap-2 transition-all hover:bg-[#0b2239] hover:text-[#fcfaf6] cursor-pointer"
             >
-              <WhatsAppIcon size={14} className="shrink-0" />
-              <span className="hidden sm:inline">WhatsApp</span>
-            </a>
+              <span>Sacola</span>
+              <span className="w-5 h-5 rounded-full bg-[#0b2239] text-white text-[10px] flex items-center justify-center font-bold">
+                {totalItems}
+              </span>
+            </button>
+          </nav>
+
+          {/* Botão de Sacola Mobile Rápido */}
+          <div className="flex items-center gap-3 md:hidden">
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="p-2 text-[#0b2239] hover:text-[#8b693b]"
+              aria-label="Buscar presentes"
+            >
+              <Search size={20} />
+            </button>
+            <button 
+              onClick={() => setIsCartOpen(true)}
+              className="border border-[#c6a16b80] text-[#0b2239] px-3 py-1.5 rounded-[2px] flex items-center gap-1.5 text-xs font-sans"
+            >
+              <span>Sacola</span>
+              <span className="w-4 h-4 rounded-full bg-[#0b2239] text-white text-[9px] flex items-center justify-center font-bold">
+                {totalItems}
+              </span>
+            </button>
           </div>
+
         </div>
 
-        {/* Apresentação da Marca (Hero Editorial e Equilibrado) */}
-        <div className="max-w-3xl mx-auto px-4 pt-10 sm:pt-14 pb-8 sm:pb-10 flex flex-col items-center text-center">
-          {/* Tag de Topo Refinada */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-neutral-100/80 border border-neutral-200/60 text-neutral-500 text-[10.5px] sm:text-xs font-medium tracking-[0.2em] uppercase mb-4 sm:mb-5">
-            <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
-            <span>Catálogo Exclusivo</span>
+        {/* Campo de Busca Rápida Mobile */}
+        {isSearchOpen && (
+          <div className="mt-3 pt-3 border-t border-[#c6a16b30] md:hidden">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Busque por cesta, flores, quadro ou chocolate..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white border border-[#c6a16b60] rounded-[2px] py-2 pl-9 pr-4 text-xs text-[#0b2239] focus:outline-none focus:border-[#0b2239]"
+              />
+              <Search size={14} className="absolute left-3 top-2.5 text-[#8e744e]" />
+            </div>
           </div>
-
-          {/* Slogan Principal — Fonte Anton (anterior) */}
-          <h1 className="font-anton text-[36px] sm:text-[58px] md:text-[72px] lg:text-[84px] font-normal text-black tracking-[-0.01em] leading-[0.98] max-w-2xl mx-auto mb-5 sm:mb-6 text-center select-none">
-            Transformamos<br />
-            sentimentos em presentes<br />
-            inesquecíveis.
-          </h1>
-
-          {/* Região de Atendimento */}
-          <div className="inline-flex items-center justify-center gap-1.5 text-xs sm:text-[13px] font-medium tracking-[0.14em] text-neutral-500 uppercase mb-6 sm:mb-7">
-            <MapPin size={13} strokeWidth={1.8} className="text-neutral-400 shrink-0" />
-            <span>João Pessoa • Santa Rita e Região</span>
-          </div>
-
-          {/* Botão Principal de WhatsApp no Header / Hero */}
-          <a
-            href="https://wa.me/5583993032780?text=Ol%C3%A1%2C%20gostaria%20de%20um%20atendimento%20pelo%20WhatsApp!"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2.5 px-6 py-3 sm:px-7 sm:py-3.5 rounded-full bg-[#25D366] hover:bg-[#20ba59] active:scale-95 text-white text-xs sm:text-sm font-semibold tracking-wider uppercase shadow-[0_4px_18px_rgba(37,211,102,0.28)] hover:shadow-[0_6px_24px_rgba(37,211,102,0.42)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#25D366]/50 group"
-          >
-            <WhatsAppIcon size={18} className="text-white shrink-0 group-hover:scale-110 transition-transform" />
-            <span>Falar no WhatsApp</span>
-          </a>
-        </div>
+        )}
       </header>
 
-      {/* Barra de Categorias Horizontal ("Cards Pequenos" inspirados no esboço, com tipografia profissional e acabamento comercial) */}
-      <nav 
-        aria-label="Navegação por categorias"
-        className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-y border-neutral-200 py-3 sm:py-3.5 shadow-sm transition-all"
-      >
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
-          {/* Fades laterais para indicar rolagem no mobile */}
-          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white to-transparent z-10 sm:hidden" />
-          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white to-transparent z-10 sm:hidden" />
-
-          <div 
-            ref={pillsContainerRef}
-            className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-0.5 px-1 scroll-smooth"
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* 3. BARRA UTILITÁRIA                                                */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      <div className="bg-[#fffaf0] border-b border-[#ddd1b9] px-4 sm:px-8 py-2.5 text-xs text-[#263d33]">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <button 
+            onClick={() => scrollTo("categorias")}
+            className="flex items-center gap-1.5 hover:text-[#8b693b] font-medium cursor-pointer"
           >
-            {dynamicCategoryPills.map((pill) => {
-              const isActive = activeCategory === pill.id;
-              return (
+            <span>☰</span>
+            <span>Menu de Coleções</span>
+          </button>
+
+          <button 
+            onClick={() => scrollTo("universos")}
+            className="hover:text-[#8b693b] font-medium cursor-pointer"
+          >
+            Presente para ⌄
+          </button>
+
+          <button 
+            onClick={() => scrollTo("queridinhos")}
+            className="flex items-center gap-1 hover:text-[#8b693b] font-medium cursor-pointer"
+          >
+            <span>Buscar</span>
+            <span>⌕</span>
+          </button>
+        </div>
+      </div>
+
+      <main>
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {/* 4. HERO SECTION SUBLIME                                            */}
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        <section className="relative min-h-[580px] sm:min-h-[640px] bg-[#0b2239] text-[#fff3da] overflow-hidden flex flex-col justify-center">
+          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 items-center">
+            
+            {/* Texto à Esquerda */}
+            <div className="lg:col-span-7 px-6 sm:px-12 py-12 sm:py-20 z-10 relative">
+              <span className="eyebrow-sublime text-[#e0c49c] mb-3 block">
+                VISUAL STORY · EXCLUSIVO
+              </span>
+
+              <h1 className="font-serif-sublime text-4xl sm:text-5xl lg:text-[64px] font-normal tracking-[-0.03em] leading-[1.08] mb-6 text-[#fffdfa]">
+                O extraordinário <br />
+                começa em <br />
+                <em className="text-[#e5c798] not-italic font-serif-sublime">um gesto.</em>
+              </h1>
+
+              <p className="text-sm sm:text-base text-[#dce0dd] max-w-md font-sans font-light leading-relaxed mb-8">
+                Presentes personalizados que carregam carinho, afeto e significado. 
+                Detalhes que contam a sua história e emocionam quem você ama.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-4">
+                <button 
+                  onClick={() => scrollTo("universos")}
+                  className="btn-sublime-gold inline-flex items-center gap-3 cursor-pointer"
+                >
+                  <span>Descobrir as Coleções</span>
+                  <span aria-hidden="true">↗</span>
+                </button>
+
+                <button 
+                  onClick={() => scrollTo("categorias")}
+                  className="text-xs text-[#ebd4a0] hover:text-white underline underline-offset-4 tracking-[0.05em] py-2 px-1 cursor-pointer"
+                >
+                  Encontre a sua ocasião ↓
+                </button>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-[#c6a16b30] flex items-center gap-6 text-[11px] text-[#bdc4c5]">
+                <span>✓ Feito por encomenda</span>
+                <span>✓ Fotos & Nomes exclusivos</span>
+                <span>✓ Entrega com todo o cuidado</span>
+              </div>
+            </div>
+
+            {/* Vitrine / Foto à Direita */}
+            <div className="lg:col-span-5 relative h-[380px] sm:h-[460px] lg:h-[580px] bg-gradient-to-tr from-[#071726] to-[#123025] flex items-center justify-center p-6 sm:p-10">
+              
+              {/* Selo Dourado Flutuante */}
+              <div className="absolute right-6 top-6 sm:right-10 sm:top-10 z-20 w-24 h-24 sm:w-28 sm:h-28 rounded-full border border-[#d8bd7b66] bg-[#16372b85] backdrop-blur-md flex flex-col items-center justify-center text-center p-2">
+                <span className="text-[7.5px] uppercase tracking-[0.2em] text-[#ebd4a0]">FEITO PARA</span>
+                <i className="font-serif-sublime italic text-lg sm:text-xl text-[#e5c798] leading-tight">emocionar</i>
+              </div>
+
+              {/* Fotografia Principal do Produto */}
+              {heroFeaturedProduct?.image ? (
+                <img 
+                  src={heroFeaturedProduct.image} 
+                  alt={heroFeaturedProduct.name}
+                  className="w-full h-full max-h-[460px] object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)] z-10"
+                />
+              ) : (
+                <div className="w-64 h-64 rounded-full bg-[#173d30] border border-[#c6a16b40] flex items-center justify-center text-[#e5c798]">
+                  <Gift size={64} strokeWidth={1} />
+                </div>
+              )}
+
+              {/* Card de Preço Jateado Flutuante */}
+              {heroFeaturedProduct && (
+                <Link 
+                  to={`/product/${heroFeaturedProduct.id}`}
+                  className="absolute bottom-6 left-6 right-6 sm:left-10 sm:right-10 z-20 bg-[#fffdf9ea] backdrop-blur-md border border-[#c6a16b75] p-3.5 sm:p-4 rounded-[2px] text-[#0b2239] shadow-[0_15px_35px_rgba(11,34,57,0.2)] flex items-center justify-between hover:bg-white transition-all group"
+                >
+                  <div>
+                    <span className="block font-serif-sublime text-[17px] sm:text-[19px] leading-tight group-hover:text-[#8b693b] transition-colors">
+                      {heroFeaturedProduct.name}
+                    </span>
+                    <strong className="text-sm font-sans font-semibold text-[#0b2239]">
+                      {heroFeaturedProduct.price}
+                    </strong>
+                  </div>
+                  <span className="text-[10px] uppercase tracking-[0.1em] text-[#8e744e] flex items-center gap-1">
+                    <span>Personalizar</span>
+                    <ArrowRight size={12} />
+                  </span>
+                </Link>
+              )}
+            </div>
+
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {/* 5. FAIXA DE PROMESSAS DE VALOR                                     */}
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        <section className="bg-[#e8dec9] text-[#4f5746] py-5 px-4 border-b border-[#ddd1b9]">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-around gap-4 text-xs font-sans">
+            <div className="flex items-center gap-2">
+              <b className="font-serif-sublime text-lg text-[#9b793c] font-normal">01</b>
+              <span>Personalize o seu gesto com nomes, mensagens e fotos</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <b className="font-serif-sublime text-lg text-[#9b793c] font-normal">02</b>
+              <span>Feito por encomenda com acabamento fino artesanal</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <b className="font-serif-sublime text-lg text-[#9b793c] font-normal">03</b>
+              <span>Entrega rápida e programada para a sua data especial</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {/* 6. SEÇÃO DE UNIVERSOS & COLEÇÕES                                   */}
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        <section id="universos" className="py-16 sm:py-24 px-4 sm:px-8 max-w-7xl mx-auto scroll-mt-20">
+          <div className="flex flex-col sm:flex-row items-baseline justify-between gap-4 mb-10 border-b border-[#c6a16b35] pb-5">
+            <div>
+              <span className="eyebrow-sublime block mb-1">CADA MOMENTO, UM UNIVERSO</span>
+              <h2 className="font-serif-sublime text-3xl sm:text-4xl text-[#0b2239]">
+                Qual história <br className="hidden sm:inline" />
+                <em className="text-[#8f6b3f] not-italic font-serif-sublime">vamos celebrar?</em>
+              </h2>
+            </div>
+            <p className="text-xs sm:text-sm text-[#6e776b] max-w-xs font-sans">
+              Escolha a ocasião que deseja homenagear. Nós transformamos o carinho em um presente inesquecível.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            
+            {/* Card 1: Cestas */}
+            <div 
+              onClick={() => { setActiveCategorySlug("cesta-cafe-da-manha"); scrollTo("categorias"); }}
+              className="group relative h-[360px] sm:h-[420px] rounded-[2px] overflow-hidden bg-[#213c30] cursor-pointer shadow-sm hover:shadow-xl transition-all"
+            >
+              <img 
+                src="/cestas/cestacoluna1_valor129,90.jpeg" 
+                alt="Cestas de Café da Manhã"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80";
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0b2239f5] via-[#0b223940] to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6 text-white z-10">
+                <small className="block text-[8.5px] uppercase tracking-[0.2em] text-[#e5c798] mb-1 font-sans">
+                  O CARINHO DE ESTAR PERTO
+                </small>
+                <h3 className="font-serif-sublime text-2xl mb-2 text-[#fff3df]">
+                  Cestas de Café
+                </h3>
+                <span className="inline-block text-[11px] font-sans border-b border-[#e0c79a66] pb-1 text-[#e5c798] group-hover:border-white group-hover:text-white transition-colors">
+                  Explorar a coleção ↗
+                </span>
+              </div>
+            </div>
+
+            {/* Card 2: Gestos de Amor */}
+            <div 
+              onClick={() => { setActiveCategorySlug("quadros-casal"); scrollTo("categorias"); }}
+              className="group relative h-[360px] sm:h-[420px] rounded-[2px] overflow-hidden bg-[#371922] cursor-pointer shadow-sm hover:shadow-xl transition-all"
+            >
+              <img 
+                src="/quadros_a4/quadro_casal_1_valor69,90.jpeg" 
+                alt="Gestos de Amor e Casal"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80";
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#32151ef5] via-[#32151e40] to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6 text-white z-10">
+                <small className="block text-[8.5px] uppercase tracking-[0.2em] text-[#e5c798] mb-1 font-sans">
+                  AMOR QUE VIRA SURPRESA
+                </small>
+                <h3 className="font-serif-sublime text-2xl mb-2 text-[#fff3df]">
+                  Gestos de Amor
+                </h3>
+                <span className="inline-block text-[11px] font-sans border-b border-[#e0c79a66] pb-1 text-[#e5c798] group-hover:border-white group-hover:text-white transition-colors">
+                  Encontrar o presente ↗
+                </span>
+              </div>
+            </div>
+
+            {/* Card 3: Aniversários */}
+            <div 
+              onClick={() => { setActiveCategorySlug("cesta-aniversario"); scrollTo("categorias"); }}
+              className="group relative h-[360px] sm:h-[420px] rounded-[2px] overflow-hidden bg-[#243f30] cursor-pointer shadow-sm hover:shadow-xl transition-all"
+            >
+              <img 
+                src="/cestas/cesta2_valor119,99.jpeg" 
+                alt="Presentes de Aniversário"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80";
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#132b20f5] via-[#132b2040] to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6 text-white z-10">
+                <small className="block text-[8.5px] uppercase tracking-[0.2em] text-[#e5c798] mb-1 font-sans">
+                  O DIA DE QUEM VOCÊ AMA
+                </small>
+                <h3 className="font-serif-sublime text-2xl mb-2 text-[#fff3df]">
+                  Aniversários
+                </h3>
+                <span className="inline-block text-[11px] font-sans border-b border-[#e0c79a66] pb-1 text-[#e5c798] group-hover:border-white group-hover:text-white transition-colors">
+                  Ver presentes ↗
+                </span>
+              </div>
+            </div>
+
+            {/* Card 4: Para Empresas */}
+            <div 
+              onClick={() => scrollTo("empresas")}
+              className="group relative h-[360px] sm:h-[420px] rounded-[2px] overflow-hidden bg-[#142a3b] cursor-pointer shadow-sm hover:shadow-xl transition-all"
+            >
+              <img 
+                src="/mamaes_bebes/caixa2bebe_valor34,90.jpeg" 
+                alt="Presentes Corporativos"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=800&q=80";
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0b2239f5] via-[#0b223940] to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6 text-white z-10">
+                <small className="block text-[8.5px] uppercase tracking-[0.2em] text-[#e5c798] mb-1 font-sans">
+                  SUA MARCA, SEU CUIDADO
+                </small>
+                <h3 className="font-serif-sublime text-2xl mb-2 text-[#fff3df]">
+                  Para Empresas
+                </h3>
+                <span className="inline-block text-[11px] font-sans border-b border-[#e0c79a66] pb-1 text-[#e5c798] group-hover:border-white group-hover:text-white transition-colors">
+                  Fazer um orçamento ↗
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {/* 7. ATALHOS RÁPIDOS DE OCASIÕES (hp-occasions)                       */}
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        <section className="bg-[#eee5d5] py-8 px-4 sm:px-8 border-y border-[#d2c3a5]">
+          <div className="max-w-7xl mx-auto">
+            <span className="eyebrow-sublime block mb-3 text-[#9b793c]">PRESENTE PARA…</span>
+            <div className="flex flex-wrap items-center gap-3 sm:gap-6">
+              <button 
+                onClick={() => { setActiveCategorySlug("quadros-casal"); scrollTo("categorias"); }}
+                className="flex items-center justify-between gap-4 font-serif-sublime text-lg sm:text-xl text-[#0b2239] border-b border-[#bd9e72] pb-1 hover:text-[#907043] transition-colors cursor-pointer"
+              >
+                <span>Meu amor</span>
+                <span className="text-[#907043]">↗</span>
+              </button>
+
+              <button 
+                onClick={() => { setActiveCategorySlug("cesta-aniversario"); scrollTo("categorias"); }}
+                className="flex items-center justify-between gap-4 font-serif-sublime text-lg sm:text-xl text-[#0b2239] border-b border-[#bd9e72] pb-1 hover:text-[#907043] transition-colors cursor-pointer"
+              >
+                <span>Um aniversário</span>
+                <span className="text-[#907043]">↗</span>
+              </button>
+
+              <button 
+                onClick={() => { setActiveCategorySlug("cesta-cafe-da-manha"); scrollTo("categorias"); }}
+                className="flex items-center justify-between gap-4 font-serif-sublime text-lg sm:text-xl text-[#0b2239] border-b border-[#bd9e72] pb-1 hover:text-[#907043] transition-colors cursor-pointer"
+              >
+                <span>Uma conquista</span>
+                <span className="text-[#907043]">↗</span>
+              </button>
+
+              <button 
+                onClick={() => scrollTo("empresas")}
+                className="flex items-center justify-between gap-4 font-serif-sublime text-lg sm:text-xl text-[#0b2239] border-b border-[#bd9e72] pb-1 hover:text-[#907043] transition-colors cursor-pointer"
+              >
+                <span>Minha equipe & empresas</span>
+                <span className="text-[#907043]">↗</span>
+              </button>
+
+              <button 
+                onClick={() => { setActiveCategorySlug("all"); scrollTo("categorias"); }}
+                className="flex items-center justify-between gap-4 font-serif-sublime text-lg sm:text-xl text-[#0b2239] border-b border-[#bd9e72] pb-1 hover:text-[#907043] transition-colors cursor-pointer"
+              >
+                <span>Surpreender sem data</span>
+                <span className="text-[#907043]">↗</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {/* 8. QUERIDINHOS VISUAL STORY (VITRINE DESTACADA)                    */}
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        <section id="queridinhos" className="py-16 sm:py-24 px-4 sm:px-8 max-w-7xl mx-auto scroll-mt-20">
+          <div className="flex flex-col sm:flex-row items-baseline justify-between gap-4 mb-8">
+            <div>
+              <span className="eyebrow-sublime block mb-1">A SELEÇÃO DA NOSSA MARCA</span>
+              <h2 className="font-serif-sublime text-3xl sm:text-4xl text-[#0b2239]">
+                Queridinhos <br className="hidden sm:inline" />
+                <em className="text-[#8f6b3f] not-italic font-serif-sublime">Visual Story.</em>
+              </h2>
+            </div>
+            <button 
+              onClick={() => scrollTo("categorias")}
+              className="text-xs text-[#8f6b3f] border-b border-[#b69566] pb-1 hover:text-[#0b2239] transition-colors cursor-pointer"
+            >
+              Ver todos os presentes ↗
+            </button>
+          </div>
+
+          {/* Abas e Ferramentas da Seleção */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-[#c6a16b35] pb-4 mb-8">
+            <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto w-full sm:w-auto scrollbar-hide py-1">
+              {[
+                { id: "all", label: "Todos" },
+                { id: "cestas", label: "Cestas" },
+                { id: "quadros", label: "Quadros" },
+                { id: "amor", label: "Românticos" },
+                { id: "combos", label: "Combos" }
+              ].map((tab) => (
                 <button
-                  key={pill.id}
-                  data-pill-id={pill.id}
-                  onClick={() => scrollToSection(pill.id)}
-                  className={`relative shrink-0 px-4 py-2 sm:px-4.5 sm:py-2 rounded-lg text-xs sm:text-[13px] tracking-wide transition-all whitespace-nowrap focus:outline-none select-none border ${
-                    isActive
-                      ? "bg-black text-white border-black font-semibold shadow-sm"
-                      : "bg-neutral-50/90 text-neutral-600 hover:text-black hover:bg-neutral-100 border-neutral-200/80 font-medium"
+                  key={tab.id}
+                  onClick={() => setFavoritesFilter(tab.id)}
+                  className={`px-3 py-1.5 text-xs font-sans tracking-[0.03em] whitespace-nowrap transition-all border-b-2 cursor-pointer ${
+                    favoritesFilter === tab.id
+                      ? "border-[#8f6b3f] text-[#0b2239] font-semibold"
+                      : "border-transparent text-[#6d757a] hover:text-[#0b2239]"
                   }`}
                 >
-                  {pill.label}
+                  {tab.label}
                 </button>
-              );
-            })}
+              ))}
+            </div>
+
+            <div className="w-full sm:w-64 relative">
+              <input
+                type="search"
+                placeholder="Buscar na seleção..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white border border-[#c6a16b60] rounded-[2px] py-2 pl-3 pr-8 text-xs text-[#0b2239] focus:outline-none focus:border-[#0b2239]"
+              />
+              <Search size={14} className="absolute right-2.5 top-2.5 text-[#8e744e]" />
+            </div>
           </div>
-        </div>
-      </nav>
 
-      {/* Conteúdo Principal com Catálogo */}
-      <main className="w-full max-w-[1600px] mx-auto px-2 sm:px-6 md:px-8 py-10 sm:py-16 space-y-16 sm:space-y-28">
+          <p className="text-[11px] text-[#7c7f72] mb-6">
+            {favoriteProducts.length} presentes selecionados com carinho
+          </p>
 
-        {isLoading ? (
-          <div className="w-full flex justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black dark:border-white"></div>
+          {/* Grid dos Queridinhos */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {favoriteProducts.map((product) => (
+              <SublimeProductCard key={product.id} product={product} />
+            ))}
           </div>
-        ) : (
-          <>
-            {/* PRODUTOS EM DESTAQUE (ROLAGEM HORIZONTAL PARA A DIREITA) */}
-            <section id="destaques" className="w-full pb-0">
-              <div className="flex items-end justify-between mb-4 sm:mb-6 px-1 sm:px-0">
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-black dark:text-white">
-                    Produtos em destaque
-                  </h2>
-                  <div className="w-8 h-px bg-black dark:bg-white mt-2" />
-                </div>
 
-                {/* Controles de Navegação (Desktop/Tablet) */}
-                <div className="hidden sm:flex items-center gap-1.5 pb-1">
-                  <button
-                    onClick={() => scrollFeatured('left')}
-                    aria-label="Rolar para a esquerda"
-                    className="w-8 h-8 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => scrollFeatured('right')}
-                    aria-label="Rolar para a direita"
-                    className="w-8 h-8 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Trilho com rolagem horizontal para a direita */}
-              <div
-                ref={featuredScrollRef}
-                className="w-full overflow-x-auto overflow-y-visible pb-2 pt-1 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-hide no-scrollbar scroll-smooth snap-x snap-mandatory"
-                style={{ WebkitOverflowScrolling: "touch" }}
+          {favoriteProducts.length === 0 && (
+            <div className="text-center py-16 bg-[#fffdfa] border border-[#e5ded4] p-8">
+              <Gift size={40} className="mx-auto text-[#c6a16b] mb-3 opacity-60" />
+              <p className="font-serif-sublime text-lg text-[#0b2239] mb-1">
+                Nenhum presente encontrado nesta seleção
+              </p>
+              <p className="text-xs text-[#6e776b] mb-4">
+                Tente buscar por outro termo ou explore as outras categorias abaixo.
+              </p>
+              <button
+                onClick={() => { setFavoritesFilter("all"); setSearchQuery(""); }}
+                className="btn-sublime-primary text-xs"
               >
-                <div className="flex gap-3 sm:gap-4.5 w-max pr-6 sm:pr-8">
-                  {getFeaturedProducts().map(product => (
-                    <FeaturedCard key={product.id} product={product} />
-                  ))}
+                Limpar filtros
+              </button>
+            </div>
+          )}
+        </section>
+
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {/* 9. CATÁLOGO COMPLETO POR CATEGORIAS (SUPABASE)                      */}
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        <section id="categorias" className="py-16 sm:py-24 px-4 sm:px-8 max-w-7xl mx-auto scroll-mt-20 border-t border-[#c6a16b30]">
+          <div className="mb-10 text-center max-w-2xl mx-auto">
+            <span className="eyebrow-sublime block mb-2">CATÁLOGO COMPLETO</span>
+            <h2 className="font-serif-sublime text-3xl sm:text-4xl text-[#0b2239] mb-3">
+              Cada ocasião, um gesto especial.
+            </h2>
+            <p className="text-xs sm:text-sm text-[#626870] font-sans">
+              Navegue por todas as categorias do nosso catálogo artesanal. Escolha os detalhes que nós cuidamos do carinho.
+            </p>
+          </div>
+
+          {/* Abas de Categorias Reais do Supabase */}
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide py-2 mb-8">
+            <button
+              onClick={() => setActiveCategorySlug("all")}
+              className={`px-4 py-2 rounded-full text-xs font-sans whitespace-nowrap transition-all border cursor-pointer ${
+                activeCategorySlug === "all"
+                  ? "bg-[#0b2239] text-[#fcfaf6] border-[#0b2239]"
+                  : "bg-white text-[#0b2239] border-[#c6a16b60] hover:border-[#0b2239]"
+              }`}
+            >
+              Todas as Coleções ({products.length})
+            </button>
+
+            {categoriesList.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategorySlug(cat.slug)}
+                className={`px-4 py-2 rounded-full text-xs font-sans whitespace-nowrap transition-all border cursor-pointer ${
+                  activeCategorySlug === cat.slug
+                    ? "bg-[#0b2239] text-[#fcfaf6] border-[#0b2239]"
+                    : "bg-white text-[#0b2239] border-[#c6a16b60] hover:border-[#0b2239]"
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Ferramentas de Ordenação */}
+          <div className="flex items-center justify-between border-b border-[#c6a16b35] pb-3 mb-8 text-xs">
+            <span className="text-[#626870]">
+              Exibindo <strong>{catalogProducts.length}</strong> presentes
+            </span>
+
+            <div className="flex items-center gap-2">
+              <label htmlFor="sort-select" className="text-[#626870]">Ordenar por:</label>
+              <select
+                id="sort-select"
+                value={catalogSort}
+                onChange={(e) => setCatalogSort(e.target.value as any)}
+                className="bg-white border border-[#c6a16b60] text-[#0b2239] px-2 py-1 rounded-[2px] text-xs focus:outline-none"
+              >
+                <option value="featured">Seleção da Marca</option>
+                <option value="low">Menor preço</option>
+                <option value="high">Maior preço</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Renderização dos Produtos do Catálogo */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {catalogProducts.map((product) => (
+              <SublimeProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {/* 10. SEÇÃO EDITORIAL / VALORES                                      */}
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        <section className="bg-[#ece5d9] py-16 sm:py-24 px-6 sm:px-12">
+          <div className="max-w-5xl mx-auto text-center">
+            <span className="eyebrow-sublime block mb-2">O CUIDADO ESTÁ NOS DETALHES</span>
+            <h2 className="font-serif-sublime text-3xl sm:text-5xl text-[#0b2239] mb-12">
+              Feito para chegar <br />
+              <em className="text-[#8f6b3f] not-italic font-serif-sublime">ao coração.</em>
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+              <div className="bg-[#fffdf9a0] p-6 rounded-[2px] border border-[#d8ccba]">
+                <strong className="block font-serif-sublime text-xl text-[#0b2239] mb-2">
+                  Seu toque pessoal
+                </strong>
+                <p className="text-xs sm:text-sm text-[#526458] font-sans leading-relaxed">
+                  Nomes, mensagens comoventes e fotos que eternizam lembranças. Cada produto é customizado individualmente para vocês.
+                </p>
+              </div>
+
+              <div className="bg-[#fffdf9a0] p-6 rounded-[2px] border border-[#d8ccba]">
+                <strong className="block font-serif-sublime text-xl text-[#0b2239] mb-2">
+                  Uma escolha cuidadosa
+                </strong>
+                <p className="text-xs sm:text-sm text-[#526458] font-sans leading-relaxed">
+                  Chocolates finos, caixas artesanais de alta gramatura, laços de cetim e acabamento de alto padrão de boutique.
+                </p>
+              </div>
+
+              <div className="bg-[#fffdf9a0] p-6 rounded-[2px] border border-[#d8ccba]">
+                <strong className="block font-serif-sublime text-xl text-[#0b2239] mb-2">
+                  O presente certo
+                </strong>
+                <p className="text-xs sm:text-sm text-[#526458] font-sans leading-relaxed">
+                  Um mesmo carinho pode celebrar um aniversário, um pedido de namoro ou a vitória de quem conquistou um grande sonho.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {/* 11. SEÇÃO CORPORATIVA                                              */}
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        <section id="empresas" className="py-16 sm:py-24 px-6 sm:px-12 max-w-7xl mx-auto scroll-mt-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <span className="eyebrow-sublime block mb-2">PRESENTES CORPORATIVOS</span>
+              <h2 className="font-serif-sublime text-3xl sm:text-4xl text-[#0b2239] mb-4">
+                Reconhecer também <br />
+                é presentear.
+              </h2>
+              <p className="text-sm text-[#53655b] font-sans leading-relaxed mb-4">
+                Para clientes especiais, equipes dedicadas e parceiros comerciais: composições que carregam o carinho e o valor da sua marca.
+              </p>
+              <p className="text-xs text-[#6e776b] font-sans leading-relaxed mb-6">
+                Montamos propostas sob medida com a identidade visual da sua empresa, cartões com mensagens institucionais e entregas programadas.
+              </p>
+              
+              <a
+                href="https://wa.me/5583993032780?text=Ol%C3%A1!%20Gostaria%20de%20um%20or%C3%A7amento%20para%20presentes%20corporativos%20da%20Visual%20Story."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-sublime-primary inline-flex items-center gap-3"
+              >
+                <span>Monte seu orçamento via WhatsApp</span>
+                <span>↗</span>
+              </a>
+            </div>
+
+            <div className="bg-[#eee6d8] p-4 sm:p-6 rounded-[2px] border border-[#dcd5c8]">
+              <div className="bg-[#fffdf8] p-6 rounded-[2px] border border-[#cfcabf] text-center">
+                <span className="font-serif-sublime text-2xl text-[#0b2239] block mb-2">
+                  Atendimento Corporativo VIP
+                </span>
+                <p className="text-xs text-[#526458] mb-6">
+                  Atendemos pedidos em lote com descontos progressivos e personalização corporativa completa.
+                </p>
+                <div className="grid grid-cols-2 gap-3 text-left text-xs text-[#0b2239]">
+                  <div className="border border-[#c6a16b40] p-3 bg-[#faf8f2]">
+                    <strong>Kits comemorativos</strong>
+                    <p className="text-[10px] text-[#6e776b]">Aniversariantes do mês & metas</p>
+                  </div>
+                  <div className="border border-[#c6a16b40] p-3 bg-[#faf8f2]">
+                    <strong>Fim de ano & Brindes</strong>
+                    <p className="text-[10px] text-[#6e776b]">Agradecimento a clientes VIP</p>
+                  </div>
                 </div>
               </div>
-            </section>
+            </div>
+          </div>
+        </section>
 
-            {/* CESTAS */}
-            {hasCestas && (
-              <section id="cestas" className="w-full -mt-5 sm:-mt-8">
-                <div className="mb-8 sm:mb-10 px-2 sm:px-0">
-                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                    {getCategoryDisplayName('cestas', 'Cestas')}
-                  </h2>
-                  <div className="w-8 h-px bg-black mt-2" />
-                </div>
-                {cestasCafeProds.length > 0 && (
-                  <SubSectionCarousel 
-                    title={getCategoryDisplayName('cesta-cafe-da-manha', 'Cesta Café da Manhã')} 
-                    description={getCategoryDescription('cesta-cafe-da-manha', 'Cada detalhe escolhido pensando em transformar uma manhã em uma lembrança inesquecível.')} 
-                    products={cestasCafeProds}
-                    buttonText="Comprar"
-                  />
-                )}
-                {cestasAnivProds.length > 0 && (
-                  <SubSectionCarousel 
-                    title={getCategoryDisplayName('cesta-aniversario', 'Cesta Aniversário')} 
-                    description={getCategoryDescription('cesta-aniversario', 'Um aniversário ainda mais especial, com carinho em cada detalhe.')} 
-                    products={cestasAnivProds}
-                    buttonText="Comprar"
-                  />
-                )}
-                {cestasCoresProds.length > 0 && (
-                  <SubSectionCarousel 
-                    title={getCategoryDisplayName('cesta-cores', 'Cesta Cores')} 
-                    description={getCategoryDescription('cesta-cores', 'Mais do que uma cesta, um carinho preparado em cada detalhe.')} 
-                    products={cestasCoresProds}
-                    buttonText="Comprar"
-                  />
-                )}
-              </section>
-            )}
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {/* 12. PASSO A PASSO DA ENCOMENDA                                     */}
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        <section className="bg-[#fcfaf6] border-t border-[#c6a16b35] py-16 sm:py-24 px-6 sm:px-12">
+          <div className="max-w-7xl mx-auto">
+            <span className="eyebrow-sublime block mb-2">COMO FUNCIONA</span>
+            <h2 className="font-serif-sublime text-3xl sm:text-4xl text-[#0b2239] mb-12">
+              Escolha. Personalize. Celebre.
+            </h2>
 
-            {/* QUADRO A4 */}
-            {hasQuadrosA4 && (
-              <section id="quadros-a4" className="w-full">
-                <div className="mb-8 sm:mb-10 px-2 sm:px-0">
-                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                    {getCategoryDisplayName('quadros-a4', 'Quadro A4')}
-                  </h2>
-                  <p className="text-[11px] sm:text-sm text-neutral-500 dark:text-neutral-400 font-light tracking-wide mt-1">
-                    {getCategoryDescription('quadros-a4', 'Escolha o tema, personalize cada detalhe e transforme uma memória.')}
-                  </p>
-                  <div className="w-8 h-px bg-black mt-3" />
-                </div>
-                {quadrosCasalProds.length > 0 && (
-                  <SubSectionCarousel 
-                    title={getCategoryDisplayName('quadros-casal', 'Quadros Casal')} 
-                    description={getCategoryDescription('quadros-casal')}
-                    products={quadrosCasalProds}
-                    buttonText="Comprar"
-                  />
-                )}
-                {quadrosAnivProds.length > 0 && (
-                  <SubSectionCarousel 
-                    title={getCategoryDisplayName('quadros-aniversario', 'Quadros Aniversário')} 
-                    description={getCategoryDescription('quadros-aniversario')}
-                    products={quadrosAnivProds}
-                    buttonText="Comprar"
-                  />
-                )}
-              </section>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="border-t border-[#c6a16b60] pt-6">
+                <span className="font-serif-sublime text-3xl sm:text-4xl text-[#c6a16b] block mb-3">01</span>
+                <h3 className="font-serif-sublime text-xl text-[#0b2239] mb-2">Encontre seu presente</h3>
+                <p className="text-xs sm:text-sm text-[#5b656b] font-sans leading-relaxed">
+                  Navegue pelas coleções e descubra a cesta, caixa ou quadro que melhor representa seu afeto.
+                </p>
+              </div>
 
-            {/* QUADRO 10X15 */}
-            {hasQuadros10x15 && (
-              <section id="quadros-10x15" className="w-full">
-                <div className="mb-8 sm:mb-10 px-2 sm:px-0">
-                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left">
-                    {getCategoryDisplayName('quadros-10x15', 'Quadro 10x15')}
-                  </h2>
-                  <p className="text-[11px] sm:text-sm text-neutral-500 dark:text-neutral-400 font-light tracking-wide mt-1">
-                    {getCategoryDescription('quadros-10x15', 'Transforme momentos especiais em uma lembrança que fica para sempre.')}
-                  </p>
-                  <div className="w-8 h-px bg-black mt-3" />
-                </div>
-                {quadro10x15CasalProds.length > 0 && (
-                  <SubSectionCarousel 
-                    title={getCategoryDisplayName('quadro-10x15-casal', 'Quadro 10x15 Casal')} 
-                    description={getCategoryDescription('quadro-10x15-casal')}
-                    products={quadro10x15CasalProds}
-                    buttonText="Comprar"
-                  />
-                )}
-                {quadro10x15AnivProds.length > 0 && (
-                  <SubSectionCarousel 
-                    title={getCategoryDisplayName('quadro-10x15-aniversario', 'Quadro 10x15 Aniversário')} 
-                    description={getCategoryDescription('quadro-10x15-aniversario')}
-                    products={quadro10x15AnivProds}
-                    buttonText="Comprar"
-                  />
-                )}
-              </section>
-            )}
+              <div className="border-t border-[#c6a16b60] pt-6">
+                <span className="font-serif-sublime text-3xl sm:text-4xl text-[#c6a16b] block mb-3">02</span>
+                <h3 className="font-serif-sublime text-xl text-[#0b2239] mb-2">Conte sua ideia</h3>
+                <p className="text-xs sm:text-sm text-[#5b656b] font-sans leading-relaxed">
+                  Envie sua foto, escolha as frases e personalize cada detalhe. Nós enviamos a prévia antes de produzir.
+                </p>
+              </div>
 
-            {/* KITS CASAL */}
-            {kitsProds.length > 0 && (
-              <SectionCarousel
-                id="kits"
-                title={getCategoryDisplayName('kits-casal', 'Kits Casal')}
-                description={getCategoryDescription('kits-casal', 'Composições exclusivas criadas por especialistas')}
-                products={kitsProds}
-              />
-            )}
-
-            {/* MAMÃES / BEBÊS */}
-            {mamaesProds.length > 0 && (
-              <SectionCarousel
-                id="mamaes-bebes"
-                title={getCategoryDisplayName('mamaes-e-bebes', 'Mamães / Bebês')}
-                description={getCategoryDescription('mamaes-e-bebes', 'Presentes especiais para mamãe e bebê')}
-                products={mamaesProds}
-              />
-            )}
-
-            {/* PRODUTOS AVULSOS */}
-            {produtosAvulsosProds.length > 0 && (
-              <SectionCarousel
-                id="produtos"
-                title={getCategoryDisplayName('produtos', 'Produtos')}
-                description={getCategoryDescription('produtos', 'Coleção principal com curadoria especial')}
-                products={produtosAvulsosProds}
-              />
-            )}
-            
-            {/* PLACAS ACRÍLICAS */}
-            {placasProds.length > 0 && (
-              <SectionCarousel
-                id="placas"
-                title={getCategoryDisplayName('placas-acrilicas', 'Placas Acrílicas')}
-                description={getCategoryDescription('placas-acrilicas', 'Placas decorativas incríveis')}
-                products={placasProds}
-              />
-            )}
-
-            {/* COMBOS PROMOCIONAIS */}
-            {combosProds.length > 0 && (
-              <section id="combos" className="w-full">
-                <div className="mb-8 sm:mb-12 px-2 sm:px-0">
-                  <h2 className="text-xl sm:text-2xl font-medium tracking-[0.15em] uppercase mb-1 text-left text-neutral-900 dark:text-white">
-                    {getCategoryDisplayName('combos-promocionais', 'Combos Promocionais')}
-                  </h2>
-                  <p className="text-[11px] sm:text-sm text-neutral-500 font-light tracking-wide mt-1">
-                    {getCategoryDescription('combos-promocionais', 'Ofertas imperdíveis por tempo limitado')}
-                  </p>
-                  <div className="w-8 h-px bg-black dark:bg-white mt-3" />
-                </div>
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6">
-                  {combosProds.map(product => <MiniCard key={product.id} product={product} />)}
-                </div>
-              </section>
-            )}
-            
-            {/* ESPECIAL MÃES */}
-            {maesProds.length > 0 && (
-              <SectionCarousel
-                id="maes"
-                title={getCategoryDisplayName('especial-maes', 'Especial Mães')}
-                description={getCategoryDescription('especial-maes', 'Presentes inesquecíveis para quem você mais ama')}
-                products={maesProds}
-              />
-            )}
-
-            {/* CATEGORIAS EXTRAS DINÂMICAS DO BANCO DE DADOS */}
-            {extraCategories.map(cat => {
-              const catProducts = getCategoryProducts(cat.id);
-              if (catProducts.length === 0) return null;
-              return (
-                <SectionCarousel
-                  key={cat.id}
-                  id={cat.slug || `cat-${cat.id}`}
-                  title={cat.name}
-                  description={cat.description}
-                  products={catProducts}
-                />
-              );
-            })}
-          </>
-        )}
+              <div className="border-t border-[#c6a16b60] pt-6">
+                <span className="font-serif-sublime text-3xl sm:text-4xl text-[#c6a16b] block mb-3">03</span>
+                <h3 className="font-serif-sublime text-xl text-[#0b2239] mb-2">Prepare a entrega</h3>
+                <p className="text-xs sm:text-sm text-[#5b656b] font-sans leading-relaxed">
+                  Todos os presentes são feitos sob encomenda com entrega ágil ou agendada para a sua data especial.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
       </main>
 
-      <footer className="w-full border-t border-neutral-200 py-16 px-4 flex flex-col items-center justify-center text-center mt-20 bg-white text-black">
-        <span className="text-sm font-semibold tracking-[0.3em] mb-4 uppercase">Eternizando Momentos</span>
-        <p className="text-xs text-neutral-500 max-w-sm font-light leading-relaxed">
-          A excelência em produtos premium, pensados para os clientes mais exigentes.
-        </p>
-        <div className="mt-8 pt-8 border-t border-neutral-200 w-full max-w-xs text-[10px] text-neutral-400">
-          © {new Date().getFullYear()} Eternizando Momentos. Todos os direitos reservados.
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* 13. RODAPÉ DE ALTA JOALHERIA & BOUTIQUE                             */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      <footer className="bg-[#0b2239] text-[#e2dfd6] py-14 px-6 sm:px-12 border-t border-[#c6a16b50]">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10">
+          
+          <div className="md:col-span-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="brand-seal-vs w-11 h-11 text-xl text-[#e5c798]">
+                <span>VS</span>
+              </div>
+              <div>
+                <span className="block font-serif-sublime text-2xl tracking-[0.14em] text-[#fffdfa]">
+                  VISUAL STORY
+                </span>
+                <small className="block text-[8px] tracking-[0.28em] text-[#c6a16b] uppercase">
+                  Presentes Finos & Afeto
+                </small>
+              </div>
+            </div>
+            <p className="text-xs text-[#a0a8ad] font-sans leading-relaxed max-w-sm mb-4">
+              Transformando sentimentos, momentos especiais e lembranças inesquecíveis em presentes artesanais que tocam a alma.
+            </p>
+            <p className="text-[11px] text-[#c6a16b]">
+              O extraordinário está nos detalhes.
+            </p>
+          </div>
+
+          <div className="md:col-span-4 text-xs font-sans space-y-2">
+            <h4 className="font-serif-sublime text-base text-[#e5c798] mb-3">Atendimento & Pedidos</h4>
+            <p className="text-[#a0a8ad]">
+              Para dúvidas, encomendas personalizadas ou orçamentos corporativos:
+            </p>
+            <div className="pt-2 space-y-1.5">
+              <a 
+                href="https://wa.me/5583993032780?text=Ol%C3%A1%2C%20gostaria%20de%20um%20atendimento%20pelo%20WhatsApp!" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-[#e5c798] hover:underline"
+              >
+                <WhatsAppIcon className="w-4 h-4" />
+                <span>WhatsApp: (83) 99303-2780</span>
+              </a>
+              <a 
+                href="https://instagram.com/virtualstore_3" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-[#e5c798] hover:underline"
+              >
+                <Instagram size={15} />
+                <span>Instagram: @virtualstore_3</span>
+              </a>
+            </div>
+          </div>
+
+          <div className="md:col-span-3 text-xs font-sans space-y-2">
+            <h4 className="font-serif-sublime text-base text-[#e5c798] mb-3">Links Úteis</h4>
+            <ul className="space-y-1.5 text-[#a0a8ad]">
+              <li><button onClick={() => scrollTo("universos")} className="hover:text-white cursor-pointer">Coleções</button></li>
+              <li><button onClick={() => scrollTo("categorias")} className="hover:text-white cursor-pointer">Catálogo Geral</button></li>
+              <li><button onClick={() => scrollTo("empresas")} className="hover:text-white cursor-pointer">Para Empresas</button></li>
+              <li><Link to="/admin" className="hover:text-white">Painel do Administrador</Link></li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-[#c6a16b25] text-center text-[10px] text-[#788289] font-sans flex flex-col sm:flex-row items-center justify-between gap-3">
+          <span>© {new Date().getFullYear()} Visual Story. Todos os direitos reservados.</span>
+          <span>Feito por encomenda · Entregas pontuais e com embalagem especial.</span>
         </div>
       </footer>
+
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* 14. BARRA DE NAVEGAÇÃO MOBILE FIXA INFERIOR                        */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#fffdf9f7] backdrop-blur-md border-t border-[#c6a16b60] py-2 px-3 shadow-[0_-4px_22px_rgba(11,34,57,0.08)] sm:hidden grid grid-cols-5 gap-1">
+        <button
+          onClick={() => scrollTo("top")}
+          className="flex flex-col items-center justify-center gap-1 text-[10px] text-[#0b2239] py-1 cursor-pointer"
+        >
+          <span className="font-serif-sublime text-base font-bold">VS</span>
+          <span>Início</span>
+        </button>
+
+        <button
+          onClick={() => scrollTo("universos")}
+          className="flex flex-col items-center justify-center gap-1 text-[10px] text-[#566672] py-1 cursor-pointer hover:text-[#0b2239]"
+        >
+          <Gift size={18} strokeWidth={1.5} />
+          <span>Coleções</span>
+        </button>
+
+        <button
+          onClick={() => scrollTo("categorias")}
+          className="flex flex-col items-center justify-center gap-1 text-[10px] text-[#566672] py-1 cursor-pointer hover:text-[#0b2239]"
+        >
+          <Search size={18} strokeWidth={1.5} />
+          <span>Buscar</span>
+        </button>
+
+        <a
+          href="https://wa.me/5583993032780?text=Ol%C3%A1!%20Gostaria%20de%20atendimento%20para%20presentes%20da%20Visual%20Story."
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center justify-center gap-1 text-[10px] text-[#566672] py-1 hover:text-[#0b2239]"
+        >
+          <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
+          <span>Contato</span>
+        </a>
+
+        <button
+          onClick={() => setIsCartOpen(true)}
+          className="flex flex-col items-center justify-center gap-1 text-[10px] text-[#0b2239] py-1 relative cursor-pointer"
+        >
+          <ShoppingBag size={18} strokeWidth={1.5} />
+          <span>Sacola</span>
+          {totalItems > 0 && (
+            <span className="absolute top-0.5 right-3 w-4 h-4 rounded-full bg-[#0b2239] text-white text-[9px] flex items-center justify-center font-bold">
+              {totalItems}
+            </span>
+          )}
+        </button>
+      </div>
+
     </div>
   );
 }
