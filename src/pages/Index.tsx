@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { VSBrandMark } from "@/components/VSBrandMark";
+import { SnowEffect, SnowHeaderButton } from "@/components/SnowEffect";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Product } from "@/types/product";
@@ -278,6 +279,11 @@ export default function Index() {
     <div className="min-h-screen bg-[#faf8f6] text-neutral-900 font-sans selection:bg-[#ff8da1] selection:text-neutral-900">
       
       {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* CAMADA TEMÁTICA DE NATAL — NEVE INTERATIVA LEVE                     */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      <SnowEffect />
+      
+      {/* ─────────────────────────────────────────────────────────────────── */}
       {/* 1. BARRA SUPERIOR DE ANÚNCIO (TICKER SLIM EM LOOP PARA A ESQUERDA)   */}
       {/* ─────────────────────────────────────────────────────────────────── */}
       <div 
@@ -356,6 +362,9 @@ export default function Index() {
 
           {/* Direita: Ações e Botão da Sacola */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Controle da Neve de Natal no Cabeçalho */}
+            <SnowHeaderButton />
+
             <a
               href="https://instagram.com/virtualstore_3"
               target="_blank"
@@ -504,49 +513,58 @@ export default function Index() {
 
       <main>
         {/* ─────────────────────────────────────────────────────────────────── */}
-        {/* 3. HERO SECTION — VIRTUAL STORE (BOUTIQUE ELEGANTE E LUMINOSA)      */}
+        {/* 3. HERO SECTION — VIRTUAL STORE (EXPERIÊNCIA NATALINA ACONCHEGANTE) */}
         {/* ─────────────────────────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden bg-white border-b border-neutral-200/60 py-12 sm:py-20 px-4 sm:px-8">
-          {/* Gradiente sutil decorativo de fundo */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-[#ffd1dc]/40 to-transparent rounded-full blur-3xl pointer-events-none -mr-40 -mt-20" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-[#ffe8b3]/30 to-transparent rounded-full blur-3xl pointer-events-none -ml-32 -mb-20" />
+        <section className="relative overflow-hidden bg-[#0c1410] border-b border-neutral-900 py-12 sm:py-20 px-4 sm:px-8">
+          {/* Imagem de Fundo Temática de Natal com Enquadramento Mobile & Desktop */}
+          <div className="absolute inset-0 z-0">
+            <img 
+              src="/hero-natal.jpg" 
+              alt="Ambiente Natalino Virtual Store" 
+              className="w-full h-full object-cover object-center lg:object-right select-none"
+              loading="eager"
+            />
+            {/* Camada gradiente nobre para 100% de contraste e legibilidade impecável */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/92 via-black/82 to-black/55 sm:from-black/88 sm:via-black/75 sm:to-black/45" />
+            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/85 to-transparent pointer-events-none" />
+          </div>
 
           <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
             
             {/* Texto de Impacto Editorial */}
             <div className="lg:col-span-7 flex flex-col items-start text-left">
               
-              {/* Badge Oficial */}
-              <div className="badge-vs-tag mb-4 sm:mb-5 shadow-sm">
-                <Sparkles size={12} className="text-[#d15b70]" />
-                <span>Catálogo Exclusivo</span>
+              {/* Badge Oficial com Toque Natalino */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#ff8da1] text-xs font-semibold tracking-wider uppercase mb-4 sm:mb-5 shadow-sm">
+                <Sparkles size={13} className="text-[#f9d342] animate-pulse" />
+                <span>Especial de Natal • Edição Limitada</span>
               </div>
 
               {/* Slogan com a Fonte Anton Consagrada */}
-              <h1 className="font-anton text-[38px] sm:text-[58px] md:text-[70px] lg:text-[78px] font-normal tracking-[-0.01em] leading-[0.96] text-neutral-900 uppercase mb-5 select-none">
+              <h1 className="font-anton text-[38px] sm:text-[58px] md:text-[70px] lg:text-[78px] font-normal tracking-[-0.01em] leading-[0.96] text-white uppercase mb-5 select-none drop-shadow-md">
                 Transformamos <br />
                 sentimentos em <br />
-                <span className="text-[#d15b70]">presentes inesquecíveis.</span>
+                <span className="text-[#ff8da1]">presentes inesquecíveis.</span>
               </h1>
 
               {/* Localização Oficial */}
-              <div className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-semibold tracking-[0.14em] text-neutral-600 uppercase mb-6">
-                <MapPin size={14} className="text-[#d15b70] shrink-0" />
+              <div className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-semibold tracking-[0.14em] text-neutral-300 uppercase mb-6">
+                <MapPin size={14} className="text-[#ff8da1] shrink-0" />
                 <span>Santa Rita, João Pessoa e Região</span>
               </div>
 
               {/* Breve Descrição Comercial */}
-              <p className="text-sm sm:text-base text-neutral-600 max-w-lg leading-relaxed font-light mb-8">
-                Cestas especiais de café da manhã, quadros afetivos, kits personalizados e memórias eternizadas com carinho e acabamento de boutique.
+              <p className="text-sm sm:text-base text-neutral-200 max-w-lg leading-relaxed font-light mb-8 drop-shadow-sm">
+                Cestas natalinas especiais, quadros afetivos, kits personalizados e memórias eternizadas com todo o carinho e aconchego do Natal.
               </p>
 
               {/* Ações / Botões Principais */}
               <div className="flex flex-wrap items-center gap-3.5">
                 <a
-                  href="https://wa.me/5583993032780?text=Ol%C3%A1!%20Gostaria%20de%20encomendar%20um%20presente%20personalizado%20na%20Virtual%20Store."
+                  href="https://wa.me/5583993032780?text=Ol%C3%A1!%20Gostaria%20de%20encomendar%20um%20presente%20personalizado%20de%20Natal%20na%20Virtual%20Store."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-vs-whatsapp inline-flex items-center gap-2.5"
+                  className="btn-vs-whatsapp inline-flex items-center gap-2.5 shadow-lg shadow-green-900/30"
                 >
                   <WhatsAppIcon size={18} className="text-white" />
                   <span>Pedir pelo WhatsApp</span>
@@ -554,7 +572,7 @@ export default function Index() {
 
                 <button 
                   onClick={() => scrollTo("universos")}
-                  className="btn-vs-primary inline-flex items-center gap-2"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-white/90 hover:bg-white text-neutral-900 font-semibold text-xs tracking-wider uppercase backdrop-blur-md border border-white/40 transition-all shadow-md hover:scale-[1.02]"
                 >
                   <span>Explorar Catálogo</span>
                   <ArrowRight size={14} />
@@ -562,7 +580,7 @@ export default function Index() {
               </div>
 
               {/* Selos de Confiança */}
-              <div className="mt-8 pt-6 border-t border-neutral-200/80 flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-neutral-500 font-medium">
+              <div className="mt-8 pt-6 border-t border-white/15 flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-neutral-300 font-medium">
                 <span className="flex items-center gap-1.5"><Check size={14} className="text-[#25D366]" /> Feito por encomenda</span>
                 <span className="flex items-center gap-1.5"><Check size={14} className="text-[#25D366]" /> Fotos & Nomes exclusivos</span>
                 <span className="flex items-center gap-1.5"><Check size={14} className="text-[#25D366]" /> Entrega cuidadosa</span>
@@ -572,19 +590,22 @@ export default function Index() {
             {/* Vitrine / Fotografia de Produto em Destaque */}
             <div className="lg:col-span-5 relative flex items-center justify-center p-4 sm:p-6">
               
-              {/* Moldura de Fundo do Card */}
-              <div className="relative w-full max-w-[380px] bg-white rounded-2xl border border-neutral-200/90 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
+              {/* Moldura de Fundo do Card com Visual Premium de Vidro Refinado */}
+              <div className="relative w-full max-w-[380px] bg-white/95 backdrop-blur-md rounded-2xl border border-white/60 p-4 shadow-[0_25px_60px_rgba(0,0,0,0.45)]">
                 
                 {/* Selo de Topo */}
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-100">
-                  <span className="eyebrow-vs">O Mais Pedido</span>
+                  <span className="eyebrow-vs flex items-center gap-1 text-[#d15b70]">
+                    <Sparkles size={11} />
+                    <span>Destaque de Natal</span>
+                  </span>
                   <span className="text-[10px] font-bold text-[#d15b70] bg-[#fff0f3] px-2 py-0.5 rounded-full uppercase">
                     Virtual Store
                   </span>
                 </div>
 
                 {/* Fotografia Principal */}
-                <div className="w-full aspect-[4/5] bg-neutral-100 rounded-xl overflow-hidden relative mb-4">
+                <div className="w-full aspect-[4/5] bg-neutral-100 rounded-xl overflow-hidden relative mb-4 shadow-inner">
                   {heroFeaturedProduct?.image ? (
                     <img 
                       src={heroFeaturedProduct.image} 
