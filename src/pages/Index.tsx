@@ -281,73 +281,55 @@ export default function Index() {
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* 1. HEADER (ÁREA EXCLUSIVA DE CABEÇALHO & APRESENTAÇÃO INICIAL)      */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <header className="relative overflow-hidden bg-[#0a100d] border-b border-neutral-900 select-none">
-        {/* Imagem de Fundo Temática de Natal Exclusiva do Header */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <img 
-            src="/hero-natal.jpg" 
-            alt="Ambiente Natalino Virtual Store" 
-            className="w-full h-full object-cover object-[center_right] sm:object-right select-none"
-            loading="eager"
-          />
-          {/* Camada 1: Escurecimento base */}
-          <div className="absolute inset-0 bg-black/60" />
-          {/* Camada 2: Gradiente direcional */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/75 to-black/85 lg:bg-gradient-to-r lg:from-black/95 lg:via-black/75 lg:to-black/35" />
-          {/* Camada 3: Transição na base */}
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-transparent pointer-events-none" />
-        </div>
-
-        {/* Animação de Neve Restrita Exclusivamente ao Header */}
-        <SnowEffect />
-
-        {/* 1.1 Ticker Slim no Topo */}
+      <header className="relative bg-white select-none">
+        
+        {/* 1.1 Ticker Slim no Topo (Cor de Natal: Vermelho Natalino Clássico Nobre) */}
         <div 
           role="region"
           aria-label="Aviso institucional"
-          className="relative z-20 bg-black/50 border-b border-white/10 py-1 sm:py-1.5 overflow-hidden w-full backdrop-blur-sm"
+          className="relative z-30 bg-[#85182a] border-b border-[#6f1322] py-1.5 sm:py-2 overflow-hidden w-full shadow-inner"
         >
           <div className="animate-ticker-marquee flex items-center whitespace-nowrap">
             {/* Lote 1 */}
-            <div className="flex items-center gap-6 sm:gap-8 px-4 text-[9.5px] sm:text-[10px] tracking-[0.18em] uppercase font-medium text-white">
+            <div className="flex items-center gap-6 sm:gap-8 px-4 text-[9.5px] sm:text-[10px] tracking-[0.18em] uppercase font-semibold text-white">
               <span className="inline-flex items-center gap-1.5">
-                <Sparkles size={11} className="text-[#ff8da1] shrink-0 animate-pulse" />
+                <Sparkles size={11} className="text-[#ffd166] shrink-0 animate-pulse" />
                 <span>Presentes Personalizados com Afeto</span>
               </span>
-              <span className="text-[#ff8da1]/60">•</span>
-              <span>Entregas em <strong className="font-semibold text-white">Santa Rita, João Pessoa e Região</strong></span>
-              <span className="text-neutral-500">•</span>
+              <span className="text-white/40">•</span>
+              <span>Entregas em <strong className="font-bold text-[#fff3cd]">Santa Rita, João Pessoa e Região</strong></span>
+              <span className="text-white/40">•</span>
               <span className="inline-flex items-center gap-1.5">
-                <Sparkles size={11} className="text-[#ff8da1] shrink-0" />
+                <Sparkles size={11} className="text-[#ffd166] shrink-0" />
                 <span>Presentes Personalizados com Afeto</span>
               </span>
-              <span className="text-[#ff8da1]/60">•</span>
-              <span>Entregas em <strong className="font-semibold text-white">Santa Rita, João Pessoa e Região</strong></span>
-              <span className="text-neutral-500">•</span>
+              <span className="text-white/40">•</span>
+              <span>Entregas em <strong className="font-bold text-[#fff3cd]">Santa Rita, João Pessoa e Região</strong></span>
+              <span className="text-white/40">•</span>
             </div>
 
             {/* Lote 2 */}
-            <div className="flex items-center gap-6 sm:gap-8 px-4 text-[9.5px] sm:text-[10px] tracking-[0.18em] uppercase font-medium text-white" aria-hidden="true">
+            <div className="flex items-center gap-6 sm:gap-8 px-4 text-[9.5px] sm:text-[10px] tracking-[0.18em] uppercase font-semibold text-white" aria-hidden="true">
               <span className="inline-flex items-center gap-1.5">
-                <Sparkles size={11} className="text-[#ff8da1] shrink-0 animate-pulse" />
+                <Sparkles size={11} className="text-[#ffd166] shrink-0 animate-pulse" />
                 <span>Presentes Personalizados com Afeto</span>
               </span>
-              <span className="text-[#ff8da1]/60">•</span>
-              <span>Entregas em <strong className="font-semibold text-white">Santa Rita, João Pessoa e Região</strong></span>
-              <span className="text-neutral-500">•</span>
+              <span className="text-white/40">•</span>
+              <span>Entregas em <strong className="font-bold text-[#fff3cd]">Santa Rita, João Pessoa e Região</strong></span>
+              <span className="text-white/40">•</span>
               <span className="inline-flex items-center gap-1.5">
-                <Sparkles size={11} className="text-[#ff8da1] shrink-0" />
+                <Sparkles size={11} className="text-[#ffd166] shrink-0" />
                 <span>Presentes Personalizados com Afeto</span>
               </span>
-              <span className="text-[#ff8da1]/60">•</span>
-              <span>Entregas em <strong className="font-semibold text-white">Santa Rita, João Pessoa e Região</strong></span>
-              <span className="text-neutral-500">•</span>
+              <span className="text-white/40">•</span>
+              <span>Entregas em <strong className="font-bold text-[#fff3cd]">Santa Rita, João Pessoa e Região</strong></span>
+              <span className="text-white/40">•</span>
             </div>
           </div>
         </div>
 
-        {/* 1.2 Barra de Navegação (Logo, Menu, Sacola, Contatos) */}
-        <nav className="relative z-20 border-b border-white/10 px-4 sm:px-8 py-3.5 backdrop-blur-md bg-black/40">
+        {/* 1.2 Barra de Navegação (Fundo Branco onde tem Virtual Store) */}
+        <nav className="relative z-30 bg-white border-b border-neutral-200/80 px-4 sm:px-8 py-3 sm:py-3.5 shadow-sm">
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
             
             {/* Esquerda: Hambúrguer para Menu Lateral */}
@@ -355,23 +337,23 @@ export default function Index() {
               <button
                 onClick={() => setMenuOpen(true)}
                 aria-label="Abrir Menu de Coleções"
-                className="p-2 -ml-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors focus:outline-none"
+                className="p-2 -ml-2 text-neutral-800 hover:text-black hover:bg-neutral-100 rounded-lg transition-colors focus:outline-none"
               >
                 <MenuIcon size={22} strokeWidth={1.75} />
               </button>
               
               <button 
                 onClick={() => scrollTo("universos")}
-                className="hidden lg:flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-white/80 hover:text-white transition-colors"
+                className="hidden lg:flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-neutral-700 hover:text-neutral-900 transition-colors"
               >
                 <span>Coleções</span>
                 <span className="text-[10px]">⌄</span>
               </button>
             </div>
 
-            {/* Centro: Logomarca Oficial Virtual Store */}
+            {/* Centro: Logomarca Oficial Virtual Store com fundo branco */}
             <Link to="/" onClick={() => scrollTo("top")}>
-              <VSBrandMark size="md" variant="horizontal" colorTheme="light" subtitle="Presentes Personalizados" />
+              <VSBrandMark size="md" variant="horizontal" colorTheme="default" subtitle="Presentes Personalizados" />
             </Link>
 
             {/* Direita: Ações e Botão da Sacola */}
@@ -381,7 +363,7 @@ export default function Index() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram @virtualstore_3"
-                className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors focus:outline-none"
+                className="p-2 text-neutral-700 hover:text-[#d15b70] hover:bg-neutral-100 rounded-lg transition-colors focus:outline-none"
               >
                 <Instagram size={20} strokeWidth={1.75} />
               </a>
@@ -391,7 +373,7 @@ export default function Index() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Atendimento pelo WhatsApp"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#25D366]/20 hover:bg-[#25D366] text-[#25D366] hover:text-white border border-[#25D366]/40 transition-all text-xs font-semibold tracking-wide uppercase focus:outline-none"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#25D366]/10 hover:bg-[#25D366] text-[#128C7E] hover:text-white border border-[#25D366]/30 transition-all text-xs font-semibold tracking-wide uppercase focus:outline-none"
               >
                 <WhatsAppIcon size={14} className="shrink-0" />
                 <span>(83) 99303-2780</span>
@@ -401,12 +383,12 @@ export default function Index() {
               <button 
                 onClick={() => setIsCartOpen(true)}
                 aria-label="Abrir Sacola de Compras"
-                className="relative p-2 text-white hover:bg-white/10 rounded-lg transition-colors focus:outline-none flex items-center gap-1.5 border border-white/20 px-3"
+                className="relative p-2 text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors focus:outline-none flex items-center gap-1.5 border border-neutral-200 px-3"
               >
                 <ShoppingBag size={19} strokeWidth={1.8} />
                 <span className="hidden md:inline text-xs font-semibold uppercase tracking-wider">Sacola</span>
                 {totalItems > 0 && (
-                  <span className="bg-[#ff8da1] text-neutral-900 text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-sm">
+                  <span className="bg-[#d15b70] text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-sm">
                     {totalItems}
                   </span>
                 )}
@@ -416,8 +398,29 @@ export default function Index() {
           </div>
         </nav>
 
-        {/* 1.3 Apresentação Inicial da Loja (Informações Institucionais e Apresentação) */}
-        <div className="relative z-20 max-w-5xl mx-auto py-16 sm:py-24 px-4 sm:px-8 flex flex-col items-start text-left">
+        {/* 1.3 Área Temática Natalina (Imagem de Fundo e Apresentação Inicial) */}
+        <div className="relative overflow-hidden bg-[#0a100d] border-b border-neutral-900">
+          {/* Imagem de Fundo Temática de Natal Exclusiva da Apresentação */}
+          <div className="absolute inset-0 z-0 pointer-events-none">
+            <img 
+              src="/hero-natal.jpg" 
+              alt="Ambiente Natalino Virtual Store" 
+              className="w-full h-full object-cover object-[center_right] sm:object-right select-none"
+              loading="eager"
+            />
+            {/* Camada 1: Escurecimento base */}
+            <div className="absolute inset-0 bg-black/60" />
+            {/* Camada 2: Gradiente direcional */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/75 to-black/85 lg:bg-gradient-to-r lg:from-black/95 lg:via-black/75 lg:to-black/35" />
+            {/* Camada 3: Transição na base */}
+            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-transparent pointer-events-none" />
+          </div>
+
+          {/* Animação de Neve Restrita Exclusivamente a esta área */}
+          <SnowEffect />
+
+          {/* Apresentação Inicial da Loja */}
+          <div className="relative z-20 max-w-5xl mx-auto py-16 sm:py-24 px-4 sm:px-8 flex flex-col items-start text-left">
           
           {/* Badges de Topo (Selo Natalino + Botão de Neve Integrado) */}
           <div className="flex flex-wrap items-center gap-2.5 mb-4 sm:mb-5">
@@ -471,7 +474,9 @@ export default function Index() {
 
         </div>
 
-      </header>
+      </div>
+
+    </header>
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* FECHAMENTO DO HEADER                                                */}
       {/* ─────────────────────────────────────────────────────────────────── */}
