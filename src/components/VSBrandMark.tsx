@@ -1,51 +1,58 @@
-import { Gift } from "lucide-react";
-
 interface VSBrandMarkProps {
   variant?: "horizontal" | "stacked" | "icon-only";
   size?: "sm" | "md" | "lg";
   className?: string;
   subtitle?: string;
+  badgeStyle?: "solid-black" | "transparent-dark" | "transparent-white";
 }
 
 export function VSBrandMark({
-  variant = "stacked",
+  variant = "horizontal",
   size = "md",
   className = "",
   subtitle = "Presentes Personalizados",
+  badgeStyle = "solid-black",
 }: VSBrandMarkProps) {
-  // Ícone com o monograma VS estilizado com a alça da sacola de presentes
   const iconSizes = {
-    sm: "w-8 h-8",
-    md: "w-10 h-10",
-    lg: "w-14 h-14",
+    sm: "w-8 h-8 rounded-lg",
+    md: "w-10 h-10 sm:w-11 sm:h-11 rounded-xl",
+    lg: "w-14 h-14 sm:w-16 sm:h-16 rounded-2xl",
   };
 
   const titleSizes = {
     sm: "text-xs tracking-[0.2em]",
-    md: "text-sm sm:text-base tracking-[0.24em]",
-    lg: "text-lg sm:text-xl tracking-[0.28em]",
+    md: "text-sm sm:text-base tracking-[0.22em]",
+    lg: "text-lg sm:text-xl tracking-[0.26em]",
   };
 
   const subtitleSizes = {
     sm: "text-[8px] tracking-[0.25em]",
-    md: "text-[9px] sm:text-[10px] tracking-[0.28em]",
-    lg: "text-[11px] sm:text-xs tracking-[0.3em]",
+    md: "text-[9px] sm:text-[10px] tracking-[0.26em]",
+    lg: "text-[11px] sm:text-xs tracking-[0.28em]",
   };
+
+  // Imagem do logotipo oficial extraída dos ativos do projeto
+  const logoSrc = badgeStyle === "transparent-white"
+    ? "/vs_logo_white.png"
+    : badgeStyle === "transparent-dark"
+    ? "/vs_logo_dark.png"
+    : "/vs_logo.png";
 
   const IconGraphic = (
     <div
-      className={`relative rounded-xl bg-black text-white flex items-center justify-center shrink-0 shadow-sm border border-neutral-800 ${iconSizes[size]}`}
+      className={`relative overflow-hidden flex items-center justify-center shrink-0 select-none shadow-sm ${
+        badgeStyle === "solid-black" 
+          ? "bg-black border border-neutral-800" 
+          : "bg-transparent"
+      } ${iconSizes[size]}`}
     >
-      {/* Alça da sacola no topo */}
-      <div className="absolute -top-1.5 w-3.5 h-2.5 border-t-2 border-x-2 border-white rounded-t-full pointer-events-none opacity-90" />
-      
-      {/* Monograma VS */}
-      <span className="font-extrabold font-sans text-white select-none tracking-tighter text-[13px] sm:text-[15px] pt-0.5">
-        VS
-      </span>
-      
-      {/* Ponto delicado dourado / rose */}
-      <span className="absolute bottom-1 right-1 w-1 h-1 rounded-full bg-[#d4af37]" />
+      <img
+        src={logoSrc}
+        alt="Virtual Store Logo"
+        className="w-full h-full object-contain p-1"
+        loading="eager"
+        decoding="sync"
+      />
     </div>
   );
 
@@ -55,14 +62,14 @@ export function VSBrandMark({
 
   if (variant === "horizontal") {
     return (
-      <div className={`inline-flex items-center gap-3 select-none ${className}`}>
+      <div className={`inline-flex items-center gap-2.5 sm:gap-3 select-none ${className}`}>
         {IconGraphic}
         <div className="flex flex-col text-left">
           <span className={`font-extrabold uppercase text-neutral-900 dark:text-white font-sans leading-none ${titleSizes[size]}`}>
             VIRTUAL STORE
           </span>
           {subtitle && (
-            <span className={`font-medium uppercase text-neutral-400 dark:text-neutral-500 mt-1 leading-none ${subtitleSizes[size]}`}>
+            <span className={`font-semibold uppercase text-neutral-400 dark:text-neutral-400 mt-1 leading-none ${subtitleSizes[size]}`}>
               {subtitle}
             </span>
           )}
@@ -71,17 +78,17 @@ export function VSBrandMark({
     );
   }
 
-  // Variant "stacked" (centralizado elegante)
+  // Variant "stacked" (centralizado)
   return (
     <div className={`flex flex-col items-center justify-center text-center select-none ${className}`}>
-      <div className="flex items-center gap-2 mb-1">
+      <div className="mb-2">
         {IconGraphic}
-        <span className={`font-extrabold uppercase text-neutral-900 dark:text-white font-sans leading-none ${titleSizes[size]}`}>
-          VIRTUAL STORE
-        </span>
       </div>
+      <span className={`font-extrabold uppercase text-neutral-900 dark:text-white font-sans leading-none ${titleSizes[size]}`}>
+        VIRTUAL STORE
+      </span>
       {subtitle && (
-        <span className={`font-semibold uppercase text-neutral-400 dark:text-neutral-500 leading-none ${subtitleSizes[size]}`}>
+        <span className={`font-semibold uppercase text-neutral-400 dark:text-neutral-400 mt-1 leading-none ${subtitleSizes[size]}`}>
           {subtitle}
         </span>
       )}

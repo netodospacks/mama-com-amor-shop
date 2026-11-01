@@ -65,9 +65,7 @@ export function AdminLayout() {
       {/* Sidebar Desktop */}
       <aside className="hidden lg:flex flex-col w-64 fixed inset-y-0 bg-white dark:bg-[#0A0A0A] border-r border-neutral-200 dark:border-neutral-800 z-40">
         <div className="p-6 flex items-center gap-3 border-b border-neutral-100 dark:border-neutral-800">
-          <div className="w-8 h-8 bg-black dark:bg-white rounded flex items-center justify-center shrink-0">
-            <Store size={18} className="text-white dark:text-black" />
-          </div>
+          <img src="/vs_logo.png" alt="Virtual Store" className="w-8 h-8 rounded-lg object-contain shadow-sm" />
           <span className="font-bold tracking-tight text-sm uppercase leading-tight">
             Virtual Store<br/><span className="font-light text-[10px] text-neutral-500 tracking-widest">Administração</span>
           </span>

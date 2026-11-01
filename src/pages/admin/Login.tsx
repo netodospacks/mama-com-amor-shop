@@ -51,10 +51,11 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900 px-4 font-sans text-neutral-900 dark:text-neutral-100">
       <div className="max-w-md w-full bg-white dark:bg-neutral-800 p-8 rounded-2xl shadow-xl border border-neutral-100 dark:border-neutral-700">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold tracking-tight mb-2">Painel Administrativo</h1>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <img src="/vs_logo.png" alt="Virtual Store Logo" className="w-14 h-14 rounded-2xl shadow-md mb-3 object-contain" />
+          <h1 className="text-2xl font-bold tracking-tight mb-1">Painel Administrativo</h1>
           <p className="text-sm text-neutral-500 dark:text-neutral-400">
-            Faça login para gerenciar o catálogo
+            Faça login para gerenciar o catálogo Virtual Store
           </p>
         </div>
 
