@@ -1,0 +1,30 @@
+{
+  "exportedAt": "2026-11-01T14:14:36.304Z",
+  "projectUrl": "https://skuuymfaxtkwulhexmgd.supabase.co",
+  "tables": {
+    "categories": {
+      "status": "ok",
+      "count": 13,
+      "savedTo": "backups/VERSAO_01_ORIGINAL/database/categories.json",
+      "bytes": 4524
+    },
+    "products": {
+      "status": "ok",
+      "count": 114,
+      "savedTo": "backups/VERSAO_01_ORIGINAL/database/products.json",
+      "bytes": 158901
+    },
+    "subproducts": {
+      "status": "ok",
+      "count": 0,
+      "savedTo": "backups/VERSAO_01_ORIGINAL/database/subproducts.json",
+      "bytes": 2
+    },
+    "product_subproducts": {
+      "status": "ok",
+      "count": 0,
+      "savedTo": "backups/VERSAO_01_ORIGINAL/database/product_subproducts.json",
+      "bytes": 2
+    }
+  }
+}

@@ -60,10 +60,29 @@ export default {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        salvia: "#E8EFE5",
+        deepgreen: "#173D32",
+        vinho: {
+          DEFAULT: "#6F1E31",
+          hover: "#83243a",
+          dark: "#571626",
+        },
+        champagne: {
+          DEFAULT: "#D6BC85",
+          soft: "#ede0c2",
+          dark: "#b89a5e",
+        },
+        creme: "#FBF7EE",
         store: {
-          pink: "#ff8da1",
-          light: "#fff0f3",
-          dark: "#d15b70"
+          pink: "#6F1E31",
+          red: "#6F1E31",
+          vinho: "#6F1E31",
+          pine: "#173D32",
+          gold: "#D6BC85",
+          salvia: "#E8EFE5",
+          creme: "#FBF7EE",
+          light: "#FBF7EE",
+          dark: "#173D32"
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

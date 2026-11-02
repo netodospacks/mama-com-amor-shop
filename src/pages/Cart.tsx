@@ -1,13 +1,10 @@
-import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PaymentMethodSelector } from "@/components/PaymentMethodSelector";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { CartAddonsSection } from "@/components/CartAddonsSection";
 import { formatSubproductPrice } from "@/lib/subproducts";
-import { toast } from "sonner";
 
 export default function Cart() {
   const { 
@@ -19,18 +16,10 @@ export default function Cart() {
     subtotalProductsFormatted,
     subtotalAddonsFormatted,
     subtotalAddons,
-    formaPagamento, 
-    setFormaPagamento 
   } = useCart();
-  const [paymentError, setPaymentError] = useState(false);
   const navigate = useNavigate();
 
   const handleProceedToCheckout = () => {
-    if (!formaPagamento) {
-      setPaymentError(true);
-      toast.error("Por favor, selecione a forma de pagamento (PIX ou CARTÃO).");
-      return;
-    }
     navigate("/checkout");
   };
 
@@ -161,18 +150,6 @@ export default function Cart() {
               );
             })}
 
-            {/* Seção Forma de Pagamento */}
-            <div className="mt-6 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-              <PaymentMethodSelector 
-                value={formaPagamento}
-                onChange={(method) => {
-                  setFormaPagamento(method);
-                  setPaymentError(false);
-                }}
-                error={paymentError}
-              />
-            </div>
-
             {/* Total do Pedido */}
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-store-light space-y-2">
               <div className="flex justify-between items-center text-sm text-gray-600">
@@ -202,7 +179,7 @@ export default function Cart() {
               className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white h-14 rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-200 text-base flex items-center justify-center gap-2"
             >
               <WhatsAppIcon size={20} className="text-white shrink-0" />
-              <span>Finalizar Pedido pelo WhatsApp</span>
+              <span>Finalizar no WhatsApp</span>
             </Button>
           </div>
         </div>

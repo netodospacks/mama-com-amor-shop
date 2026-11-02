@@ -19,22 +19,24 @@ export function Header() {
       <header className="bg-white py-3 px-4 shadow-sm border-b border-gray-100">
         <div className="container max-w-lg mx-auto flex justify-between items-center">
           <Link to="/">
-            <VSBrandMark size="sm" variant="horizontal" subtitle="Presentes Personalizados" />
+            <VSBrandMark size="sm" variant="horizontal" subtitle="PRESENTES PERSONALIZADOS" />
           </Link>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <a 
               href="https://instagram.com/virtualstore_3" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="p-2.5 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors shrink-0"
+              aria-label="Instagram @virtualstore_3"
+              className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-colors shrink-0"
             >
               <Instagram className="w-5 h-5 text-gray-800" />
             </a>
 
             <Link 
               to="/cart" 
-              className="relative p-2.5 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors shrink-0"
+              aria-label="Sacola de Compras"
+              className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-colors shrink-0"
             >
               <ShoppingCart className="w-5 h-5 text-gray-800" />
               {totalItems > 0 && (

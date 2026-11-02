@@ -1,0 +1,254 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Poppins:wght@300;400;500;600;700;800&family=Great+Vibes&family=Cinzel:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 40% 99%;
+    --foreground: 340 25% 18%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 340 25% 18%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 340 25% 18%;
+
+    /* Rosa suave premium */
+    --primary: 345 55% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 345 70% 92%;
+
+    /* Dourado elegante */
+    --gold: 38 55% 58%;
+    --gold-foreground: 0 0% 100%;
+    --gold-soft: 38 70% 94%;
+
+    --secondary: 345 40% 96%;
+    --secondary-foreground: 340 30% 25%;
+
+    --muted: 345 25% 96%;
+    --muted-foreground: 340 10% 45%;
+
+    --accent: 38 70% 94%;
+    --accent-foreground: 340 25% 18%;
+
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 345 30% 92%;
+    --input: 345 30% 92%;
+    --ring: 345 55% 55%;
+
+    --radius: 1rem;
+
+    --gradient-rose: linear-gradient(135deg, hsl(345 70% 96%), hsl(345 55% 88%));
+    --gradient-gold: linear-gradient(135deg, hsl(38 65% 70%), hsl(38 55% 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(345 70% 95%) 0%, hsl(38 60% 94%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(345 55% 55%), hsl(345 50% 65%));
+
+    --shadow-soft: 0 4px 24px -8px hsl(345 50% 60% / 0.15);
+    --shadow-elegant: 0 10px 40px -12px hsl(345 50% 50% / 0.25);
+    --shadow-gold: 0 8px 32px -8px hsl(38 60% 55% / 0.3);
+
+    --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Cores da Nova Identidade Visual Story (Conceito Sublime) */
+    --navy: 211 68% 13%; /* #0b2239 */
+    --navy-deep: 200 49% 16%; /* #142f3b */
+    --forest: 161 45% 16%; /* #173d30 */
+    --wine: 338 40% 25%; /* #592638 */
+    --ivory: 40 43% 98%; /* #fcfaf6 */
+    --ivory-warm: 43 45% 96%; /* #faf8f2 */
+    --sand: 36 26% 87%; /* #e8dfd2 */
+    --border-sublime: 35 22% 86%; /* #e5ded4 */
+    --gold-sublime: 36 45% 60%; /* #c6a16b */
+    --gold-light: 36 60% 75%; /* #e5c798 */
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    touch-action: pan-x pan-y;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Poppins', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: pan-x pan-y;
+  }
+
+  input, textarea, select {
+    user-select: auto;
+    -webkit-user-select: auto;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+  }
+}
+
+@layer utilities {
+  .font-anton {
+    font-family: 'Anton', sans-serif;
+  }
+  .font-cursive {
+    font-family: 'Great Vibes', cursive;
+  }
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  .gradient-rose {
+    background: var(--gradient-rose);
+  }
+  .gradient-gold {
+    background: var(--gradient-gold);
+  }
+  .gradient-premium {
+    background: var(--gradient-premium);
+  }
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  .shadow-elegant {
+    box-shadow: var(--shadow-elegant);
+  }
+  .shadow-gold {
+    box-shadow: var(--shadow-gold);
+  }
+  .text-gold {
+    color: hsl(var(--gold));
+  }
+  .bg-gold {
+    background-color: hsl(var(--gold));
+  }
+  .border-gold {
+    border-color: hsl(var(--gold));
+  }
+  /* Ocultar scrollbar mantendo funcionalidade de scroll */
+  .no-scrollbar::-webkit-scrollbar,
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar,
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  /* Utilitários Visuais — Conceito Sublime / Visual Story */
+  .font-serif-sublime {
+    font-family: Georgia, 'Playfair Display', serif;
+  }
+
+  .btn-sublime-primary {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    letter-spacing: 0.1em;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 14px 22px;
+    background: #0b2239;
+    border: 1px solid #0b2239;
+    color: #fcfaf6;
+    transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+  }
+  .btn-sublime-primary::before {
+    content: '';
+    position: absolute;
+    inset: -60% -130%;
+    pointer-events: none;
+    z-index: -1;
+    background: linear-gradient(110deg, transparent 44%, #ffffff26 49%, #ffffff0c 53%, transparent 58%);
+    transform: translateX(-45%);
+    transition: transform 0.7s;
+  }
+  .btn-sublime-primary:hover::before,
+  .btn-sublime-primary:focus-visible::before {
+    transform: translateX(45%);
+  }
+  .btn-sublime-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 18px rgba(11, 34, 57, 0.18);
+    background: #173c50;
+  }
+
+  .btn-sublime-gold {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    letter-spacing: 0.08em;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 13px 22px;
+    background: #e5c798;
+    color: #0b2239;
+    border: 1px solid #e5c798;
+    transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+  }
+  .btn-sublime-gold:hover {
+    background: #ecd6b4;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(198, 161, 107, 0.25);
+  }
+
+  .eyebrow-sublime {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #c6a16b;
+    font-weight: 600;
+  }
+
+  .brand-seal-vs {
+    display: grid;
+    place-items: center;
+    border: 1px solid #c6a16b;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 3px #fcfaf6, inset 0 0 0 4px rgba(198, 161, 107, 0.4);
+    color: #a37c45;
+    font-family: Georgia, 'Playfair Display', serif;
+    font-style: italic;
+    flex-shrink: 0;
+  }
+}
+
+/* Animações Sublime */
+@keyframes hero-reveal {
+  from { opacity: 0; transform: scale(1.04); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes copy-reveal {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes cta-lustre {
+  from { opacity: 0.4; transform: translateY(5px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Impede scroll horizontal na página toda */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}

@@ -4,10 +4,12 @@ import { formatSubproductPrice } from "./subproducts";
 
 export interface CheckoutData {
   nome: string;
-  cidade: string;
-  bairro: string;
-  tipoEntrega: string;
+  cidade?: string;
+  bairro?: string;
+  tipoEntrega?: string;
   linkMaps?: string;
+  destinatario?: string;
+  observacoes?: string;
   formaPagamento?: string;
 }
 
@@ -21,14 +23,24 @@ export function formatWhatsAppMessage(
 
   let message = `*PEDIDO — VIRTUAL STORE* 🛍️\n\n`;
   message += `*Nome:* ${data.nome}\n`;
-  message += `*Cidade:* ${data.cidade}\n`;
-  message += `*Bairro:* ${data.bairro}\n`;
-  message += `*Entrega:* ${data.tipoEntrega}\n`;
-  
-  if (data.linkMaps && data.tipoEntrega === "Delivery") {
+  if (data.cidade) {
+    message += `*Cidade:* ${data.cidade}\n`;
+  }
+  if (data.bairro) {
+    message += `*Bairro:* ${data.bairro}\n`;
+  }
+  if (data.tipoEntrega) {
+    message += `*Entrega:* ${data.tipoEntrega}\n`;
+  }
+  if (data.linkMaps) {
     message += `*Localização:* ${data.linkMaps}\n`;
   }
-  
+  if (data.destinatario) {
+    message += `*Destinatário:* ${data.destinatario}\n`;
+  }
+  if (data.observacoes) {
+    message += `*Observações:* ${data.observacoes}\n`;
+  }
   if (data.formaPagamento) {
     message += `*Forma de pagamento:* ${data.formaPagamento}\n`;
   }
@@ -52,8 +64,6 @@ export function formatWhatsAppMessage(
     message += `\n`;
   });
 
-  message += `*Subtotal dos produtos:* ${formatBRL(total)}\n`;
-  message += `*Entrega:* ${data.tipoEntrega === "Retirada" ? "Retirada no local" : "Taxa a combinar"}\n`;
   message += `*TOTAL:* ${formatBRL(total)}\n`;
 
   return message;

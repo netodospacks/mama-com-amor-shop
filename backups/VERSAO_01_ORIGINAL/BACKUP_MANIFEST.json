@@ -1,0 +1,91 @@
+{
+  "versionId": "VISUAL STORY — VERSÃO ORIGINAL — BACKUP 01",
+  "gitCommit": "2098042",
+  "gitTag": "v1-original-backup-01",
+  "gitBranch": "backup/versao-01-original",
+  "createdAt": "2026-11-01T14:17:19.351Z",
+  "system": {
+    "nodeVersion": "v24.15.0",
+    "platform": "linux"
+  },
+  "databaseBackup": {
+    "status": "COMPLETE",
+    "provider": "Supabase Cloud",
+    "tables": {
+      "categories": {
+        "count": 13,
+        "file": "database/categories.json"
+      },
+      "products": {
+        "count": 114,
+        "file": "database/products.json"
+      },
+      "subproducts": {
+        "count": 0,
+        "file": "database/subproducts.json"
+      },
+      "product_subproducts": {
+        "count": 0,
+        "file": "database/product_subproducts.json"
+      }
+    },
+    "totalDumpFiles": 5
+  },
+  "codeBackup": {
+    "status": "COMPLETE",
+    "totalFiles": 288,
+    "archive": "visual_story_versao_01_original_backup.tar.gz"
+  },
+  "filesSample": [
+    {
+      "path": ".env.example",
+      "size": 281,
+      "sha256": "262d20236139de8c8bf04c25acffe15e6f8af4d472f0f64b596171b933a4c63c"
+    },
+    {
+      "path": "bun.lock",
+      "size": 146605,
+      "sha256": "523ae2d6800b5710769aa6683c0b68e282a43d2b443f53a54a208e854060d50b"
+    },
+    {
+      "path": "bun.lockb",
+      "size": 245395,
+      "sha256": "987b8cf2f5b19342e0975dae000633b7fce3bb4a78308d81533d986a7473f2f9"
+    },
+    {
+      "path": "components.json",
+      "size": 414,
+      "sha256": "9820835141c54e5b5dfbb68b3c3790db73c9ebfb967884ae3fccd058d698a1a6"
+    },
+    {
+      "path": "diagnose_products.mjs",
+      "size": 6083,
+      "sha256": "71ed134a67b8d06d3c5540ad178b238d7501a933fa5480c40a526ce0d7662d1d"
+    },
+    {
+      "path": "eslint.config.js",
+      "size": 765,
+      "sha256": "c55264234fef783629810643d995cd522c3adaeb60e7157906310607292015a3"
+    },
+    {
+      "path": "fix_catalog.cjs",
+      "size": 2184,
+      "sha256": "0aacdfe38ad04ee49b12b7224a00a48292e896adcd89b683c0ef082f11a39bbf"
+    },
+    {
+      "path": "index.html",
+      "size": 2758,
+      "sha256": "445246243196f297632801e6826aa67083771d3982c6feef76f71ebbe9eb104d"
+    },
+    {
+      "path": "package-lock.json",
+      "size": 297161,
+      "sha256": "2448e5d63135634bef40e0abfe2a161608350568a72f77658fa8cdd9d98420ba"
+    },
+    {
+      "path": "package.json",
+      "size": 2976,
+      "sha256": "f65d3931e706adea9425d70ba3fc4fa674a41f58b61bd77c27fa717da2e01527"
+    }
+  ]
+}

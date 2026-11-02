@@ -1,0 +1,243 @@
+import { useState, useEffect } from "react";
+import { useCart } from "@/context/CartContext";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, ShoppingBag } from "lucide-react";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { LocationPicker } from "@/components/LocationPicker";
+import { PaymentMethodSelector, PaymentMethod } from "@/components/PaymentMethodSelector";
+import { generateWhatsAppLink } from "@/lib/whatsapp";
+import { toast } from "sonner";
+
+const BAIRROS_POR_CIDADE: Record<string, string[]> = {
+  "Santa Rita": [
+    "Tibiri", "Marcos Moura", "Várzea Nova", "Alto das Populares", 
+    "Centro", "Jardim Planalto", "Popular", "Livramento"
+  ],
+  "Bayeux": [
+    "Centro", "Imaculada", "SESI", "Sesi Industrial", 
+    "Alto da Boa Vista", "Mário Andreazza", "São Bento", "Jardim Aeroporto"
+  ],
+  "João Pessoa": [
+    "Mangabeira", "Valentina", "Bancários", "Geisel", "Cristo", 
+    "Torre", "Tambaú", "Manaíra", "Bessa", "Jaguaribe", 
+    "Cruz das Armas", "Altiplano"
+  ]
+};
+
+export default function Checkout() {
+  const { items, totalPrice, totalPriceFormatted, clearCart, formaPagamento, setFormaPagamento } = useCart();
+  const navigate = useNavigate();
+  
+  const [formData, setFormData] = useState({
+    nome: "",
+    cidade: "Santa Rita",
+    bairro: "Tibiri",
+    tipoEntrega: "Retirada",
+    linkMaps: "",
+    formaPagamento: formaPagamento || ("" as PaymentMethod | ""),
+  });
+  const [paymentError, setPaymentError] = useState(false);
+
+  // Keep in sync with cart context
+  useEffect(() => {
+    if (formaPagamento && !formData.formaPagamento) {
+      setFormData(prev => ({ ...prev, formaPagamento }));
+    }
+  }, [formaPagamento]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    
+    if (name === "cidade") {
+      setFormData(prev => ({
+        ...prev,
+        cidade: value,
+        bairro: BAIRROS_POR_CIDADE[value][0] // Auto-select first bairro
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleLocationChange = (link: string) => {
+    setFormData(prev => ({ ...prev, linkMaps: link }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.nome) {
+      toast.error("Por favor, preencha seu nome.");
+      return;
+    }
+
+    if (!formData.formaPagamento) {
+      setPaymentError(true);
+      toast.error("Por favor, selecione a forma de pagamento (PIX ou CARTÃO).");
+      return;
+    }
+
+    if (formData.tipoEntrega === "Delivery" && !formData.linkMaps) {
+      toast.error("Por favor, informe sua localização exata para a entrega.");
+      return;
+    }
+
+    const whatsappLink = generateWhatsAppLink(formData, items, totalPrice);
+    
+    window.open(whatsappLink, "_blank");
+    clearCart();
+    navigate("/");
+    toast.success("Pedido gerado! Conclua o envio no WhatsApp. 🎉");
+  };
+
+  if (items.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mb-4 text-rose-500">
+          <ShoppingBag className="w-10 h-10" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Seu carrinho está vazio</h2>
+        <p className="text-sm text-gray-500 mb-6 max-w-xs">
+          Adicione presentes ao seu carrinho antes de ir para o checkout.
+        </p>
+        <Button 
+          onClick={() => navigate("/")}
+          className="bg-black text-white hover:bg-neutral-800 rounded-xl px-6 py-2.5 text-sm"
+        >
+          Voltar ao Catálogo
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-32">
+      <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 p-4 flex items-center shadow-sm">
+        <button 
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-store-light text-store-dark hover:bg-rose-100 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <h1 className="text-lg font-bold ml-4 text-gray-800">Finalizar Pedido</h1>
+      </div>
+
+      <main className="container max-w-lg mx-auto pt-20 px-4">
+        
+        <div className="bg-store-pink/10 border border-store-pink/20 rounded-2xl p-4 mb-6 text-center">
+          <p className="font-bold text-store-dark text-[15px]">💖 Rapidinho! Só precisamos dessas infos pra garantir sua entrega certinha</p>
+          <p className="text-xs text-gray-600 mt-2">Dica: Me manda o número da casa e forma de pagamento lá no WhatsApp 😊</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+            <h2 className="font-bold text-gray-800 border-b pb-2">Seus Dados</h2>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Nome completo</label>
+              <Input 
+                name="nome"
+                value={formData.nome}
+                onChange={handleChange}
+                placeholder="Como devemos te chamar?"
+                className="bg-gray-50 rounded-xl"
+                required
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Cidade</label>
+                <select 
+                  name="cidade"
+                  value={formData.cidade}
+                  onChange={handleChange}
+                  className="w-full h-10 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-store-pink/50"
+                >
+                  {Object.keys(BAIRROS_POR_CIDADE).map(cidade => (
+                    <option key={cidade} value={cidade}>{cidade}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Bairro</label>
+                <select 
+                  name="bairro"
+                  value={formData.bairro}
+                  onChange={handleChange}
+                  className="w-full h-10 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-store-pink/50"
+                >
+                  {BAIRROS_POR_CIDADE[formData.cidade]?.map(bairro => (
+                    <option key={bairro} value={bairro}>{bairro}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+            <h2 className="font-bold text-gray-800 border-b pb-2">Entrega</h2>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Tipo de Entrega</label>
+              <select 
+                name="tipoEntrega"
+                value={formData.tipoEntrega}
+                onChange={handleChange}
+                className="w-full h-10 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-store-pink/50"
+              >
+                <option value="Retirada">Retirada (Grátis)</option>
+                <option value="Delivery">Delivery (Taxa a combinar)</option>
+              </select>
+            </div>
+
+            {formData.tipoEntrega === "Delivery" && (
+              <LocationPicker onLocationChange={handleLocationChange} />
+            )}
+          </div>
+
+          {/* Escolha a forma de pagamento - ÚLTIMA OPÇÃO */}
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+            <h2 className="font-bold text-gray-800 border-b pb-2">Escolha a forma de pagamento</h2>
+            <PaymentMethodSelector 
+              value={formData.formaPagamento} 
+              onChange={(method) => {
+                setFormData(prev => ({ ...prev, formaPagamento: method }));
+                setFormaPagamento(method);
+                setPaymentError(false);
+              }}
+              error={paymentError}
+            />
+          </div>
+        </form>
+
+      </main>
+
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40">
+        <div className="container max-w-lg mx-auto flex flex-col gap-2">
+          <div className="flex justify-between items-center px-1 text-xs text-gray-500">
+            <span>Forma de pagamento:</span>
+            <span className={`font-semibold ${formData.formaPagamento ? "text-gray-800" : "text-amber-500"}`}>
+              {formData.formaPagamento || "Selecione acima"}
+            </span>
+          </div>
+          <div className="flex justify-between items-center px-1">
+            <span className="font-medium text-gray-600">Total do pedido:</span>
+            <span className="font-bold text-lg text-store-pink">{totalPriceFormatted}</span>
+          </div>
+          <Button 
+            onClick={handleSubmit}
+            className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white h-14 rounded-xl font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-all duration-200 text-base sm:text-lg flex items-center justify-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-[#25D366]/50 focus:ring-offset-2"
+          >
+            <WhatsAppIcon size={22} className="text-white shrink-0" />
+            <span>Finalizar pelo WhatsApp</span>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

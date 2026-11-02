@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { ShoppingBag, X, Plus, Minus, Trash2 } from "lucide-react";
 import { CheckoutStage } from "./CheckoutStage";
 import { WhatsAppIcon } from "./WhatsAppIcon";
-import { PaymentMethodSelector } from "./PaymentMethodSelector";
 import { CartAddonsSection } from "./CartAddonsSection";
 import { formatSubproductPrice } from "@/lib/subproducts";
-import { toast } from "sonner";
 
 export function CartDrawer() {
   const { 
@@ -22,19 +21,12 @@ export function CartDrawer() {
     subtotalAddonsFormatted,
     subtotalAddons,
     setIsCheckoutOpen,
-    formaPagamento,
-    setFormaPagamento 
   } = useCart();
-  const [paymentError, setPaymentError] = useState(false);
+  const navigate = useNavigate();
 
   const handleCheckout = () => {
-    if (!formaPagamento) {
-      setPaymentError(true);
-      toast.error("Por favor, selecione a forma de pagamento (PIX ou CARTÃO).");
-      return;
-    }
     setIsCartOpen(false);
-    setIsCheckoutOpen(true);
+    navigate("/checkout");
   };
 
   return (
@@ -193,18 +185,6 @@ export function CartDrawer() {
             {/* Footer */}
             {items.length > 0 && (
               <div className="p-5 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-[#0A0A0A] space-y-4">
-                {/* Seletor de Forma de Pagamento */}
-                <div>
-                  <PaymentMethodSelector 
-                    value={formaPagamento} 
-                    onChange={(method) => {
-                      setFormaPagamento(method);
-                      setPaymentError(false);
-                    }}
-                    error={paymentError}
-                  />
-                </div>
-
                 {/* Discriminação de Subtotais se houver adicionais */}
                 {subtotalAddons > 0 && (
                   <div className="space-y-1 text-xs text-neutral-500 dark:text-neutral-400">
@@ -233,43 +213,8 @@ export function CartDrawer() {
                   className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-4 rounded-xl text-xs sm:text-sm font-semibold tracking-wide uppercase shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#25D366]/50 focus:ring-offset-2"
                 >
                   <WhatsAppIcon size={19} className="text-white shrink-0" />
-                  <span>Finalizar Pedido pelo WhatsApp</span>
+                  <span>Finalizar no WhatsApp</span>
                 </motion.button>
-
-                {/* Opção de envio rápido direto pelo WhatsApp */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!formaPagamento) {
-                      setPaymentError(true);
-                      toast.error("Por favor, selecione a forma de pagamento (PIX ou CARTÃO).");
-                      return;
-                    }
-                    let message = "Olá, gostaria de fazer este pedido:\n\n";
-                    message += "*PRODUTOS:*\n\n";
-                    items.forEach(item => {
-                      message += `*${item.product.name}*\n`;
-                      message += `Quantidade: ${item.quantity}\n`;
-                      message += `Preço: ${item.product.price}\n`;
-                      if (item.selectedAddons && item.selectedAddons.length > 0) {
-                        message += `Adicionais:\n`;
-                        item.selectedAddons.forEach(a => {
-                          message += `- ${a.name} (+ ${formatSubproductPrice(a.price)})\n`;
-                        });
-                      }
-                      message += `\n`;
-                    });
-                    message += `*Total: ${totalPriceFormatted}*\n\n`;
-                    message += `*Forma de pagamento:* ${formaPagamento}\n\n`;
-                    message += "_Dados de entrega a combinar no WhatsApp._";
-
-                    const encodedMessage = encodeURIComponent(message);
-                    window.open(`https://wa.me/5583993032780?text=${encodedMessage}`, "_blank");
-                  }}
-                  className="w-full text-center text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors underline underline-offset-4 pt-1 block"
-                >
-                  Ou enviar direto no WhatsApp sem preencher endereço
-                </button>
               </div>
             )}
           </motion.div>

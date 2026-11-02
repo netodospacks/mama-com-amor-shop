@@ -185,7 +185,7 @@ export function SnowToggleBadge({ className = "" }: { className?: string }) {
         }`}
         style={{ animationDuration: "8s" }}
       />
-      <span>{isSnowing ? "Neve Ativa" : "Pausar Neve"}</span>
+      <span>{isSnowing ? "Neve Ativa" : "Ativar Neve"}</span>
     </button>
   );
 }

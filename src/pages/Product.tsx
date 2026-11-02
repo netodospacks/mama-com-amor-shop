@@ -187,24 +187,24 @@ export default function Product() {
   const handleCheckoutDirect = () => {
     if (!product) return;
     addItem(product, 1, selectedAddons);
-    setIsCheckoutOpen(true);
+    navigate("/checkout");
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAFAFA] dark:bg-[#050505]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black dark:border-white"></div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FBF7EE] text-neutral-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B233C]"></div>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAFAFA] dark:bg-[#050505] text-neutral-900 dark:text-white">
-        <h1 className="text-2xl font-light mb-4 tracking-widest">PRODUTO NÃO ENCONTRADO</h1>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FBF7EE] text-neutral-900">
+        <h1 className="text-2xl font-light mb-4 tracking-widest text-[#8B233C]">PRODUTO NÃO ENCONTRADO</h1>
         <button 
           onClick={() => navigate('/')}
-          className="text-sm border-b border-black dark:border-white pb-1 hover:opacity-60 transition-opacity"
+          className="text-sm border-b border-[#8B233C] pb-1 text-neutral-900 hover:text-[#8B233C] transition-colors"
         >
           Voltar ao Catálogo
         </button>
@@ -213,22 +213,22 @@ export default function Product() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#0A0A0A] text-neutral-900 dark:text-neutral-100 font-sans selection:bg-neutral-200 selection:text-black pb-24">
+    <div className="min-h-screen bg-[#FBF7EE] text-neutral-900 font-sans selection:bg-[#8B233C] selection:text-white pb-24">
       
       {/* Premium Header minimalista */}
-      <header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 py-4 flex items-center justify-between bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-black/5 dark:border-white/5 transition-all">
+      <header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 py-4 flex items-center justify-between bg-[#FBF7EE]/90 backdrop-blur-xl border-b border-[#EADFCF] transition-all">
         <button 
           onClick={() => navigate(-1)}
-          className="p-2 -ml-2 text-neutral-800 dark:text-neutral-200 hover:opacity-60 transition-opacity flex items-center gap-2"
+          className="p-2 -ml-2 text-neutral-900 hover:text-[#8B233C] transition-colors flex items-center gap-2"
         >
           <ArrowLeft size={20} strokeWidth={1.5} />
           <span className="text-xs uppercase tracking-widest font-medium hidden sm:inline">Voltar</span>
         </button>
-        <Link to="/" className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] text-neutral-900 dark:text-white uppercase absolute left-1/2 -translate-x-1/2">
+        <Link to="/" className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] text-[#8B233C] uppercase absolute left-1/2 -translate-x-1/2">
           Eternizando Momentos
         </Link>
         <div className="flex gap-2 w-8 sm:w-auto">
-           <button onClick={() => setIsCartOpen(true)} className="p-2 text-neutral-800 dark:text-neutral-200 hover:opacity-60">
+           <button onClick={() => setIsCartOpen(true)} className="p-2 text-neutral-900 hover:text-[#8B233C] transition-colors">
              <ShoppingBag size={20} strokeWidth={1.5} />
            </button>
         </div> 
@@ -250,11 +250,11 @@ export default function Product() {
               onTouchEnd={handleTouchEnd}
               onMouseDown={handleMouseDown}
               onMouseUp={handleMouseUp}
-              className={`w-full aspect-[4/5] md:aspect-square bg-neutral-100 dark:bg-neutral-800 md:rounded-2xl overflow-hidden relative shadow-sm md:shadow-xl mb-4 touch-pan-y ${
+              className={`w-full aspect-[4/5] md:aspect-square bg-[#F5EFE6] border border-[#EADFCF] md:rounded-2xl overflow-hidden relative shadow-md mb-4 touch-pan-y ${
                 images.length > 1 ? "cursor-grab active:cursor-grabbing select-none" : ""
               }`}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900" />
+              <div className="absolute inset-0 bg-[#F5EFE6]" />
               
               {images.length > 0 ? (
                 <AnimatePresence initial={false} custom={slideDirection}>
@@ -358,7 +358,7 @@ export default function Product() {
             className="w-full md:w-1/2 px-5 md:px-0 pt-8 md:pt-4 flex flex-col"
           >
             <div className="mb-8">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-medium tracking-tight mb-3 text-black dark:text-white">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-3 text-neutral-900">
                 {product.name}
               </h1>
               <div className="flex flex-col mb-6">
@@ -367,12 +367,12 @@ export default function Product() {
                     <span className="text-sm md:text-base text-neutral-400 line-through">
                       {product.price}
                     </span>
-                    <span className="text-xl md:text-2xl font-semibold tracking-tight text-rose-500">
+                    <span className="text-2xl md:text-3xl font-extrabold tracking-tight text-[#8B233C]">
                       {product.promoPrice}
                     </span>
                   </>
                 ) : (
-                  <span className="text-xl md:text-2xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-200">
+                  <span className="text-2xl md:text-3xl font-extrabold tracking-tight text-[#8B233C]">
                     {product.price}
                   </span>
                 )}
@@ -381,28 +381,28 @@ export default function Product() {
               {/* Descrição Curta */}
               <FormattedDescription 
                 text={(product as any).short_description || product.shortDescription} 
-                className="text-sm md:text-base text-neutral-500"
+                className="text-sm md:text-base text-neutral-600 leading-relaxed"
               />
             </div>
 
-            {/* Seção de Mimos & Adicionais Disponíveis */}
+            {/* Seção de Mimos & Adicionais Disponíveis (Card Branco) */}
             {addons.length > 0 && (
-              <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-rose-50/50 via-white to-pink-50/30 dark:from-neutral-900 dark:via-neutral-900 dark:to-neutral-800/40 border border-rose-100 dark:border-neutral-800 shadow-xs">
+              <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-white border border-[#EADFCF] shadow-md text-neutral-900">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-store-pink/10 text-store-pink flex items-center justify-center shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-rose-100 text-[#8B233C] flex items-center justify-center shrink-0">
                       <Gift size={15} />
                     </div>
                     <div>
-                      <h3 className="text-xs sm:text-sm font-bold tracking-tight text-neutral-900 dark:text-white flex items-center gap-1.5">
+                      <h3 className="text-xs sm:text-sm font-bold tracking-tight text-neutral-900 flex items-center gap-1.5">
                         <span>Que tal adicionar um mimo?</span>
                       </h3>
-                      <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                      <p className="text-[11px] text-neutral-500">
                         Personalize seu presente e surpreenda quem você ama!
                       </p>
                     </div>
                   </div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500">
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-200">
                     Opcional
                   </span>
                 </div>
@@ -416,11 +416,11 @@ export default function Product() {
                         onClick={() => toggleSelectAddon(addon)}
                         className={`p-2.5 rounded-xl border flex items-center gap-3 cursor-pointer select-none transition-all ${
                           isSelected
-                            ? "bg-rose-500/10 border-rose-400 dark:border-rose-500 shadow-sm"
-                            : "bg-white/80 dark:bg-neutral-900/80 border-neutral-200/80 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700"
+                            ? "bg-rose-50/80 border-[#8B233C] shadow-sm"
+                            : "bg-[#FAF7F2] border-[#EADFCF] hover:border-neutral-300"
                         }`}
                       >
-                        <div className="w-12 h-12 rounded-lg bg-neutral-100 dark:bg-neutral-800 overflow-hidden shrink-0 relative">
+                        <div className="w-12 h-12 rounded-lg bg-white overflow-hidden shrink-0 relative border border-neutral-200">
                           {addon.image ? (
                             <img src={addon.image} alt={addon.name} className="w-full h-full object-cover" />
                           ) : (
@@ -431,15 +431,15 @@ export default function Product() {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-xs font-semibold text-neutral-900 dark:text-white truncate">
+                          <h4 className="text-xs font-bold text-neutral-900 truncate">
                             {addon.name}
                           </h4>
                           {addon.description && (
-                            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 truncate">
+                            <p className="text-[10px] text-neutral-500 truncate">
                               {addon.description}
                             </p>
                           )}
-                          <p className="text-[11px] font-bold text-store-pink mt-0.5">
+                          <p className="text-[11px] font-extrabold text-[#8B233C] mt-0.5">
                             + {formatSubproductPrice(addon.price)}
                           </p>
                         </div>
@@ -447,8 +447,8 @@ export default function Product() {
                         <div
                           className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 border transition-colors ${
                             isSelected
-                              ? "bg-store-pink border-store-pink text-white"
-                              : "border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+                              ? "bg-[#8B233C] border-[#8B233C] text-white"
+                              : "border-neutral-300 bg-white"
                           }`}
                         >
                           {isSelected && <Check size={12} strokeWidth={3} />}
@@ -459,11 +459,11 @@ export default function Product() {
                 </div>
 
                 {selectedAddons.length > 0 && (
-                  <div className="mt-3 pt-2.5 border-t border-rose-100/80 dark:border-neutral-800 flex items-center justify-between text-xs">
-                    <span className="text-neutral-600 dark:text-neutral-400">
+                  <div className="mt-3 pt-2.5 border-t border-neutral-200 flex items-center justify-between text-xs">
+                    <span className="text-neutral-600 font-medium">
                       {selectedAddons.length} {selectedAddons.length === 1 ? "mimo selecionado" : "mimos selecionados"}
                     </span>
-                    <span className="font-bold text-neutral-900 dark:text-white">
+                    <span className="font-extrabold text-[#8B233C]">
                       + {formatSubproductPrice(selectedAddons.reduce((acc, a) => acc + (Number(a.price) || 0), 0))}
                     </span>
                   </div>
@@ -472,16 +472,15 @@ export default function Product() {
             )}
 
             <div className="flex flex-col gap-3 mb-10">
-              {/* Botão Adicionar ao Carrinho Premium */}
+              {/* Botão Adicionar ao Carrinho */}
               <motion.button 
                 onClick={handleAddToCart}
                 whileHover={{ scale: 1.01, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full bg-black dark:bg-white text-white dark:text-black py-4 md:py-5 rounded-xl text-sm md:text-base font-medium tracking-[0.15em] uppercase flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(255,255,255,0.15)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_15px_40px_rgba(255,255,255,0.2)] transition-all duration-300 group relative overflow-hidden"
+                className="w-full bg-[#8B233C] hover:bg-[#6F1E31] text-white py-4 md:py-5 rounded-xl text-sm md:text-base font-bold tracking-[0.15em] uppercase flex items-center justify-center gap-3 shadow-lg transition-all duration-300"
               >
-                <div className="absolute inset-0 bg-white/20 dark:bg-black/10 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 ease-out rounded-xl" />
-                <ShoppingBag size={20} strokeWidth={1.5} className="relative z-10" />
-                <span className="relative z-10">
+                <ShoppingBag size={20} strokeWidth={1.8} className="text-white" />
+                <span>
                   {selectedAddons.length > 0
                     ? `Adicionar ao Carrinho (+${selectedAddons.length} ${selectedAddons.length === 1 ? 'mimo' : 'mimos'})`
                     : "Adicionar ao Carrinho"}
@@ -501,22 +500,22 @@ export default function Product() {
             </div>
 
             {/* Informações Extras e Trust Badges */}
-            <div className="flex items-center gap-6 mb-12 py-6 border-y border-neutral-200 dark:border-neutral-800">
-              <div className="flex items-center gap-2 text-neutral-500">
-                <Truck size={18} strokeWidth={1.5} />
-                <span className="text-[11px] md:text-xs uppercase tracking-wider">Envio Rápido</span>
+            <div className="flex items-center gap-6 mb-12 py-6 border-y border-[#EADFCF]">
+              <div className="flex items-center gap-2 text-neutral-600">
+                <Truck size={18} strokeWidth={1.5} className="text-[#8B233C]" />
+                <span className="text-[11px] md:text-xs uppercase tracking-wider font-semibold">Envio Rápido</span>
               </div>
-              <div className="flex items-center gap-2 text-neutral-500">
-                <ShieldCheck size={18} strokeWidth={1.5} />
-                <span className="text-[11px] md:text-xs uppercase tracking-wider">Compra Segura</span>
+              <div className="flex items-center gap-2 text-neutral-600">
+                <ShieldCheck size={18} strokeWidth={1.5} className="text-[#8B233C]" />
+                <span className="text-[11px] md:text-xs uppercase tracking-wider font-semibold">Compra Segura</span>
               </div>
             </div>
 
             {/* Descrição Detalhada e Especificações */}
-            <div className="space-y-10 text-sm md:text-base font-light text-neutral-600 dark:text-neutral-400">
+            <div className="space-y-10 text-sm md:text-base font-light text-neutral-700">
               
               <section>
-                <h3 className="text-xs uppercase tracking-[0.2em] font-medium text-black dark:text-white mb-4">
+                <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-[#8B233C] mb-4">
                   Detalhes do Produto
                 </h3>
                 <FormattedDescription 
@@ -526,10 +525,10 @@ export default function Product() {
 
               {product.specifications && product.specifications.length > 0 && (
                 <section>
-                  <h3 className="text-xs uppercase tracking-[0.2em] font-medium text-black dark:text-white mb-4">
+                  <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-[#8B233C] mb-4">
                     Especificações
                   </h3>
-                  <ul className="list-disc pl-4 space-y-2 marker:text-neutral-300 dark:marker:text-neutral-700">
+                  <ul className="list-disc pl-4 space-y-2 marker:text-[#8B233C]">
                     {product.specifications.map((spec, index) => (
                       <li key={index} className="pl-2">{spec}</li>
                     ))}
@@ -538,11 +537,11 @@ export default function Product() {
               )}
 
               {product.observations && (
-                <section className="bg-neutral-50 dark:bg-neutral-900 p-5 rounded-xl border border-neutral-100 dark:border-neutral-800">
-                  <h3 className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-medium text-black dark:text-white mb-2">
+                <section className="bg-white p-5 rounded-2xl border border-[#EADFCF] shadow-sm text-neutral-900">
+                  <h3 className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold text-[#8B233C] mb-2">
                     Observações
                   </h3>
-                  <p className="text-xs leading-relaxed text-neutral-500">
+                  <p className="text-xs leading-relaxed text-neutral-600 font-normal">
                     {product.observations}
                   </p>
                 </section>
