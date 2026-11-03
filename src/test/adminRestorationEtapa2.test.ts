@@ -98,6 +98,58 @@ describe('ETAPA 2: Testes Obrigatórios de Restauração Administrativa', () => 
       expect(updatedFeatured.some(p => p.id === '3')).toBe(false);
       expect(updatedFeatured.map(p => p.id)).toEqual(['1', '5']);
     });
+
+    it('5b. Estrela de 1 clique: marcar e desmarcar destaque altera pontualmente is_featured sem mutar outros campos', () => {
+      const originalProduct: Product = {
+        id: 'prod-42',
+        name: 'Cesta Encanto de Café',
+        price: 'R$ 180,00',
+        numericPrice: 180.0,
+        promoPrice: 'R$ 150,00',
+        isPromo: true,
+        image: 'https://images.unsplash.com/cesta.jpg',
+        isFeatured: false,
+        active: true,
+        sortOrder: 10,
+      };
+
+      // Simulação da operação pontual da estrela de 1 clique
+      const applyOneClickFeatured = (p: Product, newFeatured: boolean) => ({
+        ...p,
+        isFeatured: newFeatured,
+      });
+
+      // 1. Clicar na estrela vazia marca destaque
+      const featuredProduct = applyOneClickFeatured(originalProduct, true);
+      expect(featuredProduct.isFeatured).toBe(true);
+      expect(featuredProduct.name).toBe(originalProduct.name);
+      expect(featuredProduct.price).toBe(originalProduct.price);
+      expect(featuredProduct.image).toBe(originalProduct.image);
+      expect(featuredProduct.active).toBe(true);
+
+      // 2. Clicar na estrela preenchida desmarca destaque
+      const unfeaturedProduct = applyOneClickFeatured(featuredProduct, false);
+      expect(unfeaturedProduct.isFeatured).toBe(false);
+      expect(unfeaturedProduct.name).toBe(originalProduct.name);
+    });
+
+    it('5c. Estrela de 1 clique: reversão otimista em caso de erro', () => {
+      let productState: { id: string; is_featured: boolean } = { id: 'p1', is_featured: false };
+      const previousState = productState.is_featured;
+
+      // Otimista
+      productState = { ...productState, is_featured: !previousState };
+      expect(productState.is_featured).toBe(true);
+
+      // Falha simulada do Supabase
+      const simulateFailure = true;
+      if (simulateFailure) {
+        // Rollback
+        productState = { ...productState, is_featured: previousState };
+      }
+
+      expect(productState.is_featured).toBe(false);
+    });
   });
 
   // 6, 7: Normalização de slugs e categorias

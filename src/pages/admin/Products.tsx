@@ -14,8 +14,10 @@ import {
   PackageX,
   AlertTriangle,
   Gift,
+  Star,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 import { SubproductsManager } from '@/components/admin/SubproductsManager';
 import { fetchAddonCountsByProduct } from '@/lib/subproducts';
 
@@ -398,10 +400,13 @@ function DeleteModal({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function Products() {
+  const queryClient = useQueryClient();
+
   // Data
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingFeaturedId, setUpdatingFeaturedId] = useState<string | null>(null);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -643,6 +648,46 @@ export default function Products() {
     } catch (err: any) {
       console.error(err);
       toast.error('Não foi possível alterar o status.');
+    }
+  };
+
+  // ── Toggle featured (1-click star) ─────────────────────────────────────────
+
+  const toggleFeatured = async (p: Product) => {
+    if (updatingFeaturedId === p.id) return;
+    const nextFeatured = !p.is_featured;
+    setUpdatingFeaturedId(p.id);
+
+    // Atualização otimista imediata na interface
+    setProducts(prev =>
+      prev.map(item => (item.id === p.id ? { ...item, is_featured: nextFeatured } : item))
+    );
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ is_featured: nextFeatured })
+        .eq('id', p.id);
+
+      if (error) throw error;
+
+      if (nextFeatured) {
+        toast.success('Produto adicionado aos destaques!');
+      } else {
+        toast.success('Produto removido dos destaques.');
+      }
+
+      // Invalida cache do catálogo público para sincronização imediata
+      queryClient.invalidateQueries({ queryKey: ['public-catalog'] });
+    } catch (err: any) {
+      console.error(err);
+      // Reversão em caso de erro
+      setProducts(prev =>
+        prev.map(item => (item.id === p.id ? { ...item, is_featured: p.is_featured } : item))
+      );
+      toast.error('Não foi possível atualizar o destaque. Tente novamente.');
+    } finally {
+      setUpdatingFeaturedId(null);
     }
   };
 
@@ -1011,8 +1056,18 @@ export default function Products() {
                             </div>
                             <div>
                               <p className="font-medium text-sm leading-tight">{p.name}</p>
-                              <div className="flex gap-1 mt-0.5 flex-wrap">
-                                {p.is_featured && <span className="text-[10px] bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5">⭐ Destaque</span>}
+                              <div className="flex gap-1 mt-0.5 flex-wrap items-center">
+                                {p.is_featured && (
+                                  <button
+                                    type="button"
+                                    disabled={updatingFeaturedId === p.id}
+                                    onClick={() => toggleFeatured(p)}
+                                    title="Clique para remover dos destaques"
+                                    className="text-[10px] bg-amber-100 hover:bg-amber-200 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5 transition-colors cursor-pointer"
+                                  >
+                                    ⭐ Destaque
+                                  </button>
+                                )}
                                 {p.is_promo && <span className="text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded font-medium">Promo</span>}
                                 {p.is_new && <span className="text-[10px] bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-1.5 py-0.5 rounded font-medium">Novo</span>}
                                 {addonCounts[p.id] ? (
@@ -1045,6 +1100,26 @@ export default function Products() {
                         </td>
                         <td className="px-5 py-4 text-right">
                           <div className="flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              disabled={updatingFeaturedId === p.id}
+                              onClick={() => toggleFeatured(p)}
+                              className={`p-2 rounded-lg transition-colors ${
+                                p.is_featured
+                                  ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20'
+                                  : 'text-neutral-400 hover:text-amber-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                              } disabled:opacity-50`}
+                              title={p.is_featured ? "Remover dos destaques" : "Adicionar aos destaques"}
+                            >
+                              {updatingFeaturedId === p.id ? (
+                                <Loader2 size={15} className="animate-spin text-amber-500" />
+                              ) : (
+                                <Star
+                                  size={15}
+                                  className={p.is_featured ? "fill-amber-400 text-amber-500" : "text-neutral-400 hover:text-amber-500"}
+                                />
+                              )}
+                            </button>
                             <button
                               onClick={() => openEdit(p)}
                               className="p-2 text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
@@ -1116,6 +1191,27 @@ export default function Products() {
                         >
                           {p.active ? <CheckCircle2 size={11} /> : <XCircle size={11} />}
                           {p.active ? 'Ativo' : 'Inativo'}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={updatingFeaturedId === p.id}
+                          onClick={() => toggleFeatured(p)}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                            p.is_featured
+                              ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 hover:bg-amber-200'
+                              : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200'
+                          } disabled:opacity-50`}
+                          title={p.is_featured ? "Remover dos destaques" : "Adicionar aos destaques"}
+                        >
+                          {updatingFeaturedId === p.id ? (
+                            <Loader2 size={11} className="animate-spin text-amber-500" />
+                          ) : (
+                            <Star
+                              size={11}
+                              className={p.is_featured ? "fill-amber-400 text-amber-500" : "text-neutral-400"}
+                            />
+                          )}
+                          <span>{p.is_featured ? 'Destaque' : 'Destacar'}</span>
                         </button>
                         <button
                           onClick={() => openEdit(p)}
