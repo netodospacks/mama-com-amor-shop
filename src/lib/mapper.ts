@@ -42,6 +42,15 @@ export const mapProductFromDB = (dbProduct: any): Product & { categorySlug?: str
     }
   }
 
+  const primaryImage =
+    (typeof dbProduct.image === 'string' && dbProduct.image.trim())
+      ? dbProduct.image.trim()
+      : (gallery && gallery.length > 0 && typeof gallery[0] === 'string' && gallery[0].trim())
+      ? gallery[0].trim()
+      : (typeof dbProduct.image_url === 'string' && dbProduct.image_url.trim())
+      ? dbProduct.image_url.trim()
+      : undefined;
+
   return {
     id: String(dbProduct.id),
     name: dbProduct.name || '',
@@ -50,7 +59,7 @@ export const mapProductFromDB = (dbProduct: any): Product & { categorySlug?: str
       dbProduct.is_promo && dbProduct.promo_price != null
         ? formatPriceValue(dbProduct.promo_price)
         : undefined,
-    image: dbProduct.image || undefined,
+    image: primaryImage,
     gallery,
     isPromo: Boolean(dbProduct.is_promo),
     isNew: Boolean(dbProduct.is_new),

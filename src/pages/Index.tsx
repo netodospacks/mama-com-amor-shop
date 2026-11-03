@@ -28,6 +28,7 @@ import { VSBrandMark } from "@/components/VSBrandMark";
 import { SnowEffect, SnowToggleBadge } from "@/components/SnowEffect";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Product } from "@/types/product";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { mapProductFromDB } from "@/lib/mapper";
@@ -55,15 +56,17 @@ const VirtualStoreProductCard = ({
   badge?: string;
   buttonText?: string;
 }) => {
+  const displayImage = product.image || (product.gallery && product.gallery.length > 0 ? product.gallery[0] : null);
+
   return (
     <article className="group bg-white rounded-2xl border border-[#EADFCF] p-3 sm:p-4 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg shadow-sm">
       <Link 
         to={`/product/${product.id}`}
         className="block relative overflow-hidden bg-[#FAF7F2] aspect-[4/5] rounded-xl"
       >
-        {product.image ? (
+        {displayImage ? (
           <img 
-            src={product.image} 
+            src={displayImage} 
             alt={product.name}
             loading="lazy"
             decoding="async"
@@ -144,9 +147,6 @@ const VirtualStoreProductCard = ({
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Index() {
   const { totalItems, setIsCartOpen } = useCart();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categoriesList, setCategoriesList] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Filtros interativos da vitrine "Queridinhos"
@@ -161,55 +161,122 @@ export default function Index() {
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  // Busca de dados do Supabase
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (!isSupabaseConfigured) {
-          setIsLoading(false);
-          return;
-        }
-
-        const [prodRes, catRes] = await Promise.all([
-          supabase
-            .from('products')
-            .select('*, categories(id, name, slug)')
-            .eq('active', true)
-            .order('sort_order'),
-          supabase
-            .from('categories')
-            .select('*')
-            .eq('active', true)
-            .order('sort_order', { ascending: true })
-        ]);
-
-        if (prodRes.data && prodRes.data.length > 0) {
-          setProducts(prodRes.data.map(mapProductFromDB));
-        }
-
-        if (catRes.data && catRes.data.length > 0) {
-          setCategoriesList(catRes.data);
-        }
-      } catch (err) {
-        console.error("Erro ao carregar dados do catálogo:", err);
-      } finally {
-        setIsLoading(false);
+  // Busca de dados reativa do Supabase via TanStack Query (com revalidação automática de foco)
+  const { data: catalogData, isLoading } = useQuery({
+    queryKey: ['public-catalog'],
+    queryFn: async () => {
+      if (!isSupabaseConfigured) {
+        return { products: [], categories: [] };
       }
-    };
-    fetchData();
-  }, []);
 
-  // Produto em destaque para o Hero
+      const [prodRes, catRes] = await Promise.all([
+        supabase
+          .from('products')
+          .select('*, categories(id, name, slug, active)')
+          .eq('active', true)
+          .order('sort_order', { ascending: true }),
+        supabase
+          .from('categories')
+          .select('*')
+          .eq('active', true)
+          .order('sort_order', { ascending: true })
+      ]);
+
+      const activeCategories = catRes.data || [];
+      const activeCategoryIds = new Set(activeCategories.map(c => c.id));
+
+      // REGRA: Quando uma categoria for ocultada, seus produtos não devem aparecer no catálogo público
+      const validProducts = (prodRes.data || []).filter(p => {
+        if (p.category_id && !activeCategoryIds.has(p.category_id)) {
+          return false;
+        }
+        return true;
+      });
+
+      return {
+        products: validProducts.map(mapProductFromDB),
+        categories: activeCategories
+      };
+    },
+    staleTime: 1000 * 20, // 20 segundos
+    refetchOnWindowFocus: true,
+  });
+
+  const products = catalogData?.products || [];
+  const categoriesList = catalogData?.categories || [];
+
+  // Produtos em destaque exclusivos (is_featured === true)
+  const featuredProducts = useMemo(() => {
+    return products.filter(p => p.isFeatured);
+  }, [products]);
+
+  // Produto spotlight para hero
   const heroFeaturedProduct = useMemo(() => {
     if (products.length === 0) return null;
-    return products.find(p => p.isFeatured) || products.find(p => p.isPromo) || products[0];
-  }, [products]);
+    return featuredProducts[0] || products.find(p => p.isPromo) || products[0];
+  }, [products, featuredProducts]);
+
+  // Metadados visuais boutique para categorias conhecidas ou dinâmicas
+  const getCategoryVisuals = (cat: { id: string; name: string; slug: string }) => {
+    const slug = (cat.slug || "").toLowerCase();
+    if (slug.includes('cesta')) {
+      return {
+        eyebrow: "O CARINHO DE ESTAR PERTO",
+        image: "/cestas/cestacoluna1_valor129,90.jpeg",
+        fallback: "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80",
+        cta: "Ver opções ↗"
+      };
+    }
+    if (slug.includes('quadro') || slug.includes('placa')) {
+      return {
+        eyebrow: "MEMÓRIAS ETERNAS",
+        image: "/QUADROSA4/WhatsApp Image 2026-05-27 at 02.30.48.jpeg",
+        fallback: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80",
+        cta: "Ver modelos ↗"
+      };
+    }
+    if (slug.includes('kit') || slug.includes('casal') || slug.includes('amor')) {
+      return {
+        eyebrow: "AMOR QUE VIRA PRESENTE",
+        image: "/produtos_combos/comboVS_valor29,90.jpeg",
+        fallback: "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80",
+        cta: "Surpreender ↗"
+      };
+    }
+    if (slug.includes('bebe') || slug.includes('mae')) {
+      return {
+        eyebrow: "DELICADEZA & TERNURA",
+        image: "/mamaes_bebes/caixa2bebe_valor34,90.jpeg",
+        fallback: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=800&q=80",
+        cta: "Conhecer ↗"
+      };
+    }
+    if (slug.includes('natal')) {
+      return {
+        eyebrow: "MAGIA & AFETO",
+        image: "/banners/WhatsApp Image 2026-10-15 at 19.34.15.jpeg",
+        fallback: "https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=800&q=80",
+        cta: "Coleção Natal ↗"
+      };
+    }
+    const prodWithImg = products.find(p => (p.categoryId === cat.id || p.categorySlug === cat.slug) && p.image);
+    return {
+      eyebrow: "COLEÇÃO EXCLUSIVA",
+      image: prodWithImg?.image || "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80",
+      fallback: "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80",
+      cta: "Explorar ↗"
+    };
+  };
 
   // Produtos filtrados para a vitrine "Queridinhos"
   const favoriteProducts = useMemo(() => {
-    let list = products.length > 0 ? products : [];
+    let list = [...products];
 
-    if (favoritesFilter === "cestas") {
+    if (favoritesFilter === "all") {
+      // Prioridade absoluta para produtos em destaque
+      const featured = list.filter(p => p.isFeatured);
+      list = featured.length > 0 ? featured : list.filter(p => p.isPromo || p.isNew);
+    } else if (favoritesFilter === "cestas") {
       list = list.filter(p => p.categorySlug?.includes("cesta") || p.name.toLowerCase().includes("cesta"));
     } else if (favoritesFilter === "quadros") {
       list = list.filter(p => p.categorySlug?.includes("quadro") || p.name.toLowerCase().includes("quadro"));
@@ -217,16 +284,18 @@ export default function Index() {
       list = list.filter(p => p.categorySlug?.includes("casal") || p.categorySlug?.includes("kit") || p.name.toLowerCase().includes("amor"));
     } else if (favoritesFilter === "combos") {
       list = list.filter(p => p.categorySlug?.includes("combo") || p.isPromo);
-    } else {
-      list = list.filter(p => p.isFeatured || p.isPromo || p.isNew);
     }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      list = list.filter(p => p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q));
+      list = list.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.shortDescription?.toLowerCase().includes(q) ||
+        p.detailedDescription?.toLowerCase().includes(q)
+      );
     }
 
-    return list.slice(0, 8);
+    return list;
   }, [products, favoritesFilter, searchQuery]);
 
   // Produtos filtrados para o Catálogo Geral
@@ -242,7 +311,13 @@ export default function Index() {
       });
     }
 
-    if (catalogSort === "low") {
+    if (catalogSort === "featured") {
+      list.sort((a, b) => {
+        if (a.isFeatured && !b.isFeatured) return -1;
+        if (!a.isFeatured && b.isFeatured) return 1;
+        return 0;
+      });
+    } else if (catalogSort === "low") {
       list.sort((a, b) => {
         const pA = parseFloat(a.price.replace("R$", "").replace(".", "").replace(",", ".").trim()) || 0;
         const pB = parseFloat(b.price.replace("R$", "").replace(".", "").replace(",", ".").trim()) || 0;
@@ -472,7 +547,7 @@ export default function Index() {
             {/* 4. Botão de Conversão em Vinho Aveludado (Inspirado na Referência) + WhatsApp */}
             <div className="flex flex-col sm:flex-row items-start justify-start gap-2.5 sm:gap-3 pt-2 w-full sm:w-auto">
               <button 
-                onClick={() => scrollTo("destaque-natal")}
+                onClick={() => scrollTo("destaques")}
                 className="self-start px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl bg-[#6f1e31] hover:bg-[#83243a] border border-[#99344c]/70 text-white text-xs font-semibold tracking-[0.14em] uppercase flex items-center justify-start gap-2.5 transition-all shadow-[0_8px_24px_rgba(111,30,49,0.45)] hover:scale-[1.02] active:scale-[0.98]"
               >
                 <span>Escolher meu presente</span>
@@ -538,10 +613,10 @@ export default function Index() {
 
               <nav className="flex-1 overflow-y-auto py-4 px-4 space-y-1">
                 <button
-                  onClick={() => scrollTo("destaque-natal")}
+                  onClick={() => scrollTo("destaques")}
                   className="w-full text-left px-4 py-3 rounded-xl text-xs font-bold tracking-wider uppercase text-neutral-800 hover:bg-neutral-100 hover:text-[#8B233C] transition-colors"
                 >
-                  🎄 Destaque de Natal
+                  ⭐ Produtos em Destaque
                 </button>
 
                 <button
@@ -625,80 +700,107 @@ export default function Index() {
       <main className="bg-[#FBF7EE] text-[#1F1A17]">
         
         {/* ─────────────────────────────────────────────────────────────────── */}
-        {/* 2. SEÇÃO INDEPENDENTE: DESTAQUE DE NATAL (CARD BRANCO NO FUNDO BEGE)*/}
+        {/* 2. SEÇÃO DE PRODUTOS EM DESTAQUE (CURADORIA EXCLUSIVA VIRTUAL STORE) */}
         {/* ─────────────────────────────────────────────────────────────────── */}
-        {heroFeaturedProduct && (
-          <section id="destaque-natal" className="bg-[#F5EFE6] border-b border-[#EADFCF] py-12 sm:py-16 px-4 sm:px-8 scroll-mt-20">
-            <div className="max-w-7xl mx-auto bg-white rounded-3xl border border-[#EADFCF] p-6 sm:p-10 shadow-lg grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center text-neutral-900">
-              
-              {/* Fotografia em Destaque */}
-              <div className="md:col-span-5 aspect-[4/5] bg-[#FAF7F2] rounded-2xl overflow-hidden relative shadow-md border border-neutral-200/80">
-                {heroFeaturedProduct.image ? (
-                  <img
-                    src={heroFeaturedProduct.image}
-                    alt={heroFeaturedProduct.name}
-                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-neutral-300">
-                    <Gift size={48} />
+        {featuredProducts.length > 0 && (
+          <section id="destaques" className="bg-[#F5EFE6] border-b border-[#EADFCF] py-12 sm:py-16 px-4 sm:px-8 scroll-mt-20">
+            <span id="destaque-natal" className="sr-only">Destaques</span>
+            <div className="max-w-7xl mx-auto">
+              <div className="mb-8 text-center max-w-2xl mx-auto">
+                <span className="eyebrow-vs block mb-1 text-[#8B233C] flex items-center justify-center gap-1.5">
+                  <Sparkles size={14} className="text-[#8B233C]" />
+                  <span>CURADORIA EXCLUSIVA</span>
+                </span>
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-neutral-900 uppercase tracking-tight mb-2">
+                  Produtos em Destaque
+                </h2>
+                <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed font-normal">
+                  Presentes selecionados a dedo pela nossa equipe para emocionar e surpreender em ocasiões especiais.
+                </p>
+              </div>
+
+              {/* Se houver 1 produto destacado, exibe o card spotlight imponente */}
+              {featuredProducts.length === 1 ? (
+                <div className="bg-white rounded-3xl border border-[#EADFCF] p-6 sm:p-10 shadow-lg grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center text-neutral-900">
+                  <div className="md:col-span-5 aspect-[4/5] bg-[#FAF7F2] rounded-2xl overflow-hidden relative shadow-md border border-neutral-200/80">
+                    {featuredProducts[0].image ? (
+                      <img
+                        src={featuredProducts[0].image}
+                        alt={featuredProducts[0].name}
+                        className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-neutral-300">
+                        <Gift size={48} />
+                      </div>
+                    )}
+                    <div className="absolute top-3 left-3 bg-[#8B233C] text-white px-3.5 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-md">
+                      Destaque da Loja
+                    </div>
                   </div>
-                )}
-                <div className="absolute top-3 left-3 bg-[#8B233C] text-white px-3.5 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-md">
-                  Destaque de Natal
+
+                  <div className="md:col-span-7 flex flex-col items-start justify-center text-left space-y-4 sm:space-y-6">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-widest text-[#8B233C] flex items-center gap-1.5">
+                        <Sparkles size={14} className="text-[#8B233C]" />
+                        <span>Sugestão Especial da Boutique</span>
+                      </span>
+                      <h3 className="text-2xl sm:text-4xl font-extrabold text-neutral-900 mt-1 font-sans">
+                        {featuredProducts[0].name}
+                      </h3>
+                      <p className="text-sm sm:text-base text-neutral-600 mt-3 leading-relaxed">
+                        {featuredProducts[0].shortDescription || "Personalização sob medida com fotos, nomes e acabamento especial de boutique feito com afeto."}
+                      </p>
+                    </div>
+
+                    <div className="flex items-baseline gap-3">
+                      <span className="text-2xl sm:text-3xl font-extrabold text-[#8B233C]">
+                        {featuredProducts[0].promoPrice || featuredProducts[0].price}
+                      </span>
+                      {featuredProducts[0].isPromo && featuredProducts[0].promoPrice && (
+                        <span className="text-xs sm:text-sm text-neutral-400 line-through">
+                          {featuredProducts[0].price}
+                        </span>
+                      )}
+                      <span className="text-xs text-neutral-500 font-medium">
+                        Personalização sob encomenda
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3.5 w-full sm:w-auto">
+                      <Link
+                        to={`/product/${featuredProducts[0].id}`}
+                        className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#8B233C] hover:bg-[#A32A47] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                      >
+                        <span>Eu Quero Este Presente</span>
+                        <ArrowRight size={15} className="text-white" />
+                      </Link>
+
+                      <a
+                        href={`https://wa.me/5583993032780?text=Ol%C3%A1!%20Gostaria%20de%20encomendar%20o%20Destaque%3A%20${encodeURIComponent(featuredProducts[0].name)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98]"
+                      >
+                        <WhatsAppIcon size={16} className="text-white" />
+                        <span>Pedir no WhatsApp</span>
+                      </a>
+                    </div>
+
+                    <div className="pt-4 border-t border-neutral-200 flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-neutral-600 font-medium">
+                      <span className="flex items-center gap-1.5"><Check size={14} className="text-[#8B233C]" /> Encomenda com prévia</span>
+                      <span className="flex items-center gap-1.5"><Check size={14} className="text-[#8B233C]" /> Entrega em João Pessoa, Santa Rita e Região</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-
-              {/* Informações e Conversão do Produto */}
-              <div className="md:col-span-7 flex flex-col items-start justify-center text-left space-y-4 sm:space-y-6">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-widest text-[#8B233C] flex items-center gap-1.5">
-                    <Sparkles size={14} className="text-[#8B233C]" />
-                    <span>Sugestão Especial de Natal</span>
-                  </span>
-                  <h2 className="text-2xl sm:text-4xl font-extrabold text-neutral-900 mt-1 font-sans">
-                    {heroFeaturedProduct.name}
-                  </h2>
-                  <p className="text-sm sm:text-base text-neutral-600 mt-3 leading-relaxed">
-                    Personalização sob medida com fotos, nomes e acabamento especial de boutique feito com afeto para celebrar o Natal.
-                  </p>
+              ) : (
+                /* Quando houver múltiplos produtos destacados, exibe todos em grade responsiva */
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+                  {featuredProducts.map((product) => (
+                    <VirtualStoreProductCard key={product.id} product={product} />
+                  ))}
                 </div>
-
-                <div className="flex items-baseline gap-3">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-[#8B233C]">
-                    {heroFeaturedProduct.price}
-                  </span>
-                  <span className="text-xs text-neutral-500 font-medium">
-                    Personalização sob encomenda
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3.5 w-full sm:w-auto">
-                  <Link
-                    to={`/product/${heroFeaturedProduct.id}`}
-                    className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#8B233C] hover:bg-[#A32A47] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    <span>Eu Quero Este Presente</span>
-                    <ArrowRight size={15} className="text-white" />
-                  </Link>
-
-                  <a
-                    href={`https://wa.me/5583993032780?text=Ol%C3%A1!%20Gostaria%20de%20encomendar%20o%20Destaque%20de%20Natal%3A%20${encodeURIComponent(heroFeaturedProduct.name)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98]"
-                  >
-                    <WhatsAppIcon size={16} className="text-white" />
-                    <span>Pedir no WhatsApp</span>
-                  </a>
-                </div>
-
-                <div className="pt-4 border-t border-neutral-200 flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-neutral-600 font-medium">
-                  <span className="flex items-center gap-1.5"><Check size={14} className="text-[#8B233C]" /> Encomenda com prévia</span>
-                  <span className="flex items-center gap-1.5"><Check size={14} className="text-[#8B233C]" /> Entrega em João Pessoa, Santa Rita e Região</span>
-                </div>
-              </div>
-
+              )}
             </div>
           </section>
         )}
@@ -753,115 +855,37 @@ export default function Index() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              
-              {/* Card 1: Cestas */}
-              <div 
-                onClick={() => { setActiveCategorySlug("cesta-cafe-da-manha"); scrollTo("categorias"); }}
-                className="group relative h-[340px] sm:h-[400px] rounded-2xl overflow-hidden bg-neutral-900 border border-white/20 cursor-pointer shadow-lg hover:shadow-2xl transition-all"
-              >
-                <img 
-                  src="/cestas/cestacoluna1_valor129,90.jpeg" 
-                  alt="Cestas de Café da Manhã"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80";
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6 text-white z-10">
-                  <small className="block text-[9px] uppercase tracking-[0.22em] text-[#F5E6C8] mb-1 font-bold">
-                    O CARINHO DE ESTAR PERTO
-                  </small>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-2 text-white">
-                    Cestas de Café
-                  </h3>
-                  <span className="inline-block text-[11px] font-semibold border-b border-[#F5E6C8] pb-0.5 text-[#F5E6C8] group-hover:text-white group-hover:border-white transition-colors">
-                    Ver opções ↗
-                  </span>
-                </div>
-              </div>
-
-              {/* Card 2: Quadros */}
-              <div 
-                onClick={() => { setActiveCategorySlug("quadros-casal"); scrollTo("categorias"); }}
-                className="group relative h-[340px] sm:h-[400px] rounded-2xl overflow-hidden bg-neutral-900 border border-white/20 cursor-pointer shadow-lg hover:shadow-2xl transition-all"
-              >
-                <img 
-                  src="/QUADROSA4/WhatsApp Image 2026-05-27 at 02.30.48.jpeg" 
-                  alt="Quadros Personalizados"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80";
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6 text-white z-10">
-                  <small className="block text-[9px] uppercase tracking-[0.22em] text-[#F5E6C8] mb-1 font-bold">
-                    MEMÓRIAS ETERNAS
-                  </small>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-2 text-white">
-                    Quadros & Placas
-                  </h3>
-                  <span className="inline-block text-[11px] font-semibold border-b border-[#F5E6C8] pb-0.5 text-[#F5E6C8] group-hover:text-white group-hover:border-white transition-colors">
-                    Ver modelos ↗
-                  </span>
-                </div>
-              </div>
-
-              {/* Card 3: Kits Casal */}
-              <div 
-                onClick={() => { setActiveCategorySlug("kits-casal"); scrollTo("categorias"); }}
-                className="group relative h-[340px] sm:h-[400px] rounded-2xl overflow-hidden bg-neutral-900 border border-white/20 cursor-pointer shadow-lg hover:shadow-2xl transition-all"
-              >
-                <img 
-                  src="/produtos_combos/comboVS_valor29,90.jpeg" 
-                  alt="Kits Casal e Românticos"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80";
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6 text-white z-10">
-                  <small className="block text-[9px] uppercase tracking-[0.22em] text-[#F5E6C8] mb-1 font-bold">
-                    AMOR QUE VIRA PRESENTE
-                  </small>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-2 text-white">
-                    Kits Românticos
-                  </h3>
-                  <span className="inline-block text-[11px] font-semibold border-b border-[#F5E6C8] pb-0.5 text-[#F5E6C8] group-hover:text-white group-hover:border-white transition-colors">
-                    Surpreender ↗
-                  </span>
-                </div>
-              </div>
-
-              {/* Card 4: Mamães e Bebês */}
-              <div 
-                onClick={() => { setActiveCategorySlug("mamaes-e-bebes"); scrollTo("categorias"); }}
-                className="group relative h-[340px] sm:h-[400px] rounded-2xl overflow-hidden bg-neutral-900 border border-white/20 cursor-pointer shadow-lg hover:shadow-2xl transition-all"
-              >
-                <img 
-                  src="/mamaes_bebes/caixa2bebe_valor34,90.jpeg" 
-                  alt="Mamães e Bebês"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=800&q=80";
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6 text-white z-10">
-                  <small className="block text-[9px] uppercase tracking-[0.22em] text-[#F5E6C8] mb-1 font-bold">
-                    DELICADEZA & TERNURA
-                  </small>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-2 text-white">
-                    Mamães & Bebês
-                  </h3>
-                  <span className="inline-block text-[11px] font-semibold border-b border-[#F5E6C8] pb-0.5 text-[#F5E6C8] group-hover:text-white group-hover:border-white transition-colors">
-                    Conhecer ↗
-                  </span>
-                </div>
-              </div>
-
+              {categoriesList.slice(0, 4).map((cat) => {
+                const visuals = getCategoryVisuals(cat);
+                return (
+                  <div 
+                    key={cat.id}
+                    onClick={() => { setActiveCategorySlug(cat.slug); scrollTo("categorias"); }}
+                    className="group relative h-[340px] sm:h-[400px] rounded-2xl overflow-hidden bg-neutral-900 border border-white/20 cursor-pointer shadow-lg hover:shadow-2xl transition-all"
+                  >
+                    <img 
+                      src={visuals.image} 
+                      alt={cat.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = visuals.fallback;
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                    <div className="absolute bottom-6 left-6 right-6 text-white z-10">
+                      <small className="block text-[9px] uppercase tracking-[0.22em] text-[#F5E6C8] mb-1 font-bold">
+                        {visuals.eyebrow}
+                      </small>
+                      <h3 className="text-xl sm:text-2xl font-bold mb-2 text-white">
+                        {cat.name}
+                      </h3>
+                      <span className="inline-block text-[11px] font-semibold border-b border-[#F5E6C8] pb-0.5 text-[#F5E6C8] group-hover:text-white group-hover:border-white transition-colors">
+                        {visuals.cta}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>

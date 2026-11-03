@@ -112,7 +112,12 @@ export default function Categories() {
   };
 
   const generateSlug = (text: string) => {
-    return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -123,9 +128,24 @@ export default function Categories() {
     }
     setSaving(true);
 
-    // Na edição, preserva rigorosamente o slug original caso o usuário não tenha alterado intencionalmente
     const originalCat = isEditing && formData.id ? categories.find(c => c.id === formData.id) : null;
-    const finalSlug = formData.slug?.trim() || originalCat?.slug || generateSlug(formData.name.trim());
+    let finalSlug = '';
+    
+    if (formData.slug?.trim()) {
+      finalSlug = generateSlug(formData.slug.trim());
+    } else if (originalCat?.slug) {
+      finalSlug = originalCat.slug;
+    } else {
+      finalSlug = generateSlug(formData.name.trim());
+    }
+
+    // Validação de colisão de slugs
+    const slugCollision = categories.find(c => c.slug === finalSlug && c.id !== formData.id);
+    if (slugCollision) {
+      toast.error(`O identificador (slug) "${finalSlug}" já está em uso pela categoria "${slugCollision.name}". Escolha outro slug.`);
+      setSaving(false);
+      return;
+    }
     
     const payload = {
       name: formData.name.trim(),

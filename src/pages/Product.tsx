@@ -31,11 +31,18 @@ export default function Product() {
         if (isSupabaseConfigured) {
           const { data } = await supabase
             .from('products')
-            .select('*, categories(slug)')
+            .select('*, categories(slug, active)')
             .eq('id', id)
             .single();
           
           if (data) {
+            // Se o produto está inativo ou sua categoria vinculada está inativa, ocultar da loja pública
+            if (data.active === false || (data.categories && (data.categories as any).active === false)) {
+              setProduct(null);
+              setIsLoading(false);
+              return;
+            }
+
             const mappedProduct = mapProductFromDB(data);
             setProduct(mappedProduct);
             setIsLoading(false);

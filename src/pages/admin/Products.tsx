@@ -577,11 +577,15 @@ export default function Products() {
 
     setSaving(true);
 
+    const mainImg = (formData.image && formData.image.trim())
+      ? formData.image.trim()
+      : (formData.gallery && formData.gallery.length > 0 && formData.gallery[0] ? formData.gallery[0].trim() : null);
+
     const payload = {
       name: formData.name.trim(),
       price: parsePrice(formData.price),
       promo_price: parsePrice(formData.promo_price) || null,
-      image: formData.image || null,
+      image: mainImg,
       gallery: formData.gallery.length > 0 ? formData.gallery : null,
       is_promo: formData.is_promo,
       is_new: formData.is_new,
