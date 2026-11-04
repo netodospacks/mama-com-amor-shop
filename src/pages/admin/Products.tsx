@@ -26,6 +26,7 @@ import { fetchAddonCountsByProduct } from '@/lib/subproducts';
 interface Category {
   id: string;
   name: string;
+  slug: string;
   active: boolean;
 }
 
@@ -39,6 +40,9 @@ interface Product {
   is_promo: boolean;
   is_new: boolean;
   is_featured: boolean;
+  is_best_seller?: boolean;
+  display_order?: number;
+  collection?: string | null;
   short_description: string | null;
   detailed_description: string | null;
   specifications: string[] | null;
@@ -77,6 +81,9 @@ type FormData = {
   is_promo: boolean;
   is_new: boolean;
   is_featured: boolean;
+  is_best_seller: boolean;
+  display_order: number;
+  collection: string;
   short_description: string;
   detailed_description: string;
   specifications: string[];
@@ -95,6 +102,9 @@ const emptyForm = (): FormData => ({
   is_promo: false,
   is_new: false,
   is_featured: false,
+  is_best_seller: false,
+  display_order: 1,
+  collection: '',
   short_description: '',
   detailed_description: '',
   specifications: [],
@@ -407,6 +417,7 @@ export default function Products() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingFeaturedId, setUpdatingFeaturedId] = useState<string | null>(null);
+  const [updatingBestSellerId, setUpdatingBestSellerId] = useState<string | null>(null);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -439,7 +450,7 @@ export default function Products() {
         .from('products')
         .select('*, categories(name)')
         .order('sort_order', { ascending: true }),
-      supabase.from('categories').select('id, name, active').order('name'),
+      supabase.from('categories').select('id, name, slug, active').order('sort_order', { ascending: true }),
       fetchAddonCountsByProduct(),
     ]);
 
@@ -507,6 +518,9 @@ export default function Products() {
       is_promo: p.is_promo ?? false,
       is_new: p.is_new ?? false,
       is_featured: p.is_featured ?? false,
+      is_best_seller: p.is_best_seller ?? false,
+      display_order: p.display_order ?? (p.sort_order ?? 1),
+      collection: p.collection ?? '',
       short_description: p.short_description ?? '',
       detailed_description: p.detailed_description ?? '',
       specifications: p.specifications ?? [],
@@ -551,6 +565,9 @@ export default function Products() {
           is_promo: p.is_promo ?? false,
           is_new: p.is_new ?? false,
           is_featured: p.is_featured ?? false,
+          is_best_seller: p.is_best_seller ?? false,
+          display_order: p.display_order ?? (p.sort_order ?? 1),
+          collection: p.collection ?? '',
           short_description: p.short_description ?? '',
           detailed_description: p.detailed_description ?? '',
           specifications: p.specifications ?? [],
@@ -561,7 +578,7 @@ export default function Products() {
         });
       }
     } else {
-      setFormData({ ...emptyForm(), sort_order: products.length + 1 });
+      setFormData({ ...emptyForm(), sort_order: products.length + 1, display_order: products.length + 1 });
     }
     toast.success("Rascunho descartado.");
   };
@@ -595,6 +612,9 @@ export default function Products() {
       is_promo: formData.is_promo,
       is_new: formData.is_new,
       is_featured: formData.is_featured,
+      is_best_seller: formData.is_best_seller,
+      display_order: formData.display_order || formData.sort_order || 1,
+      collection: formData.collection.trim() || null,
       short_description: formData.short_description || null,
       detailed_description: formData.detailed_description || null,
       specifications: formData.specifications.length > 0 ? formData.specifications : null,
@@ -688,6 +708,46 @@ export default function Products() {
       toast.error('Não foi possível atualizar o destaque. Tente novamente.');
     } finally {
       setUpdatingFeaturedId(null);
+    }
+  };
+
+  // ── Toggle best seller (1-click Mais Pedido) ──────────────────────────────
+
+  const toggleBestSeller = async (p: Product) => {
+    if (updatingBestSellerId === p.id) return;
+    const nextBestSeller = !p.is_best_seller;
+    setUpdatingBestSellerId(p.id);
+
+    // Atualização otimista imediata na interface
+    setProducts(prev =>
+      prev.map(item => (item.id === p.id ? { ...item, is_best_seller: nextBestSeller } : item))
+    );
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ is_best_seller: nextBestSeller })
+        .eq('id', p.id);
+
+      if (error) throw error;
+
+      if (nextBestSeller) {
+        toast.success('Produto marcado como MAIS PEDIDO!');
+      } else {
+        toast.success('Selo Mais Pedido removido do produto.');
+      }
+
+      // Invalida cache do catálogo público para sincronização imediata
+      queryClient.invalidateQueries({ queryKey: ['public-catalog'] });
+    } catch (err: any) {
+      console.error(err);
+      // Reversão em caso de erro
+      setProducts(prev =>
+        prev.map(item => (item.id === p.id ? { ...item, is_best_seller: p.is_best_seller } : item))
+      );
+      toast.error('Não foi possível atualizar o selo Mais Pedido.');
+    } finally {
+      setUpdatingBestSellerId(null);
     }
   };
 
@@ -823,11 +883,28 @@ export default function Products() {
                       className="w-full px-3 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm bg-neutral-50 dark:bg-neutral-900 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                     >
                       <option value="">Sem categoria</option>
-                      {categories.map(c => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}{!c.active ? ' (inativa)' : ''}
-                        </option>
-                      ))}
+                      {/* Grupo Cestas com suas subseções */}
+                      {categories.some(c => c.slug?.startsWith('cesta-') || c.name.toLowerCase().includes('cesta')) && (
+                        <optgroup label="Cestas (Subcategorias)">
+                          {categories
+                            .filter(c => c.slug?.startsWith('cesta-') || c.name.toLowerCase().includes('cesta'))
+                            .map(c => (
+                              <option key={c.id} value={c.id}>
+                                {c.name}{!c.active ? ' (inativa)' : ''}
+                              </option>
+                            ))}
+                        </optgroup>
+                      )}
+                      {/* Demais Categorias */}
+                      <optgroup label="Outras Categorias Principais">
+                        {categories
+                          .filter(c => !c.slug?.startsWith('cesta-') && !c.name.toLowerCase().includes('cesta'))
+                          .map(c => (
+                            <option key={c.id} value={c.id}>
+                              {c.name}{!c.active ? ' (inativa)' : ''}
+                            </option>
+                          ))}
+                      </optgroup>
                     </select>
                     <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
                   </div>
@@ -838,28 +915,40 @@ export default function Products() {
                     type="number"
                     min={1}
                     value={formData.sort_order}
-                    onChange={e => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 1 })}
+                    onChange={e => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 1, display_order: parseInt(e.target.value) || 1 })}
                     className="w-full px-3 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm bg-neutral-50 dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                   />
                 </div>
-                <div className="flex flex-col justify-end gap-2 pb-1">
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <input type="checkbox" checked={formData.active} onChange={e => setFormData({ ...formData, active: e.target.checked })} className="w-4 h-4 rounded" />
-                    <span className="text-sm font-medium">Produto ativo</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <input type="checkbox" checked={formData.is_featured} onChange={e => setFormData({ ...formData, is_featured: e.target.checked })} className="w-4 h-4 rounded accent-amber-500" />
-                    <span className="text-sm font-medium text-amber-700 dark:text-amber-400">⭐ Destaque (Página Inicial)</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <input type="checkbox" checked={formData.is_promo} onChange={e => setFormData({ ...formData, is_promo: e.target.checked })} className="w-4 h-4 rounded" />
-                    <span className="text-sm">Promoção</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <input type="checkbox" checked={formData.is_new} onChange={e => setFormData({ ...formData, is_new: e.target.checked })} className="w-4 h-4 rounded" />
-                    <span className="text-sm">Novidade</span>
-                  </label>
+                <div>
+                  <label className="block text-xs font-medium mb-1.5">Coleção Temática</label>
+                  <input
+                    type="text"
+                    value={formData.collection}
+                    onChange={e => setFormData({ ...formData, collection: e.target.value })}
+                    placeholder="Ex: natal, dia-das-maes"
+                    className="w-full px-3 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm bg-neutral-50 dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                  />
                 </div>
+              </div>
+
+              {/* Status e Destaques Especiais */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-neutral-50 dark:bg-neutral-900/60 rounded-xl border border-neutral-200/80 dark:border-neutral-800">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" checked={formData.active} onChange={e => setFormData({ ...formData, active: e.target.checked })} className="w-4 h-4 rounded" />
+                  <span className="text-xs sm:text-sm font-medium">Produto ativo</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" checked={formData.is_best_seller} onChange={e => setFormData({ ...formData, is_best_seller: e.target.checked })} className="w-4 h-4 rounded accent-amber-500" />
+                  <span className="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-400">🔥 MAIS PEDIDO</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" checked={formData.is_featured} onChange={e => setFormData({ ...formData, is_featured: e.target.checked })} className="w-4 h-4 rounded accent-amber-500" />
+                  <span className="text-xs sm:text-sm font-medium text-amber-700 dark:text-amber-400">⭐ Destaque Geral</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" checked={formData.is_promo} onChange={e => setFormData({ ...formData, is_promo: e.target.checked })} className="w-4 h-4 rounded" />
+                  <span className="text-xs sm:text-sm font-medium">Promoção</span>
+                </label>
               </div>
 
               {/* Main image */}
@@ -982,9 +1071,22 @@ export default function Products() {
                 className="w-full px-3 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm bg-neutral-50 dark:bg-neutral-900 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
               >
                 <option value="">Todas categorias</option>
-                {categories.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
+                {categories.some(c => c.slug?.startsWith('cesta-') || c.name.toLowerCase().includes('cesta')) && (
+                  <optgroup label="Cestas (Subcategorias)">
+                    {categories
+                      .filter(c => c.slug?.startsWith('cesta-') || c.name.toLowerCase().includes('cesta'))
+                      .map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                  </optgroup>
+                )}
+                <optgroup label="Outras Categorias">
+                  {categories
+                    .filter(c => !c.slug?.startsWith('cesta-') && !c.name.toLowerCase().includes('cesta'))
+                    .map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                </optgroup>
               </select>
               <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
             </div>
@@ -1057,6 +1159,22 @@ export default function Products() {
                             <div>
                               <p className="font-medium text-sm leading-tight">{p.name}</p>
                               <div className="flex gap-1 mt-0.5 flex-wrap items-center">
+                                {p.is_best_seller && (
+                                  <button
+                                    type="button"
+                                    disabled={updatingBestSellerId === p.id}
+                                    onClick={() => toggleBestSeller(p)}
+                                    title="Clique para remover o selo Mais Pedido"
+                                    className="text-[10px] bg-amber-500 hover:bg-amber-600 text-white font-black px-1.5 py-0.5 rounded flex items-center gap-0.5 transition-colors cursor-pointer shadow-xs"
+                                  >
+                                    🔥 MAIS PEDIDO
+                                  </button>
+                                )}
+                                {p.collection && (
+                                  <span className="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 px-1.5 py-0.5 rounded font-medium">
+                                    🎄 {p.collection}
+                                  </span>
+                                )}
                                 {p.is_featured && (
                                   <button
                                     type="button"
@@ -1168,6 +1286,16 @@ export default function Products() {
                         {' · '}Ordem: {p.sort_order}
                       </p>
                       <div className="flex gap-1 mt-1 flex-wrap">
+                        {p.is_best_seller && (
+                          <span className="text-[10px] bg-amber-500 text-white font-black px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                            🔥 MAIS PEDIDO
+                          </span>
+                        )}
+                        {p.collection && (
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 px-1.5 py-0.5 rounded font-medium">
+                            🎄 {p.collection}
+                          </span>
+                        )}
                         {p.is_featured && <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5">⭐ Destaque</span>}
                         {p.is_promo && <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Promo</span>}
                         {p.is_new && <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">Novo</span>}
