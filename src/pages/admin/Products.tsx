@@ -128,6 +128,57 @@ const emptyForm = (): FormData => ({
 
 const MAX_FILE_SIZE_MB = 10;
 
+// ─── Storage Error Parser ───────────────────────────────────────────────────
+
+export function parseStorageError(error: any): string {
+  if (!error) return 'Erro desconhecido ao enviar imagem.';
+  const msg = typeof error === 'string' ? error : (error.message || '');
+  const status = error.status || error.statusCode;
+
+  if (msg.includes('Sessão expirada') || msg.includes('não autenticada')) {
+    return 'Sessão expirada. Por favor, faça login novamente no painel.';
+  }
+  if (msg.includes('row-level security') || status === '403' || status === 403 || error.code === 'AccessDenied') {
+    return 'Permissão negada (RLS). Sua sessão de administrador pode ter expirado ou precisa ser renovada. Faça logout e login novamente no painel.';
+  }
+  if (msg.includes('Payload too large') || status === '413' || status === 413) {
+    return `A imagem é muito grande. O limite máximo é de ${MAX_FILE_SIZE_MB}MB.`;
+  }
+  if (msg.includes('Bucket not found') || status === '404' || status === 404) {
+    return 'O bucket de imagens "product-images" não foi encontrado no Supabase.';
+  }
+  if (msg.includes('JWT') || msg.includes('token') || msg.includes('auth') || status === 401 || status === '401') {
+    return 'Sessão expirada. Por favor, faça login novamente no painel.';
+  }
+  if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('network')) {
+    return 'Falha de conexão com o Supabase. Verifique sua conexão com a internet.';
+  }
+  return msg || 'Falha ao processar o arquivo no servidor.';
+}
+
+// ─── Session Validator & Auto-refresh ───────────────────────────────────────
+
+async function checkAndRefreshAdminSession(): Promise<void> {
+  const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
+  if (sessionErr || !sessionData?.session) {
+    throw new Error('Sessão expirada ou não autenticada. Por favor, faça login novamente no painel.');
+  }
+
+  const session = sessionData.session;
+  const expiresAt = session.expires_at;
+  // Se faltar menos de 2 minutos para expirar ou já expirou, renova proativamente
+  if (expiresAt && (expiresAt * 1000 - Date.now() < 120000)) {
+    try {
+      const { data: refreshed, error: refreshErr } = await supabase.auth.refreshSession();
+      if (refreshErr || !refreshed?.session) {
+        throw new Error('Sessão expirada. Por favor, faça login novamente no painel.');
+      }
+    } catch {
+      throw new Error('Sessão expirada. Por favor, faça login novamente no painel.');
+    }
+  }
+}
+
 // ─── Upload helper ────────────────────────────────────────────────────────────
 
 async function uploadImage(
@@ -135,20 +186,78 @@ async function uploadImage(
   productId: string,
   onProgress?: (msg: string) => void
 ): Promise<string> {
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
-  const fileName = `${Date.now()}.${ext}`;
-  const path = `products/${productId}/${fileName}`;
+  // 1. Validar e renovar sessão de administrador
+  await checkAndRefreshAdminSession();
+
+  // 2. Sanitizar extensão e MIME type
+  const rawExt = file.name.split('.').pop()?.toLowerCase() || '';
+  const cleanExt = rawExt.replace(/[^a-z0-9]/g, '') || (file.type.includes('png') ? 'png' : file.type.includes('webp') ? 'webp' : 'jpg');
+  
+  let mimeType = file.type || '';
+  if (!mimeType || mimeType === 'application/octet-stream') {
+    mimeType = cleanExt === 'png' ? 'image/png' : cleanExt === 'webp' ? 'image/webp' : 'image/jpeg';
+  }
+
+  // 3. Sanitizar identificador do produto
+  const cleanProductId = (productId && productId.trim() !== '' && productId !== 'undefined')
+    ? productId.trim().replace(/[^a-zA-Z0-9_-]/g, '')
+    : 'temp';
+
+  const timestamp = Date.now();
+  const uniqueSuffix = Math.random().toString(36).substring(2, 7);
+  const fileName = `${timestamp}_${uniqueSuffix}.${cleanExt}`;
+  
+  // Caminho esperado conforme padrão da loja: products/{id}/{timestamp}.ext
+  const primaryPath = `products/${cleanProductId}/${fileName}`;
 
   onProgress?.('Enviando imagem...');
 
-  const { error } = await supabase.storage
+  let { error } = await supabase.storage
     .from('product-images')
-    .upload(path, file, { upsert: false });
+    .upload(primaryPath, file, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType: mimeType,
+    });
 
-  if (error) throw error;
+  let finalPath = primaryPath;
 
-  const { data } = supabase.storage.from('product-images').getPublicUrl(path);
-  return data.publicUrl;
+  // Fallback seguro caso a política RLS exija caminho raiz para produtos
+  if (error && (error.message?.includes('row-level security') || (error as any).statusCode === '403')) {
+    const fallbackPath = `${Date.now()}_prod_${cleanProductId}_${uniqueSuffix}.${cleanExt}`;
+    console.warn(`[uploadImage] Tentando fallback para caminho seguro: ${fallbackPath}`);
+    const retry = await supabase.storage
+      .from('product-images')
+      .upload(fallbackPath, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: mimeType,
+      });
+
+    if (!retry.error) {
+      error = null;
+      finalPath = fallbackPath;
+    }
+  }
+
+  if (error) {
+    console.error('[Upload de Imagem] Falha na operação:', {
+      path: primaryPath,
+      fileSize: file.size,
+      mimeType,
+      status: error.status,
+      statusCode: (error as any).statusCode,
+      message: error.message,
+    });
+    throw error;
+  }
+
+  const { data: pubData } = supabase.storage.from('product-images').getPublicUrl(finalPath);
+  if (!pubData?.publicUrl) {
+    throw new Error('Falha ao obter URL pública da imagem após o upload.');
+  }
+
+  return pubData.publicUrl;
 }
 
 async function removeStorageFile(url: string) {
@@ -187,8 +296,13 @@ function ImagePicker({
   useEffect(() => setPreview(currentUrl), [currentUrl]);
 
   const handleFile = async (file: File) => {
+    const rawExt = file.name.split('.').pop()?.toLowerCase() || '';
+    const cleanExt = rawExt.replace(/[^a-z0-9]/g, '');
+    const allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
+
+    const isAllowed = allowedTypes.includes(file.type?.toLowerCase()) || allowedExts.includes(cleanExt);
+    if (!isAllowed) {
       toast.error('Formato não suportado. Use JPG, PNG ou WEBP.');
       return;
     }
@@ -204,8 +318,9 @@ function ImagePicker({
       onUploaded(url);
       toast.success('Imagem enviada com sucesso!');
     } catch (e: any) {
-      console.error(e);
-      toast.error('Não foi possível enviar a imagem.');
+      console.error('[ImagePicker] Erro:', e);
+      const friendlyMsg = parseStorageError(e);
+      toast.error(`Não foi possível enviar a imagem: ${friendlyMsg}`);
     } finally {
       setUploading(false);
     }
@@ -250,7 +365,7 @@ function ImagePicker({
           <input
             ref={ref}
             type="file"
-            accept=".jpg,.jpeg,.png,.webp"
+            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
             className="hidden"
             onChange={e => { if (e.target.files?.[0]) handleFile(e.target.files[0]); e.target.value = ''; }}
           />
@@ -276,9 +391,20 @@ function GalleryPicker({
   const [uploading, setUploading] = useState(false);
 
   const handleFile = async (file: File) => {
+    const rawExt = file.name.split('.').pop()?.toLowerCase() || '';
+    const cleanExt = rawExt.replace(/[^a-z0-9]/g, '');
+    const allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) { toast.error('Formato não suportado.'); return; }
-    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) { toast.error(`Máximo ${MAX_FILE_SIZE_MB}MB.`); return; }
+
+    const isAllowed = allowedTypes.includes(file.type?.toLowerCase()) || allowedExts.includes(cleanExt);
+    if (!isAllowed) {
+      toast.error('Formato não suportado. Use JPG, PNG ou WEBP.');
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      toast.error(`Máximo ${MAX_FILE_SIZE_MB}MB.`);
+      return;
+    }
 
     setUploading(true);
     try {
@@ -286,8 +412,9 @@ function GalleryPicker({
       onChange([...gallery, url]);
       toast.success('Imagem adicionada à galeria!');
     } catch (e: any) {
-      console.error(e);
-      toast.error('Não foi possível enviar a imagem.');
+      console.error('[GalleryPicker] Erro:', e);
+      const friendlyMsg = parseStorageError(e);
+      toast.error(`Não foi possível enviar a imagem: ${friendlyMsg}`);
     } finally {
       setUploading(false);
     }
@@ -321,7 +448,7 @@ function GalleryPicker({
         <input
           ref={ref}
           type="file"
-          accept=".jpg,.jpeg,.png,.webp"
+          accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
           className="hidden"
           onChange={e => { if (e.target.files?.[0]) handleFile(e.target.files[0]); e.target.value = ''; }}
         />
