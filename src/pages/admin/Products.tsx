@@ -54,7 +54,19 @@ interface Product {
   categories?: { name: string } | null;
 }
 
-// ─── Price Helpers ────────────────────────────────────────────────────────────
+// ─── Price & UUID Helpers ────────────────────────────────────────────────────
+
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  // Fallback RFC4122 v4 UUID generator for environments without crypto.randomUUID (e.g. non-HTTPS/older webviews)
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 function parsePrice(value: string | number): number {
   if (typeof value === 'number') return value;
@@ -439,47 +451,64 @@ export default function Products() {
   const [addonCounts, setAddonCounts] = useState<Record<string, number>>({});
 
   // Generate a stable temp ID for new product uploads
-  const [tempId] = useState(() => crypto.randomUUID());
+  const [tempId] = useState(() => generateUUID());
+
+  // ── Helper Categorias ──────────────────────────────────────────────────────
+  const isBasketCategory = (c: Category) => {
+    const slug = c?.slug || '';
+    const name = c?.name || '';
+    return slug.startsWith('cesta-') || name.toLowerCase().includes('cesta');
+  };
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
 
   const fetchAll = async () => {
     setLoading(true);
-    const [prodRes, catRes, counts] = await Promise.all([
-      supabase
-        .from('products')
-        .select('*, categories(name)')
-        .order('sort_order', { ascending: true }),
-      supabase.from('categories').select('id, name, slug, active').order('sort_order', { ascending: true }),
-      fetchAddonCountsByProduct(),
-    ]);
+    try {
+      const [prodRes, catRes, counts] = await Promise.all([
+        supabase
+          .from('products')
+          .select('*, categories(name)')
+          .order('sort_order', { ascending: true }),
+        supabase.from('categories').select('id, name, slug, active').order('sort_order', { ascending: true }),
+        fetchAddonCountsByProduct().catch(err => {
+          console.warn('Erro ao carregar contagem de adicionais:', err);
+          return {};
+        }),
+      ]);
 
-    if (prodRes.error) {
-      toast.error('Não foi possível carregar os produtos.');
-      console.error(prodRes.error);
-    } else {
-      setProducts(prodRes.data as Product[]);
+      if (prodRes.error) {
+        toast.error('Não foi possível carregar os produtos.');
+        console.error(prodRes.error);
+      } else {
+        setProducts((prodRes.data as Product[]) || []);
+      }
+
+      if (catRes.error) {
+        console.error(catRes.error);
+      } else {
+        setCategories((catRes.data as Category[]) || []);
+      }
+
+      if (counts) {
+        setAddonCounts(counts);
+      }
+    } catch (err: any) {
+      console.error('Erro ao buscar dados do painel:', err);
+      toast.error('Erro ao carregar produtos. Tente recarregar a página.');
+    } finally {
+      setLoading(false);
     }
-
-    if (catRes.error) {
-      console.error(catRes.error);
-    } else {
-      setCategories(catRes.data as Category[]);
-    }
-
-    if (counts) {
-      setAddonCounts(counts);
-    }
-
-    setLoading(false);
   };
 
   useEffect(() => { fetchAll(); }, []);
 
   // ── Filtered list ──────────────────────────────────────────────────────────
 
-  const filtered = products.filter(p => {
-    const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
+  const filtered = (products || []).filter(p => {
+    if (!p) return false;
+    const pName = p.name || '';
+    const matchSearch = !search || pName.toLowerCase().includes(search.toLowerCase());
     const matchCat = !filterCat || p.category_id === filterCat;
     const matchStatus =
       filterStatus === 'all' ? true :
@@ -884,10 +913,10 @@ export default function Products() {
                     >
                       <option value="">Sem categoria</option>
                       {/* Grupo Cestas com suas subseções */}
-                      {categories.some(c => c.slug?.startsWith('cesta-') || c.name.toLowerCase().includes('cesta')) && (
+                      {categories.some(isBasketCategory) && (
                         <optgroup label="Cestas (Subcategorias)">
                           {categories
-                            .filter(c => c.slug?.startsWith('cesta-') || c.name.toLowerCase().includes('cesta'))
+                            .filter(isBasketCategory)
                             .map(c => (
                               <option key={c.id} value={c.id}>
                                 {c.name}{!c.active ? ' (inativa)' : ''}
@@ -898,7 +927,7 @@ export default function Products() {
                       {/* Demais Categorias */}
                       <optgroup label="Outras Categorias Principais">
                         {categories
-                          .filter(c => !c.slug?.startsWith('cesta-') && !c.name.toLowerCase().includes('cesta'))
+                          .filter(c => !isBasketCategory(c))
                           .map(c => (
                             <option key={c.id} value={c.id}>
                               {c.name}{!c.active ? ' (inativa)' : ''}
@@ -1071,10 +1100,10 @@ export default function Products() {
                 className="w-full px-3 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm bg-neutral-50 dark:bg-neutral-900 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
               >
                 <option value="">Todas categorias</option>
-                {categories.some(c => c.slug?.startsWith('cesta-') || c.name.toLowerCase().includes('cesta')) && (
+                {categories.some(isBasketCategory) && (
                   <optgroup label="Cestas (Subcategorias)">
                     {categories
-                      .filter(c => c.slug?.startsWith('cesta-') || c.name.toLowerCase().includes('cesta'))
+                      .filter(isBasketCategory)
                       .map(c => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
@@ -1082,7 +1111,7 @@ export default function Products() {
                 )}
                 <optgroup label="Outras Categorias">
                   {categories
-                    .filter(c => !c.slug?.startsWith('cesta-') && !c.name.toLowerCase().includes('cesta'))
+                    .filter(c => !isBasketCategory(c))
                     .map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
@@ -1147,7 +1176,11 @@ export default function Products() {
                       <tr key={p.id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-800/20 transition-colors">
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800 shrink-0">
+                            <div
+                              onClick={() => openEdit(p)}
+                              className="w-10 h-10 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                              title="Clique para editar"
+                            >
                               {p.image ? (
                                 <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
                               ) : (
@@ -1157,7 +1190,14 @@ export default function Products() {
                               )}
                             </div>
                             <div>
-                              <p className="font-medium text-sm leading-tight">{p.name}</p>
+                              <button
+                                type="button"
+                                onClick={() => openEdit(p)}
+                                className="font-medium text-sm leading-tight text-left hover:underline cursor-pointer block"
+                                title="Clique para editar"
+                              >
+                                {p.name}
+                              </button>
                               <div className="flex gap-1 mt-0.5 flex-wrap items-center">
                                 {p.is_best_seller && (
                                   <button
@@ -1265,7 +1305,11 @@ export default function Products() {
                 {filtered.map(p => (
                   <div key={p.id} className="p-4 flex gap-3 items-start">
                     {/* Image */}
-                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-800 shrink-0">
+                    <div
+                      onClick={() => openEdit(p)}
+                      className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-800 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                      title="Clique para editar"
+                    >
                       {p.image ? (
                         <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
                       ) : (
@@ -1278,7 +1322,14 @@ export default function Products() {
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <p className="font-semibold text-sm leading-tight line-clamp-2">{p.name}</p>
+                        <button
+                          type="button"
+                          onClick={() => openEdit(p)}
+                          className="font-semibold text-sm leading-tight line-clamp-2 text-left hover:underline cursor-pointer"
+                          title="Clique para editar"
+                        >
+                          {p.name}
+                        </button>
                         <span className="font-semibold text-sm shrink-0">{formatPrice(p.price)}</span>
                       </div>
                       <p className="text-xs text-neutral-500 mt-0.5">

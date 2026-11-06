@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
@@ -24,22 +24,42 @@ export function CartDrawer() {
   } = useCart();
   const navigate = useNavigate();
 
+  // Fechar carrinho com tecla Escape
+  useEffect(() => {
+    if (!isCartOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsCartOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isCartOpen, setIsCartOpen]);
+
   const handleCheckout = () => {
     setIsCartOpen(false);
     navigate("/checkout");
+  };
+
+  const handleClose = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setIsCartOpen(false);
   };
 
   return (
     <AnimatePresence>
       {isCartOpen && (
         <>
-          {/* Overlay Escuro */}
+          {/* Overlay Escuro com Z-Index Alto */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setIsCartOpen(false)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90]"
+            onClick={handleClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] cursor-pointer"
           />
 
           {/* Lateral Cart Slide */}
@@ -48,7 +68,7 @@ export function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-[90%] sm:w-[440px] bg-white dark:bg-[#0A0A0A] shadow-2xl z-[100] flex flex-col border-l border-neutral-200 dark:border-neutral-800"
+            className="fixed top-0 right-0 h-full w-[90%] sm:w-[440px] bg-white dark:bg-[#0A0A0A] shadow-2xl z-[1000] flex flex-col border-l border-neutral-200 dark:border-neutral-800"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-5 border-b border-neutral-100 dark:border-neutral-800">
@@ -57,19 +77,28 @@ export function CartDrawer() {
                 Seu Carrinho
               </h2>
               <button 
-                onClick={() => setIsCartOpen(false)}
-                className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-full transition-colors"
+                type="button"
+                aria-label="Fechar carrinho"
+                onClick={handleClose}
+                className="p-2.5 -mr-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-full transition-colors cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white flex items-center justify-center min-w-[40px] min-h-[40px] touch-manipulation z-20"
               >
-                <X size={20} />
+                <X size={20} className="pointer-events-none" />
               </button>
             </div>
 
             {/* Items */}
             <div className="flex-1 overflow-y-auto p-5 space-y-6">
               {items.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-neutral-400">
+                <div className="h-full flex flex-col items-center justify-center text-neutral-400 py-12">
                   <ShoppingBag size={48} strokeWidth={1} className="mb-4 opacity-50" />
                   <p className="text-sm">Seu carrinho está vazio</p>
+                  <button
+                    type="button"
+                    onClick={handleClose}
+                    className="mt-4 px-5 py-2.5 bg-black dark:bg-white text-white dark:text-black rounded-xl text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
+                  >
+                    Continuar comprando
+                  </button>
                 </div>
               ) : (
                 items.map(item => {

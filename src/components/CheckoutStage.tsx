@@ -136,11 +136,16 @@ export function CheckoutStage({ isOpen, onClose }: { isOpen: boolean; onClose: (
                 <VSBrandMark size="sm" variant="horizontal" subtitle="Finalizar Pedido" />
               </div>
               <button 
-                onClick={onClose}
-                className="p-2 hover:bg-neutral-100 rounded-full transition-colors text-neutral-500 hover:text-black"
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClose();
+                }}
+                className="p-2.5 -mr-1.5 hover:bg-neutral-100 rounded-full transition-colors text-neutral-500 hover:text-black cursor-pointer touch-manipulation flex items-center justify-center min-w-[40px] min-h-[40px]"
                 aria-label="Fechar"
               >
-                <X size={20} />
+                <X size={20} className="pointer-events-none" />
               </button>
             </div>
 

@@ -58,34 +58,39 @@ export default function Categories() {
 
   const fetchCategories = async () => {
     setLoading(true);
-    const [catRes, prodRes] = await Promise.all([
-      supabase
-        .from('categories')
-        .select('*')
-        .order('sort_order', { ascending: true }),
-      supabase
-        .from('products')
-        .select('category_id')
-    ]);
+    try {
+      const [catRes, prodRes] = await Promise.all([
+        supabase
+          .from('categories')
+          .select('*')
+          .order('sort_order', { ascending: true }),
+        supabase
+          .from('products')
+          .select('category_id')
+      ]);
 
-    if (catRes.error) {
-      toast.error('Erro ao buscar categorias');
-      console.error(catRes.error);
-    } else {
-      setCategories(catRes.data || []);
+      if (catRes.error) {
+        toast.error('Erro ao buscar categorias');
+        console.error(catRes.error);
+      } else {
+        setCategories(catRes.data || []);
+      }
+
+      if (prodRes.data) {
+        const counts: Record<string, number> = {};
+        prodRes.data.forEach((p: { category_id: string | null }) => {
+          if (p.category_id) {
+            counts[p.category_id] = (counts[p.category_id] || 0) + 1;
+          }
+        });
+        setProductCounts(counts);
+      }
+    } catch (err: any) {
+      console.error('Erro ao buscar categorias:', err);
+      toast.error('Erro ao carregar categorias. Tente recarregar.');
+    } finally {
+      setLoading(false);
     }
-
-    if (prodRes.data) {
-      const counts: Record<string, number> = {};
-      prodRes.data.forEach((p: { category_id: string | null }) => {
-        if (p.category_id) {
-          counts[p.category_id] = (counts[p.category_id] || 0) + 1;
-        }
-      });
-      setProductCounts(counts);
-    }
-
-    setLoading(false);
   };
 
   useEffect(() => {
