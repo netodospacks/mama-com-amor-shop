@@ -158,7 +158,7 @@ export function ChristmasSectionSnow({ className = "" }: { className?: string })
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className={`absolute inset-0 pointer-events-none z-[4] w-full h-full ${className}`}
+      className={`absolute inset-0 pointer-events-none z-0 w-full h-full ${className}`}
     />
   );
 }

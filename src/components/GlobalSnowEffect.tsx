@@ -40,8 +40,8 @@ export function GlobalSnowEffect() {
 
     window.addEventListener("resize", handleResize);
 
-    // Quantidade balanceada: suave no mobile, imersiva no desktop sem pesar GPU/CPU
-    const count = width < 768 ? 38 : 65;
+    // Quantidade aumentada: efeito visual mais presente tanto no mobile quanto no desktop
+    const count = width < 768 ? 75 : 130;
     const flakes: Flake[] = [];
 
     for (let i = 0; i < count; i++) {
@@ -50,10 +50,10 @@ export function GlobalSnowEffect() {
       flakes.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        radius: isCrystal ? Math.random() * 2.2 + 1.2 : isGold ? Math.random() * 1.8 + 0.8 : Math.random() * 2.5 + 0.8,
-        speedY: Math.random() * 0.7 + 0.35, // Queda serena e constante
-        speedX: (Math.random() - 0.5) * 0.3,
-        opacity: Math.random() * 0.45 + 0.35,
+        radius: isCrystal ? Math.random() * 2.5 + 1.4 : isGold ? Math.random() * 2.0 + 1.0 : Math.random() * 2.8 + 1.0,
+        speedY: Math.random() * 0.8 + 0.4, // Queda serena e constante
+        speedX: (Math.random() - 0.5) * 0.35,
+        opacity: Math.random() * 0.5 + 0.45,
         swaySpeed: Math.random() * 0.015 + 0.008,
         swayOffset: Math.random() * Math.PI * 2,
         type: isGold ? "gold" : isCrystal ? "crystal" : "snow",
@@ -121,7 +121,7 @@ export function GlobalSnowEffect() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="fixed inset-0 pointer-events-none z-30 w-screen h-screen overflow-hidden"
+      className="fixed inset-0 pointer-events-none z-[15] w-screen h-screen overflow-hidden"
     />
   );
 }

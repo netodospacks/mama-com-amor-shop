@@ -1,0 +1,42 @@
+{
+  "logs": [
+    {
+      "step": "Segurança RLS",
+      "action": "Bloqueio de INSERT anônimo em categories",
+      "status": "BLOCKED_BY_RLS",
+      "details": {
+        "code": "42501",
+        "message": "new row violates row-level security policy for table \"categories\""
+      }
+    },
+    {
+      "step": "Segurança RLS",
+      "action": "Bloqueio de INSERT anônimo em products",
+      "status": "BLOCKED_BY_RLS",
+      "details": {
+        "code": "42501",
+        "message": "new row violates row-level security policy for table \"products\""
+      }
+    },
+    {
+      "step": "Segurança RLS",
+      "action": "Bloqueio de INSERT anônimo em subproducts",
+      "status": "BLOCKED_BY_RLS",
+      "details": {
+        "code": "42501",
+        "message": "new row violates row-level security policy for table \"subproducts\""
+      }
+    },
+    {
+      "step": "Segurança RLS",
+      "action": "Bloqueio de Upload anônimo no Storage",
+      "status": "BLOCKED_BY_RLS",
+      "details": {
+        "message": "new row violates row-level security policy"
+      }
+    }
+  ],
+  "authenticated": false,
+  "catCount": 14,
+  "prodCount": 115
+}

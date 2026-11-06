@@ -27,6 +27,7 @@ import {
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { VSBrandMark } from "@/components/VSBrandMark";
 import { GlobalSnowEffect } from "@/components/GlobalSnowEffect";
+import { BoutiqueSectionHeader } from "@/components/BoutiqueSectionHeader";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -60,10 +61,10 @@ const VirtualStoreProductCard = ({
   const displayImage = product.image || (product.gallery && product.gallery.length > 0 ? product.gallery[0] : null);
 
   return (
-    <article className="group bg-white rounded-2xl border border-[#EADFCF] p-3 sm:p-4 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg shadow-sm h-full">
+    <article className="group relative z-20 bg-white rounded-xl sm:rounded-2xl border border-[#EADFCF] p-2 sm:p-4 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg shadow-sm h-full">
       <Link 
         to={`/product/${product.id}`}
-        className="block relative overflow-hidden bg-[#FAF7F2] aspect-[4/5] rounded-xl shrink-0"
+        className="block relative overflow-hidden bg-[#FAF7F2] aspect-[4/5] rounded-lg sm:rounded-xl shrink-0"
       >
         {displayImage ? (
           <img 
@@ -72,65 +73,65 @@ const VirtualStoreProductCard = ({
             loading="lazy"
             decoding="async"
             draggable={false}
-            className="w-full h-full object-cover p-1.5 transition-transform duration-700 ease-out group-hover:scale-105 select-none"
+            className="w-full h-full object-cover p-1 sm:p-1.5 transition-transform duration-700 ease-out group-hover:scale-105 select-none"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-neutral-300">
-            <Gift size={32} strokeWidth={1.5} />
+            <Gift size={24} className="sm:w-8 sm:h-8" strokeWidth={1.5} />
           </div>
         )}
 
         {/* Badges Oficiais da Loja */}
-        <div className="absolute left-2.5 top-2.5 flex flex-col gap-1 z-10 pointer-events-none">
+        <div className="absolute left-1.5 top-1.5 sm:left-2.5 sm:top-2.5 flex flex-col gap-0.5 sm:gap-1 z-10 pointer-events-none">
           {product.isBestSeller && (
-            <span className="bg-[#D97706] text-white text-[9px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded uppercase tracking-[0.14em] shadow-sm flex items-center gap-1">
+            <span className="bg-[#D97706] text-white text-[8px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded uppercase tracking-[0.1em] sm:tracking-[0.14em] shadow-sm flex items-center gap-0.5 sm:gap-1">
               <span>★</span> Mais Pedido
             </span>
           )}
           {product.isPromo && (
-            <span className="bg-[#8B233C] text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-[0.14em] shadow-sm">
+            <span className="bg-[#8B233C] text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded uppercase tracking-[0.1em] sm:tracking-[0.14em] shadow-sm">
               Promoção
             </span>
           )}
           {product.isNew && (
-            <span className="bg-[#173D32] text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-[0.14em] shadow-sm">
+            <span className="bg-[#173D32] text-white text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded uppercase tracking-[0.1em] sm:tracking-[0.14em] shadow-sm">
               Novidade
             </span>
           )}
           {!product.isBestSeller && !product.isPromo && !product.isNew && product.isFeatured && (
-            <span className="bg-[#D6BC85] text-[#2D0A14] font-bold text-[9px] sm:text-[10px] px-2 py-0.5 rounded uppercase tracking-[0.14em] shadow-sm">
+            <span className="bg-[#D6BC85] text-[#2D0A14] font-bold text-[8px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded uppercase tracking-[0.1em] sm:tracking-[0.14em] shadow-sm">
               Destaque
             </span>
           )}
         </div>
       </Link>
 
-      <div className="pt-3 pb-1 flex flex-col flex-grow text-neutral-900">
+      <div className="pt-2 sm:pt-3 pb-0.5 sm:pb-1 flex flex-col flex-grow text-neutral-900">
         <Link to={`/product/${product.id}`}>
-          <h3 className="font-sans font-bold text-xs sm:text-[13px] text-neutral-900 line-clamp-1 leading-snug mb-1 group-hover:text-[#8B233C] transition-colors">
+          <h3 className="font-sans font-bold text-[11px] sm:text-[13px] text-neutral-900 line-clamp-2 leading-tight mb-1 group-hover:text-[#8B233C] transition-colors">
             {product.name}
           </h3>
         </Link>
 
         {product.shortDescription && (
-          <p className="text-[11px] text-neutral-600 line-clamp-2 leading-relaxed mb-2 font-sans font-normal">
+          <p className="hidden sm:block text-[11px] text-neutral-600 line-clamp-2 leading-relaxed mb-2 font-sans font-normal">
             {product.shortDescription}
           </p>
         )}
 
         <div className="mt-auto pt-1">
-          <div className="flex items-baseline gap-1.5 mb-2.5">
+          <div className="flex flex-wrap items-baseline gap-1 sm:gap-1.5 mb-2 sm:mb-2.5">
             {product.isPromo && product.promoPrice ? (
               <>
-                <span className="text-[11px] sm:text-xs text-neutral-400 line-through font-sans">
+                <span className="text-[9px] sm:text-xs text-neutral-400 line-through font-sans">
                   {product.price}
                 </span>
-                <span className="text-sm sm:text-base font-extrabold text-[#8B233C] tracking-tight">
+                <span className="text-xs sm:text-base font-extrabold text-[#8B233C] tracking-tight">
                   {product.promoPrice}
                 </span>
               </>
             ) : (
-              <span className="text-sm sm:text-base font-extrabold text-[#8B233C] tracking-tight">
+              <span className="text-xs sm:text-base font-extrabold text-[#8B233C] tracking-tight">
                 {product.price}
               </span>
             )}
@@ -138,10 +139,10 @@ const VirtualStoreProductCard = ({
 
           <Link
             to={`/product/${product.id}`}
-            className="w-full inline-flex items-center justify-between py-2.5 px-3 rounded-lg bg-[#8B233C] hover:bg-[#A32A47] text-white text-[11px] font-sans font-bold tracking-wide transition-all shadow-sm group/btn active:scale-[0.98]"
+            className="w-full inline-flex items-center justify-center sm:justify-between py-1.5 sm:py-2.5 px-2 sm:px-3 rounded-lg bg-[#8B233C] hover:bg-[#A32A47] text-white text-[10px] sm:text-[11px] font-sans font-bold tracking-wide transition-all shadow-sm group/btn active:scale-[0.98]"
           >
             <span>{buttonText}</span>
-            <ArrowRight size={13} className="text-white transition-transform group-hover/btn:translate-x-1" />
+            <ArrowRight size={12} className="hidden sm:inline text-white transition-transform group-hover/btn:translate-x-1 ml-1" />
           </Link>
         </div>
       </div>
@@ -321,7 +322,70 @@ export default function Index() {
     }
   };
 
-  // Busca de dados reativa do Supabase via TanStack Query (com revalidação automática de foco)
+  // Metadados editoriais de boutique para categorias da loja (preserva personalização de cada seção)
+  const getCategoryEditorialInfo = (cat: { slug?: string; name?: string; description?: string | null }) => {
+    const slug = (cat.slug || "").toLowerCase();
+    const name = (cat.name || "").toLowerCase();
+
+    if (slug.includes("cesta") || name.includes("cesta")) {
+      return {
+        eyebrow: "AFETO & CELEBRAÇÃO",
+        defaultSubtitle: "Cestas artesanais preparadas com carinho em cada detalhe para surpreender e emocionar.",
+      };
+    }
+    if (slug.includes("quadro-a4") || slug.includes("quadros-a4") || slug.includes("quadros-casal") || slug.includes("quadros-aniversario") || name.includes("quadros a4") || name.includes("quadro a4")) {
+      return {
+        eyebrow: "MEMÓRIAS ETERNAS",
+        defaultSubtitle: "Quadros afetivos em tamanho A4 para eternizar histórias, datas e sentimentos inesquecíveis.",
+      };
+    }
+    if (slug.includes("10x15") || name.includes("10x15")) {
+      return {
+        eyebrow: "REGISTROS ESPECIAIS",
+        defaultSubtitle: "Mini quadros delicados e acolhedores, perfeitos para decorar e presentear com ternura.",
+      };
+    }
+    if (slug.includes("quadro") || name.includes("quadro")) {
+      return {
+        eyebrow: "MEMÓRIAS ETERNAS",
+        defaultSubtitle: "Quadros personalizados com fotos, frases e datas marcantes para eternizar seu amor.",
+      };
+    }
+    if (slug.includes("placa") || name.includes("placa")) {
+      return {
+        eyebrow: "DESIGN & EMOÇÃO",
+        defaultSubtitle: "Placas acrílicas contemporâneas com música, fotos e mensagens personalizadas de alto padrão.",
+      };
+    }
+    if (slug.includes("combo") || name.includes("combo")) {
+      return {
+        eyebrow: "EXPERIÊNCIAS COMPLETAS",
+        defaultSubtitle: "Combinações harmônicas pensadas para um presente completo, marcante e inesquecível.",
+      };
+    }
+    if (slug.includes("kit") || name.includes("kit")) {
+      return {
+        eyebrow: "SURPRESAS ARTESANAIS",
+        defaultSubtitle: "Kits temáticos com curadoria exclusiva de mimos e lembranças afetivas.",
+      };
+    }
+    if (slug.includes("bebe") || slug.includes("mae") || name.includes("mamãe") || name.includes("bebê") || name.includes("bebe") || name.includes("mãe")) {
+      return {
+        eyebrow: "DELICADEZA & TERNURA",
+        defaultSubtitle: "Presentes suaves e carinhosos criados para celebrar a vida, a maternidade e os primeiros momentos.",
+      };
+    }
+    if (slug.includes("produto") || name.includes("produto")) {
+      return {
+        eyebrow: "MIMOS & DETALHES",
+        defaultSubtitle: "Caixas, cubos de fotos, polaroids e acessórios artesanais para complementar qualquer surpresa.",
+      };
+    }
+    return {
+      eyebrow: "COLEÇÃO EXCLUSIVA",
+      defaultSubtitle: "Presentes personalizados com design autoral e acabamento artesanal de alto padrão.",
+    };
+  };
   const { data: catalogData, isLoading } = useQuery({
     queryKey: ['public-catalog'],
     queryFn: async () => {
@@ -632,12 +696,14 @@ export default function Index() {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    const element = document.getElementById(id);
+    let element = document.getElementById(id);
+    if (!element && id === "corporativo") element = document.getElementById("empresas");
+    if (!element && id === "empresas") element = document.getElementById("corporativo");
     if (element) {
       const offset = 80;
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
-        top: elementPosition - offset,
+        top: Math.max(0, elementPosition - offset),
         behavior: "smooth"
       });
     }
@@ -668,15 +734,15 @@ export default function Index() {
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* 1. HEADER (ÁREA EXCLUSIVA DE CABEÇALHO & APRESENTAÇÃO INICIAL)      */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <header className="relative bg-[#FBF7EE] select-none">
+      <header className="relative z-[5] bg-[#FBF7EE] select-none">
         
         {/* 1.1 Ticker Slim no Topo (Cor de Natal: Vinho Nobre Escuro) */}
         <div 
           role="region"
           aria-label="Aviso institucional"
-          className="relative z-30 bg-[#1F060E] border-b border-[#D6BC85]/30 py-1.5 sm:py-2 overflow-hidden w-full shadow-inner"
+          className="relative bg-[#1F060E] border-b border-[#D6BC85]/30 py-1.5 sm:py-2 overflow-hidden w-full shadow-inner"
         >
-          <div className="animate-ticker-marquee flex items-center whitespace-nowrap">
+          <div className="relative z-20 animate-ticker-marquee flex items-center whitespace-nowrap">
             {/* Lote 1 */}
             <div className="flex items-center gap-6 sm:gap-8 px-4 text-[9.5px] sm:text-[10px] tracking-[0.18em] uppercase font-semibold text-[#FBF7EE]">
               <span className="inline-flex items-center gap-1.5">
@@ -716,11 +782,11 @@ export default function Index() {
         </div>
 
         {/* 1.2 Barra de Navegação (Fundo Bege Claro com Detalhes Delicados) */}
-        <nav className="relative z-30 bg-[#FBF7EE]/95 backdrop-blur-md border-b border-[#EADFCF] px-4 sm:px-8 py-3 sm:py-3.5 shadow-xs">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        <nav className="relative bg-[#FBF7EE]/95 backdrop-blur-md border-b border-[#EADFCF] px-4 sm:px-8 py-3 sm:py-3.5 shadow-xs">
+          <div className="relative z-20 max-w-7xl mx-auto flex items-center justify-between gap-4">
             
-            {/* Esquerda: Hambúrguer para Menu Lateral */}
-            <div className="flex items-center gap-2">
+            {/* Esquerda: Hambúrguer para Menu Lateral & Links de Navegação */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={() => setMenuOpen(true)}
                 aria-label="Abrir Menu de Coleções"
@@ -731,10 +797,18 @@ export default function Index() {
               
               <button 
                 onClick={() => scrollTo("categorias")}
-                className="hidden lg:flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-neutral-800 hover:text-[#8B233C] transition-colors"
+                className="hidden lg:flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-neutral-800 hover:text-[#8B233C] hover:bg-[#F2ECE1] px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
               >
                 <span>Catálogo</span>
                 <span className="text-[10px]">⌄</span>
+              </button>
+
+              <button 
+                onClick={() => scrollTo("corporativo")}
+                className="hidden md:flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-neutral-800 hover:text-[#8B233C] hover:bg-[#F2ECE1] px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+              >
+                <Briefcase size={13} className="text-[#8B233C] shrink-0" />
+                <span>Corporativo</span>
               </button>
             </div>
 
@@ -846,8 +920,8 @@ export default function Index() {
               Transformamos sentimentos em presentes inesquecíveis.
             </p>
 
-            {/* 4. Botão de Conversão em Vinho Aveludado (Inspirado na Referência) + WhatsApp */}
-            <div className="flex flex-col sm:flex-row items-start justify-start gap-2.5 sm:gap-3 pt-2 w-full sm:w-auto">
+            {/* 4. Botão de Conversão em Vinho Aveludado (Inspirado na Referência) + WhatsApp + Corporativo */}
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start justify-start gap-2.5 sm:gap-3 pt-2 w-full sm:w-auto">
               <button 
                 onClick={() => scrollTo("destaques")}
                 className="self-start px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl bg-[#6f1e31] hover:bg-[#83243a] border border-[#99344c]/70 text-white text-xs font-semibold tracking-[0.14em] uppercase flex items-center justify-start gap-2.5 transition-all shadow-[0_8px_24px_rgba(111,30,49,0.45)] hover:scale-[1.02] active:scale-[0.98]"
@@ -867,6 +941,15 @@ export default function Index() {
                 <WhatsAppIcon size={15} className="text-white shrink-0" />
                 <span>Pedir no WhatsApp</span>
               </a>
+
+              {/* Botão Corporativo — Posicionado diretamente abaixo do WhatsApp no mobile */}
+              <button
+                onClick={() => scrollTo("corporativo")}
+                className="self-start px-5 py-3 sm:py-4 rounded-xl bg-black/40 hover:bg-black/60 border border-[#dfc285]/70 hover:border-[#dfc285] text-[#dfc285] hover:text-white text-xs font-semibold tracking-[0.14em] uppercase inline-flex items-center justify-start gap-2.5 backdrop-blur-md transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
+                <Briefcase size={15} className="text-[#dfc285] shrink-0" />
+                <span>Corporativo</span>
+              </button>
             </div>
 
             {/* 5. Linha Institucional e Região de Entrega */}
@@ -931,6 +1014,20 @@ export default function Index() {
                   🎁 Catálogo Completo
                 </button>
 
+                {/* NOVO: Botão Corporativo no Menu Mobile */}
+                <button
+                  onClick={() => scrollTo("corporativo")}
+                  className="w-full text-left px-4 py-3 rounded-xl text-xs font-bold tracking-wider uppercase text-[#8B233C] bg-[#8B233C]/5 hover:bg-[#8B233C]/10 border border-[#8B233C]/20 transition-all flex items-center justify-between"
+                >
+                  <span className="flex items-center gap-2">
+                    <Briefcase size={15} className="text-[#8B233C] shrink-0" />
+                    <span>Corporativo</span>
+                  </span>
+                  <span className="text-[9.5px] font-semibold text-[#8B233C] bg-white px-2 py-0.5 rounded-full border border-[#8B233C]/20 uppercase tracking-widest">
+                    Empresas
+                  </span>
+                </button>
+
                 <div className="pt-3 pb-1 px-4">
                   <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#8B233C]">
                     Categorias
@@ -951,10 +1048,11 @@ export default function Index() {
                 ))}
 
                 <button
-                  onClick={() => scrollTo("empresas")}
-                  className="w-full text-left px-4 py-3 rounded-xl text-xs font-bold tracking-wider uppercase text-neutral-800 hover:bg-neutral-100 hover:text-[#8B233C] transition-colors mt-2 border-t border-neutral-200"
+                  onClick={() => scrollTo("corporativo")}
+                  className="w-full text-left px-4 py-3 rounded-xl text-xs font-bold tracking-wider uppercase text-neutral-800 hover:bg-neutral-100 hover:text-[#8B233C] transition-colors mt-2 border-t border-neutral-200 flex items-center gap-2"
                 >
-                  🏢 Para Empresas & Equipes
+                  <Briefcase size={15} className="text-[#8B233C] shrink-0" />
+                  <span>Para Empresas & Equipes</span>
                 </button>
               </nav>
 
@@ -968,6 +1066,15 @@ export default function Index() {
                   <WhatsAppIcon size={16} className="text-white shrink-0" />
                   <span>Falar no WhatsApp</span>
                 </a>
+
+                {/* Botão Corporativo também posicionado abaixo do WhatsApp no menu lateral */}
+                <button
+                  onClick={() => scrollTo("corporativo")}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#8B233C]/10 hover:bg-[#8B233C]/20 border border-[#8B233C]/30 text-[#8B233C] text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                >
+                  <Briefcase size={15} className="text-[#8B233C] shrink-0" />
+                  <span>Atendimento Corporativo</span>
+                </button>
                 
                 <a
                   href="https://instagram.com/virtualstore_3"
@@ -1005,39 +1112,31 @@ export default function Index() {
             <span id="destaque-natal" className="sr-only">Destaques</span>
             <div className="max-w-7xl mx-auto">
               
-              {/* Cabeçalho da Seção de Destaques + Controles de Rolagem Desktop */}
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
-                <div>
-                  <span className="eyebrow-vs block mb-1 text-[#8B233C] flex items-center gap-1.5">
-                    <Sparkles size={14} className="text-[#8B233C]" />
-                    <span>CURADORIA EXCLUSIVA</span>
-                  </span>
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-neutral-900 uppercase tracking-tight">
-                    Produtos em Destaque
-                  </h2>
-                  <p className="text-xs sm:text-sm text-neutral-600 mt-1 font-normal max-w-xl">
-                    Presentes selecionados a dedo pela nossa equipe para emocionar e surpreender em ocasiões especiais.
-                  </p>
-                </div>
-
-                {/* Setas discretas de navegação no Desktop */}
-                <div className="hidden sm:flex items-center gap-2">
-                  <button
-                    onClick={() => scrollFeatured("left")}
-                    aria-label="Rolar destaques para esquerda"
-                    className="h-10 w-10 rounded-full bg-white border border-[#EADFCF] text-neutral-700 hover:text-[#8B233C] hover:border-[#8B233C] hover:bg-[#FAF7F2] flex items-center justify-center transition-all shadow-xs cursor-pointer active:scale-95"
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-                  <button
-                    onClick={() => scrollFeatured("right")}
-                    aria-label="Rolar destaques para direita"
-                    className="h-10 w-10 rounded-full bg-white border border-[#EADFCF] text-neutral-700 hover:text-[#8B233C] hover:border-[#8B233C] hover:bg-[#FAF7F2] flex items-center justify-center transition-all shadow-xs cursor-pointer active:scale-95"
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-                </div>
-              </div>
+              {/* Cabeçalho Padronizado da Seção de Destaques */}
+              <BoutiqueSectionHeader
+                eyebrow="CURADORIA EXCLUSIVA"
+                title="Produtos em Destaque"
+                subtitle="Presentes selecionados a dedo pela nossa equipe para emocionar e surpreender em ocasiões especiais."
+                className="mb-6 sm:mb-8"
+                actions={
+                  <div className="hidden sm:flex items-center gap-2">
+                    <button
+                      onClick={() => scrollFeatured("left")}
+                      aria-label="Rolar destaques para esquerda"
+                      className="h-10 w-10 rounded-full bg-white border border-[#EADFCF] text-neutral-700 hover:text-[#8B233C] hover:border-[#8B233C] hover:bg-[#FAF7F2] flex items-center justify-center transition-all shadow-xs cursor-pointer active:scale-95"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button
+                      onClick={() => scrollFeatured("right")}
+                      aria-label="Rolar destaques para direita"
+                      className="h-10 w-10 rounded-full bg-white border border-[#EADFCF] text-neutral-700 hover:text-[#8B233C] hover:border-[#8B233C] hover:bg-[#FAF7F2] flex items-center justify-center transition-all shadow-xs cursor-pointer active:scale-95"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                }
+              />
 
               {/* Vitrine de Rolagem Horizontal (Arrastar com dedo no celular, drag com mouse no PC) */}
               <div
@@ -1098,7 +1197,7 @@ export default function Index() {
                 Coleção de Natal
               </h2>
               <p className="text-xs sm:text-sm text-neutral-600 mt-2 font-normal leading-relaxed max-w-md mx-auto">
-                Presentes artesanais exclusivos desenvolvidos para emocionar e celebrar momentos inesquecíveis.
+                Cada produto foi desenvolvido com carinho e dedicação para tornar seu Natal ainda mais especial.
               </p>
             </div>
 
@@ -1110,7 +1209,7 @@ export default function Index() {
                 return (
                   <article 
                     key={product.id}
-                    className="group bg-white rounded-2xl sm:rounded-3xl border border-[#EADFCF] p-3.5 sm:p-5 shadow-sm hover:shadow-md transition-all flex items-stretch justify-between gap-3 sm:gap-5 hover:border-[#D6BC85]/80"
+                    className="group relative z-20 bg-white rounded-2xl sm:rounded-3xl border border-[#EADFCF] p-3.5 sm:p-5 shadow-sm hover:shadow-md transition-all flex items-stretch justify-between gap-3 sm:gap-5 hover:border-[#D6BC85]/80"
                   >
                     {/* LADO ESQUERDO: Conteúdo textual, detalhes e preço */}
                     <div className="flex-1 flex flex-col justify-between pr-1 sm:pr-2">
@@ -1214,15 +1313,34 @@ export default function Index() {
           <div className="max-w-7xl mx-auto">
             
             {/* 5.1 Abertura do Catálogo — Identidade Oficial Virtual Store */}
-            <div className="mb-8 sm:mb-10 text-center max-w-2xl mx-auto px-2">
-              <span className="eyebrow-vs block mb-2 text-[#8B233C]">
-                CATÁLOGO COMPLETO
-              </span>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-neutral-900 uppercase tracking-tight mb-3">
-                Cada ocasião, um gesto especial.
+            <div className="mb-10 sm:mb-12 text-center max-w-2xl mx-auto px-4 select-none">
+              
+              {/* Identificação Elegante: ESCOLHAS ESPECIAIS com linha ornamental minimalista */}
+              <div className="inline-flex items-center justify-center gap-3 sm:gap-4 mb-3 sm:mb-3.5">
+                <span className="h-px w-6 sm:w-10 bg-gradient-to-r from-transparent to-[#8B233C]/60" />
+                <span className="inline-flex items-center gap-1.5 text-[10.5px] sm:text-xs font-extrabold tracking-[0.26em] uppercase text-[#8B233C]">
+                  <Sparkles size={13} className="text-[#8B233C] shrink-0" />
+                  <span>ESCOLHAS ESPECIAIS</span>
+                  <Sparkles size={13} className="text-[#8B233C] shrink-0" />
+                </span>
+                <span className="h-px w-6 sm:w-10 bg-gradient-to-l from-transparent to-[#8B233C]/60" />
+              </div>
+
+              {/* Título Principal Imponente de Boutique */}
+              <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold text-neutral-900 uppercase tracking-tight leading-[1.08] mb-3 font-sans">
+                Catálogo Completo
               </h2>
-              <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed font-normal max-w-xl mx-auto">
-                Navegue pelas categorias ativas do nosso catálogo artesanal. Escolha os detalhes que nós cuidamos de cada surpresa.
+
+              {/* Detalhe ornamental sutil abaixo do título */}
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <span className="h-px w-8 sm:w-12 bg-[#D6BC85]/60" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#D6BC85]" />
+                <span className="h-px w-8 sm:w-12 bg-[#D6BC85]/60" />
+              </div>
+
+              {/* Subtítulo acolhedor */}
+              <p className="text-[13.5px] sm:text-[15px] text-[#4A3E38] font-normal leading-relaxed tracking-[0.015em] max-w-lg mx-auto">
+                Explore nosso catálogo e descubra opções personalizadas, criativas e feitas com muito carinho para surpreender quem você ama.
               </p>
             </div>
 
@@ -1313,132 +1431,107 @@ export default function Index() {
             {/* 8.4 Vitrines Organizadas por Categoria — Identidade Oficial Virtual Store */}
             <div className="space-y-14 sm:space-y-20">
               
-              {/* 1. SEÇÃO PRINCIPAL: CESTAS (Com suas subseções em sequência vertical durante a rolagem) */}
+              {/* 1. SEÇÃO PRINCIPAL: CESTAS (Visual integrado e padronizado com suporte a carrossel e grid) */}
               {catalogStructure.cestaSubsections.length > 0 && (
-                <div id="section-cestas" className="space-y-8 sm:space-y-12">
+                <div id="section-cestas" className="space-y-6">
                   
-                  {/* Cabeçalho Principal da Seção Cestas */}
-                  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b-2 border-[#8B233C]/20 pb-4">
-                    <div>
-                      <span className="eyebrow-vs block text-[10px] sm:text-[11px] text-[#8B233C] mb-0.5">
-                        COLEÇÃO PRINCIPAL
-                      </span>
-                      <h3 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-neutral-900 uppercase tracking-tight font-sans">
-                        Cestas
-                      </h3>
-                    </div>
-                    <span className="text-xs text-neutral-500 font-medium">
-                      {catalogStructure.cestaSubsections.reduce((acc, curr) => acc + curr.products.length, 0)} opções exclusivas
-                    </span>
-                  </div>
+                  {/* Cabeçalho Padronizado da Seção Cestas */}
+                  <BoutiqueSectionHeader
+                    eyebrow="COLEÇÃO PRINCIPAL"
+                    title="Cestas"
+                    subtitle="Cestas artesanais preparadas com carinho em cada detalhe para surpreender e emocionar."
+                  />
 
-                  {/* Subseções de Cestas organizadas verticalmente conforme a rolagem */}
-                  <div className="space-y-10 sm:space-y-14 pl-0 sm:pl-2">
-                    {catalogStructure.cestaSubsections.map((subsection) => {
-                      const isCarousel = (subsection.category as any).layout_type === "carousel";
+                  {/* Renderização harmoniosa: Suporta Carrossel e Grid com espaçamento equilibrado de boutique */}
+                  {(() => {
+                    const hasAnyCarousel = catalogStructure.cestaSubsections.some(
+                      (s) => (s.category as any).layout_type === "carousel"
+                    );
 
+                    if (hasAnyCarousel) {
                       return (
-                        <div key={subsection.category.id} className="space-y-5">
-                          {/* Cabeçalho da Subseção Interna de Cestas */}
-                          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 border-b border-[#EADFCF] pb-2">
-                            <div>
-                              <h4 className="text-base sm:text-lg lg:text-xl font-bold text-neutral-800 uppercase tracking-wide">
-                                {subsection.category.name}
-                              </h4>
-                              {subsection.category.description && (
-                                <p className="text-xs text-neutral-600 mt-0.5 max-w-xl font-normal">
-                                  {subsection.category.description}
-                                </p>
-                              )}
-                            </div>
-                            <span className="text-[11px] text-neutral-400 font-medium">
-                              {subsection.products.length} {subsection.products.length === 1 ? 'presente' : 'presentes'}
-                            </span>
-                          </div>
+                        <div className="space-y-6">
+                          {catalogStructure.cestaSubsections.map((subsection) => {
+                            const isCarousel = (subsection.category as any).layout_type === "carousel";
 
-                          {/* Renderização dos produtos da subseção */}
-                          {isCarousel ? (
-                            <CategoryCarouselRow 
-                              products={subsection.products} 
-                              buttonText="Personalizar"
-                            />
-                          ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-                              {subsection.products.map((product) => (
-                                <VirtualStoreProductCard 
-                                  key={product.id} 
-                                  product={product} 
-                                  buttonText="Personalizar"
-                                />
-                              ))}
-                            </div>
-                          )}
+                            return isCarousel ? (
+                              <CategoryCarouselRow 
+                                key={subsection.category.id}
+                                products={subsection.products} 
+                                buttonText="Personalizar"
+                              />
+                            ) : (
+                              <div key={subsection.category.id} className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-6">
+                                {subsection.products.map((product) => (
+                                  <VirtualStoreProductCard 
+                                    key={product.id} 
+                                    product={product} 
+                                    buttonText="Personalizar"
+                                  />
+                                ))}
+                              </div>
+                            );
+                          })}
                         </div>
                       );
-                    })}
-                  </div>
+                    }
+
+                    // Quando todas as subseções são grid: unifica o fluxo em um grid contínuo
+                    // eliminando buracos de linhas incompletas e vácuos de espaçamento desnecessários
+                    const seenIds = new Set<string>();
+                    const allCestaProducts: Product[] = [];
+                    for (const sub of catalogStructure.cestaSubsections) {
+                      for (const prod of sub.products) {
+                        if (!seenIds.has(prod.id)) {
+                          seenIds.add(prod.id);
+                          allCestaProducts.push(prod);
+                        }
+                      }
+                    }
+
+                    return (
+                      <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-6">
+                        {allCestaProducts.map((product) => (
+                          <VirtualStoreProductCard 
+                            key={product.id} 
+                            product={product} 
+                            buttonText="Personalizar"
+                          />
+                        ))}
+                      </div>
+                    );
+                  })()}
 
                 </div>
               )}
 
-              {/* 2. DEMAIS CATEGORIAS PRINCIPAIS (Combos Promocionais 3 por linha, Quadros, Kits, etc.) */}
+              {/* 2. DEMAIS CATEGORIAS PRINCIPAIS (Padronização uniforme em 3 produtos por linha como Cestas) */}
               {catalogStructure.otherSections.map((section) => {
-                const isCombo = (section.category.slug || "").toLowerCase().includes("combo");
-                const isCarousel = (section.category as any).layout_type === "carousel";
+                const editorialInfo = getCategoryEditorialInfo(section.category);
+                const subtitle = section.category.description || editorialInfo.defaultSubtitle;
+                const countBadge = `${section.products.length} ${section.products.length === 1 ? 'presente disponível' : 'presentes disponíveis'}`;
 
                 return (
                   <div key={section.category.id} id={`section-${section.category.slug}`} className="space-y-6">
                     
-                    {/* Divisor Elegante de Categoria Integrado à Identidade da Boutique */}
-                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-[#EADFCF] pb-3">
-                      <div>
-                        <span className="eyebrow-vs block text-[10px] sm:text-[11px] text-[#8B233C] mb-0.5">
-                          COLEÇÃO
-                        </span>
-                        <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-neutral-900 uppercase tracking-tight">
-                          {section.category.name}
-                        </h3>
-                        {section.category.description && (
-                          <p className="text-xs text-neutral-600 mt-1 max-w-xl font-normal">
-                            {section.category.description}
-                          </p>
-                        )}
-                      </div>
-                      <span className="text-xs text-neutral-500 font-medium">
-                        {section.products.length} {section.products.length === 1 ? 'presente disponível' : 'presentes disponíveis'}
-                      </span>
-                    </div>
+                    {/* Cabeçalho Padronizado de Categoria da Boutique */}
+                    <BoutiqueSectionHeader
+                      eyebrow={editorialInfo.eyebrow}
+                      title={section.category.name}
+                      subtitle={subtitle}
+                      countBadge={countBadge}
+                    />
 
-                    {/* Exibição condicional de acordo com a categoria e layout_type */}
-                    {isCombo ? (
-                      /* Combos Promocionais: layout fixo de 3 produtos por linha conforme especificação */
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                        {section.products.map((product) => (
-                          <VirtualStoreProductCard 
-                            key={product.id} 
-                            product={product} 
-                            buttonText="Personalizar"
-                          />
-                        ))}
-                      </div>
-                    ) : isCarousel ? (
-                      /* Carrossel horizontal para categorias configuradas com layout_type: 'carousel' */
-                      <CategoryCarouselRow 
-                        products={section.products} 
-                        buttonText="Personalizar"
-                      />
-                    ) : (
-                      /* Grid Oficial dos Produtos — Grid regular confortável de boutique */
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-                        {section.products.map((product) => (
-                          <VirtualStoreProductCard 
-                            key={product.id} 
-                            product={product} 
-                            buttonText="Personalizar"
-                          />
-                        ))}
-                      </div>
-                    )}
+                    {/* Grid Padronizado de 3 Produtos por Linha (Seguindo o padrão visual e dimensionamento de Cestas) */}
+                    <div className="grid grid-cols-2 min-[360px]:grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 gap-2 sm:gap-6">
+                      {section.products.map((product) => (
+                        <VirtualStoreProductCard 
+                          key={product.id} 
+                          product={product} 
+                          buttonText="Personalizar"
+                        />
+                      ))}
+                    </div>
 
                   </div>
                 );
@@ -1470,54 +1563,16 @@ export default function Index() {
           </div>
         </section>
 
-        {/* ─────────────────────────────────────────────────────────────────── */}
-        {/* 9. SEÇÃO EDITORIAL / VALORES (CARDS BRANCOS)                        */}
-        {/* ─────────────────────────────────────────────────────────────────── */}
-        <section className="bg-[#FBF7EE] text-neutral-900 border-y border-[#EADFCF] py-16 sm:py-24 px-6 sm:px-12">
-          <div className="max-w-5xl mx-auto text-center">
-            <span className="inline-block text-xs font-extrabold tracking-[0.22em] text-[#8B233C] uppercase mb-2">
-              O CUIDADO ESTÁ NOS DETALHES
-            </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold uppercase tracking-tight mb-12 text-neutral-900">
-              Feito para chegar <br />
-              <span className="text-[#8B233C]">ao coração.</span>
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-              <div className="bg-white text-neutral-900 p-6 sm:p-8 rounded-2xl border border-[#EADFCF] shadow-sm hover:shadow-md transition-shadow">
-                <strong className="block text-base font-bold text-neutral-900 mb-2">
-                  Seu toque pessoal
-                </strong>
-                <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed font-normal">
-                  Nomes, mensagens carinhosas e fotos que eternizam lembranças. Cada produto é customizado com todo cuidado.
-                </p>
-              </div>
-
-              <div className="bg-white text-neutral-900 p-6 sm:p-8 rounded-2xl border border-[#EADFCF] shadow-sm hover:shadow-md transition-shadow">
-                <strong className="block text-base font-bold text-neutral-900 mb-2">
-                  Acabamento impecável
-                </strong>
-                <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed font-normal">
-                  Itens selecionados, caixas artesanais de qualidade, laços delicados e embalagens feitas para encantar.
-                </p>
-              </div>
-
-              <div className="bg-white text-neutral-900 p-6 sm:p-8 rounded-2xl border border-[#EADFCF] shadow-sm hover:shadow-md transition-shadow">
-                <strong className="block text-base font-bold text-neutral-900 mb-2">
-                  O presente certo
-                </strong>
-                <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed font-normal">
-                  Seja um aniversário, um pedido de namoro ou um simples café da manhã, o gesto certo emociona para sempre.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* ─────────────────────────────────────────────────────────────────── */}
         {/* 10. SEÇÃO CORPORATIVA                                              */}
         {/* ─────────────────────────────────────────────────────────────────── */}
-        <section id="empresas" className="bg-[#F5EFE6] border-b border-[#EADFCF] py-16 sm:py-24 px-6 sm:px-12 scroll-mt-20">
+        <section 
+          id="corporativo" 
+          className="bg-[#F5EFE6] border-b border-[#EADFCF] py-16 sm:py-24 px-6 sm:px-12 scroll-mt-24"
+        >
+          {/* Âncora retrocompatível para id="empresas" */}
+          <span id="empresas" className="sr-only" aria-hidden="true" />
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div>
               <span className="eyebrow-vs block mb-2 text-[#8B233C]">CORPORATIVO & EVENTOS</span>
@@ -1658,7 +1713,7 @@ export default function Index() {
             <ul className="space-y-2 text-[#EADFCF]/80">
               <li><button onClick={() => scrollTo("destaques")} className="hover:text-[#D6BC85] cursor-pointer">Produtos em Destaque</button></li>
               <li><button onClick={() => scrollTo("categorias")} className="hover:text-[#D6BC85] cursor-pointer">Catálogo Completo</button></li>
-              <li><button onClick={() => scrollTo("empresas")} className="hover:text-[#D6BC85] cursor-pointer">Para Empresas</button></li>
+              <li><button onClick={() => scrollTo("corporativo")} className="hover:text-[#D6BC85] cursor-pointer">Corporativo & Empresas</button></li>
               <li><Link to="/admin/login" className="hover:text-[#D6BC85]">Painel do Administrador</Link></li>
             </ul>
           </div>

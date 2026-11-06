@@ -140,7 +140,7 @@ export function SnowEffect() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="absolute inset-0 pointer-events-none z-[5] w-full h-full"
+      className="absolute inset-0 pointer-events-none z-0 w-full h-full"
     />
   );
 }
