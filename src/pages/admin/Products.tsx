@@ -68,19 +68,50 @@ function generateUUID(): string {
   });
 }
 
-function parsePrice(value: string | number): number {
-  if (typeof value === 'number') return value;
-  if (!value) return 0;
-  // Remove R$, espaços e pontos de milhar, troca vírgula por ponto
-  const cleaned = value.toString().replace(/R\$\s?/gi, '').replace(/\./g, '').replace(',', '.').trim();
-  const num = parseFloat(cleaned);
-  return isNaN(num) ? 0 : num;
+export function parsePrice(value: string | number | null | undefined): number {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === 'number') return isNaN(value) ? 0 : Math.round(value * 100) / 100;
+
+  const raw = value.toString().replace(/R\$\s?/gi, '').trim();
+  if (!raw) return 0;
+
+  const lastDot = raw.lastIndexOf('.');
+  const lastComma = raw.lastIndexOf(',');
+
+  let normalized = raw;
+  if (lastDot !== -1 && lastComma !== -1) {
+    if (lastComma > lastDot) {
+      // Formato brasileiro: 1.250,50 -> remove pontos, troca vírgula por ponto
+      normalized = raw.replace(/\./g, '').replace(',', '.');
+    } else {
+      // Formato americano: 1,250.50 -> remove vírgulas
+      normalized = raw.replace(/,/g, '');
+    }
+  } else if (lastComma !== -1) {
+    // Apenas vírgula: 49,90 -> troca por ponto
+    normalized = raw.replace(/\./g, '').replace(',', '.');
+  } else if (lastDot !== -1) {
+    // Apenas ponto: verificar se é separador de milhar (ex: 1.000) ou decimal (ex: 49.90)
+    const dotCount = (raw.match(/\./g) || []).length;
+    if (dotCount > 1) {
+      normalized = raw.replace(/\./g, '');
+    } else {
+      const parts = raw.split('.');
+      if (parts[1] && parts[1].length === 3 && parseInt(parts[0], 10) >= 1) {
+        normalized = raw.replace('.', '');
+      }
+    }
+  }
+
+  normalized = normalized.replace(/[^\d.-]/g, '');
+  const parsed = parseFloat(normalized);
+  return isNaN(parsed) ? 0 : Math.round(parsed * 100) / 100;
 }
 
-function formatPrice(value: string | number | null | undefined): string {
-  if (value === null || value === undefined) return '';
-  const num = typeof value === 'string' ? parseFloat(value) : value;
-  if (isNaN(num)) return typeof value === 'string' ? value : '';
+export function formatPrice(value: string | number | null | undefined): string {
+  if (value === null || value === undefined || value === '') return '';
+  const num = typeof value === 'string' ? parsePrice(value) : value;
+  if (isNaN(num)) return '';
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(num);
 }
 
@@ -558,6 +589,14 @@ export default function Products() {
   const [updatingFeaturedId, setUpdatingFeaturedId] = useState<string | null>(null);
   const [updatingBestSellerId, setUpdatingBestSellerId] = useState<string | null>(null);
 
+  // Colunas confirmadas existentes na tabela public.products
+  const [existingColumns, setExistingColumns] = useState<Set<string>>(() => new Set([
+    'id', 'category_id', 'name', 'description', 'price', 'image_url', 'sort_order',
+    'active', 'created_at', 'updated_at', 'image', 'gallery', 'is_promo', 'is_new',
+    'short_description', 'detailed_description', 'specifications', 'observations',
+    'promo_price', 'is_featured'
+  ]));
+
   // Filters
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('');
@@ -605,10 +644,21 @@ export default function Products() {
       ]);
 
       if (prodRes.error) {
-        toast.error('Não foi possível carregar os produtos.');
+        toast.error(`Não foi possível carregar os produtos: ${prodRes.error.message}`);
         console.error(prodRes.error);
       } else {
-        setProducts((prodRes.data as Product[]) || []);
+        const prodList = (prodRes.data as Product[]) || [];
+        setProducts(prodList);
+        if (prodList.length > 0) {
+          const detected = new Set([
+            'id', 'category_id', 'name', 'description', 'price', 'image_url', 'sort_order',
+            'active', 'created_at', 'updated_at', 'image', 'gallery', 'is_promo', 'is_new',
+            'short_description', 'detailed_description', 'specifications', 'observations',
+            'promo_price', 'is_featured'
+          ]);
+          Object.keys(prodList[0]).forEach(k => detected.add(k));
+          setExistingColumns(detected);
+        }
       }
 
       if (catRes.error) {
@@ -750,8 +800,27 @@ export default function Products() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim()) { toast.error('Nome obrigatório.'); return; }
-    if (!formData.price.trim()) { toast.error('Preço obrigatório.'); return; }
+    if (!formData.name.trim()) { toast.error('Nome do produto é obrigatório.'); return; }
+    if (!formData.price.trim()) { toast.error('Preço do produto é obrigatório.'); return; }
+
+    const numericPrice = parsePrice(formData.price);
+    if (numericPrice <= 0) {
+      toast.error('Informe um preço válido maior que zero.');
+      return;
+    }
+
+    let numericPromoPrice: number | null = null;
+    if (formData.is_promo) {
+      numericPromoPrice = parsePrice(formData.promo_price);
+      if (!numericPromoPrice || numericPromoPrice <= 0) {
+        toast.error('Informe um preço promocional válido maior que zero.');
+        return;
+      }
+      if (numericPromoPrice >= numericPrice) {
+        toast.error('O preço promocional deve ser estritamente menor que o preço original.');
+        return;
+      }
+    }
 
     setSaving(true);
 
@@ -759,52 +828,116 @@ export default function Products() {
       ? formData.image.trim()
       : (formData.gallery && formData.gallery.length > 0 && formData.gallery[0] ? formData.gallery[0].trim() : null);
 
-    const payload = {
+    const validGallery = Array.isArray(formData.gallery)
+      ? formData.gallery.map(url => (typeof url === 'string' ? url.trim() : '')).filter(Boolean)
+      : [];
+
+    const cleanCategoryId = (formData.category_id && formData.category_id.trim() !== '')
+      ? formData.category_id.trim()
+      : null;
+
+    const validSpecs = Array.isArray(formData.specifications)
+      ? formData.specifications.map(s => (typeof s === 'string' ? s.trim() : '')).filter(Boolean)
+      : [];
+
+    const sortOrder = Number.isInteger(formData.sort_order) && formData.sort_order > 0
+      ? formData.sort_order
+      : (products.length + 1);
+
+    const payload: Record<string, any> = {
       name: formData.name.trim(),
-      price: parsePrice(formData.price),
-      promo_price: parsePrice(formData.promo_price) || null,
+      price: numericPrice,
+      promo_price: numericPromoPrice,
       image: mainImg,
-      gallery: formData.gallery.length > 0 ? formData.gallery : null,
+      gallery: validGallery.length > 0 ? validGallery : null,
       is_promo: formData.is_promo,
       is_new: formData.is_new,
       is_featured: formData.is_featured,
-      is_best_seller: formData.is_best_seller,
-      display_order: formData.display_order || formData.sort_order || 1,
-      collection: formData.collection.trim() || null,
-      short_description: formData.short_description || null,
-      detailed_description: formData.detailed_description || null,
-      specifications: formData.specifications.length > 0 ? formData.specifications : null,
-      observations: formData.observations || null,
-      category_id: formData.category_id || null,
+      short_description: formData.short_description?.trim() || null,
+      detailed_description: formData.detailed_description?.trim() || null,
+      specifications: validSpecs.length > 0 ? validSpecs : null,
+      observations: formData.observations?.trim() || null,
+      category_id: cleanCategoryId,
       active: formData.active,
-      sort_order: formData.sort_order,
+      sort_order: sortOrder,
     };
 
-    if (payload.is_promo && payload.promo_price) {
-      if (payload.promo_price >= payload.price) {
-        toast.error('O preço promocional deve ser menor que o preço original.');
-        setSaving(false);
-        return;
-      }
+    // Colunas opcionais: só envia se comprovadamente existirem no banco
+    if (existingColumns.has('is_best_seller')) {
+      payload.is_best_seller = formData.is_best_seller;
+    }
+    if (existingColumns.has('display_order')) {
+      payload.display_order = formData.display_order || sortOrder;
+    }
+    if (existingColumns.has('collection')) {
+      payload.collection = formData.collection?.trim() || null;
     }
 
     try {
-      if (editingId) {
-        const { error } = await supabase.from('products').update(payload).eq('id', editingId);
-        if (error) throw error;
-        toast.success('Produto atualizado com sucesso!');
-      } else {
-        const { error } = await supabase.from('products').insert([payload]);
-        if (error) throw error;
-        toast.success('Produto criado com sucesso!');
+      // 1. Tentar renovar sessão se aplicável
+      try {
+        await checkAndRefreshAdminSession();
+      } catch (sessionErr: any) {
+        console.warn('[Products:handleSubmit] Aviso ao verificar sessão administrativa:', sessionErr?.message);
       }
+
+      // Função de execução que suporta re-tentativa caso falte coluna no schema do Supabase
+      const executeSave = async (currentPayload: Record<string, any>) => {
+        if (editingId) {
+          return await supabase.from('products').update(currentPayload).eq('id', editingId);
+        } else {
+          return await supabase.from('products').insert([currentPayload]);
+        }
+      };
+
+      let saveRes = await executeSave(payload);
+
+      // Tratamento resiliente caso uma coluna opcional não exista no Supabase (PGRST204 ou 42703)
+      if (saveRes.error && (saveRes.error.code === 'PGRST204' || saveRes.error.code === '42703')) {
+        const missingMatch = saveRes.error.message?.match(/column [products.]*([a-zA-Z0-9_]+) does not exist/i)
+          || saveRes.error.message?.match(/Could not find the '([a-zA-Z0-9_]+)' column/i);
+        if (missingMatch && missingMatch[1]) {
+          const missingCol = missingMatch[1];
+          console.warn(`[Products:handleSubmit] Coluna "${missingCol}" inexistente no Supabase. Retentando sem ela.`);
+          delete payload[missingCol];
+          setExistingColumns(prev => {
+            const next = new Set(prev);
+            next.delete(missingCol);
+            return next;
+          });
+          saveRes = await executeSave(payload);
+        }
+      }
+
+      if (saveRes.error) {
+        throw saveRes.error;
+      }
+
+      toast.success(editingId ? 'Produto atualizado com sucesso!' : 'Produto criado com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['public-catalog'] });
       const draftKey = editingId ? `vs_admin_draft_edit_${editingId}` : 'vs_admin_draft_new';
       localStorage.removeItem(draftKey);
       closePanel();
       fetchAll();
     } catch (err: any) {
-      console.error(err);
-      toast.error('Não foi possível salvar o produto.');
+      console.error('[Products:handleSubmit] Erro ao salvar produto no Supabase:', err);
+      const errorMsg = err?.message || 'Erro desconhecido ao salvar produto.';
+      const errorCode = err?.code ? ` (${err.code})` : '';
+
+      let friendly = `Não foi possível salvar esse produto: ${errorMsg}${errorCode}`;
+      if (err?.code === '42501' || errorMsg.includes('row-level security')) {
+        friendly = 'Permissão negada (RLS). Sua sessão de administrador pode ter expirado ou não possui perfil autorizado. Faça logout e login novamente no painel.';
+      } else if (err?.code === '23503') {
+        friendly = 'A categoria selecionada não foi encontrada no banco de dados. Atualize a página e selecione uma categoria válida.';
+      } else if (err?.code === '23502') {
+        friendly = `Campo obrigatório ausente no banco de dados: ${errorMsg}`;
+      } else if (err?.code === '22P02') {
+        friendly = `Formato de dados ou valor numérico incompatível: ${errorMsg}`;
+      } else if (err?.code === 'PGRST204') {
+        friendly = `Incompatibilidade de esquema no Supabase: ${errorMsg}`;
+      }
+
+      toast.error(friendly);
     } finally {
       setSaving(false);
     }
@@ -820,10 +953,11 @@ export default function Products() {
         .eq('id', p.id);
       if (error) throw error;
       toast.success(`Produto ${p.active ? 'desativado' : 'ativado'} com sucesso.`);
+      queryClient.invalidateQueries({ queryKey: ['public-catalog'] });
       fetchAll();
     } catch (err: any) {
-      console.error(err);
-      toast.error('Não foi possível alterar o status.');
+      console.error('[toggleActive] Erro:', err);
+      toast.error(`Não foi possível alterar o status: ${err?.message || 'Erro no banco'}`);
     }
   };
 
@@ -856,12 +990,12 @@ export default function Products() {
       // Invalida cache do catálogo público para sincronização imediata
       queryClient.invalidateQueries({ queryKey: ['public-catalog'] });
     } catch (err: any) {
-      console.error(err);
+      console.error('[toggleFeatured] Erro:', err);
       // Reversão em caso de erro
       setProducts(prev =>
         prev.map(item => (item.id === p.id ? { ...item, is_featured: p.is_featured } : item))
       );
-      toast.error('Não foi possível atualizar o destaque. Tente novamente.');
+      toast.error(`Não foi possível atualizar o destaque: ${err?.message || 'Erro no banco'}`);
     } finally {
       setUpdatingFeaturedId(null);
     }
@@ -871,6 +1005,12 @@ export default function Products() {
 
   const toggleBestSeller = async (p: Product) => {
     if (updatingBestSellerId === p.id) return;
+
+    if (!existingColumns.has('is_best_seller')) {
+      toast.info('A funcionalidade "Mais Pedido" requer a aplicação da migração de Natal no banco Supabase.');
+      return;
+    }
+
     const nextBestSeller = !p.is_best_seller;
     setUpdatingBestSellerId(p.id);
 
@@ -896,12 +1036,12 @@ export default function Products() {
       // Invalida cache do catálogo público para sincronização imediata
       queryClient.invalidateQueries({ queryKey: ['public-catalog'] });
     } catch (err: any) {
-      console.error(err);
+      console.error('[toggleBestSeller] Erro:', err);
       // Reversão em caso de erro
       setProducts(prev =>
         prev.map(item => (item.id === p.id ? { ...item, is_best_seller: p.is_best_seller } : item))
       );
-      toast.error('Não foi possível atualizar o selo Mais Pedido.');
+      toast.error(`Não foi possível atualizar o selo Mais Pedido: ${err?.message || 'Erro no banco'}`);
     } finally {
       setUpdatingBestSellerId(null);
     }
@@ -928,12 +1068,13 @@ export default function Products() {
         }
       }
 
-      toast.success('Produto excluído.');
+      toast.success('Produto excluído com sucesso.');
+      queryClient.invalidateQueries({ queryKey: ['public-catalog'] });
       setDeleteTarget(null);
       fetchAll();
     } catch (err: any) {
-      console.error(err);
-      toast.error('Não foi possível excluir o produto.');
+      console.error('[handleDelete] Erro ao excluir produto:', err);
+      toast.error(`Não foi possível excluir o produto: ${err?.message || 'Erro no banco'}`);
     } finally {
       setDeleting(false);
     }
