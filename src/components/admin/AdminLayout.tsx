@@ -63,7 +63,8 @@ export function AdminLayout() {
           <Link
             key={link.path}
             to={link.path}
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               setIsMobileMenuOpen(false);
               if (onClick) onClick();
             }}
@@ -124,8 +125,13 @@ export function AdminLayout() {
         <header className="sticky top-0 z-30 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 lg:hidden">
             <button 
-              onClick={() => setIsMobileMenuOpen(true)}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMobileMenuOpen(prev => !prev);
+              }}
               className="p-2 -ml-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              aria-label="Abrir Menu Admin"
             >
               <Menu size={24} />
             </button>
@@ -167,14 +173,18 @@ export function AdminLayout() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMobileMenuOpen(false);
+              }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden cursor-pointer"
             />
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              onClick={(e) => e.stopPropagation()}
               className="fixed inset-y-0 left-0 w-[280px] bg-white dark:bg-[#0A0A0A] shadow-2xl z-50 flex flex-col lg:hidden"
             >
               <div className="p-6 flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800">
@@ -182,8 +192,13 @@ export function AdminLayout() {
                   Virtual Store<br/><span className="font-light text-[10px] text-neutral-500 tracking-widest">Administração</span>
                 </span>
                 <button 
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsMobileMenuOpen(false);
+                  }}
                   className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                  aria-label="Fechar Menu Admin"
                 >
                   <X size={20} />
                 </button>
