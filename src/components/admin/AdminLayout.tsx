@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -30,6 +30,24 @@ export function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Fecha o menu lateral automaticamente sempre que a rota mudar
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  // Fecha o menu lateral ao pressionar Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    if (isMobileMenuOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMobileMenuOpen]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast.success('Você saiu do painel.');
@@ -45,7 +63,10 @@ export function AdminLayout() {
           <Link
             key={link.path}
             to={link.path}
-            onClick={onClick}
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              if (onClick) onClick();
+            }}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${
               isActive 
                 ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' 

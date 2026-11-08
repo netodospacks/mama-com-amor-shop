@@ -17,8 +17,8 @@ const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 const Login = lazy(() => import("./pages/admin/Login.tsx"));
 const Dashboard = lazy(() => import("./pages/admin/Dashboard.tsx"));
-const AdminRoute = lazy(() => import("./components/admin/AdminRoute.tsx").then(m => ({ default: m.AdminRoute })));
-const AdminLayout = lazy(() => import("./components/admin/AdminLayout.tsx").then(m => ({ default: m.AdminLayout })));
+import { AdminRoute } from "./components/admin/AdminRoute";
+import { AdminLayout } from "./components/admin/AdminLayout";
 const Categories = lazy(() => import("./pages/admin/Categories.tsx"));
 const Products = lazy(() => import("./pages/admin/Products.tsx"));
 const Migration = lazy(() => import("./pages/admin/Migration.tsx"));

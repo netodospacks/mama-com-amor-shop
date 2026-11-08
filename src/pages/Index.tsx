@@ -264,6 +264,19 @@ export default function Index() {
   const { totalItems, setIsCartOpen } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Fechar menu lateral com tecla Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [menuOpen]);
+
   // Busca e Filtros do Catálogo
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -998,7 +1011,10 @@ export default function Index() {
 
               <nav className="flex-1 overflow-y-auto py-4 px-4 space-y-1">
                 <button
-                  onClick={() => scrollTo("destaques")}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    scrollTo("destaques");
+                  }}
                   className="w-full text-left px-4 py-3 rounded-xl text-xs font-bold tracking-wider uppercase text-neutral-800 hover:bg-neutral-100 hover:text-[#8B233C] transition-colors"
                 >
                   ⭐ Produtos em Destaque
@@ -1006,6 +1022,7 @@ export default function Index() {
 
                 <button
                   onClick={() => {
+                    setMenuOpen(false);
                     setActiveCategorySlug("all");
                     scrollTo("categorias");
                   }}
@@ -1016,7 +1033,10 @@ export default function Index() {
 
                 {/* NOVO: Botão Corporativo no Menu Mobile */}
                 <button
-                  onClick={() => scrollTo("corporativo")}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    scrollTo("corporativo");
+                  }}
                   className="w-full text-left px-4 py-3 rounded-xl text-xs font-bold tracking-wider uppercase text-[#8B233C] bg-[#8B233C]/5 hover:bg-[#8B233C]/10 border border-[#8B233C]/20 transition-all flex items-center justify-between"
                 >
                   <span className="flex items-center gap-2">
@@ -1038,6 +1058,7 @@ export default function Index() {
                   <button
                     key={cat.id}
                     onClick={() => {
+                      setMenuOpen(false);
                       setActiveCategorySlug(cat.slug);
                       scrollTo("categorias");
                     }}
@@ -1048,7 +1069,10 @@ export default function Index() {
                 ))}
 
                 <button
-                  onClick={() => scrollTo("corporativo")}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    scrollTo("corporativo");
+                  }}
                   className="w-full text-left px-4 py-3 rounded-xl text-xs font-bold tracking-wider uppercase text-neutral-800 hover:bg-neutral-100 hover:text-[#8B233C] transition-colors mt-2 border-t border-neutral-200 flex items-center gap-2"
                 >
                   <Briefcase size={15} className="text-[#8B233C] shrink-0" />
@@ -1069,7 +1093,10 @@ export default function Index() {
 
                 {/* Botão Corporativo também posicionado abaixo do WhatsApp no menu lateral */}
                 <button
-                  onClick={() => scrollTo("corporativo")}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    scrollTo("corporativo");
+                  }}
                   className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#8B233C]/10 hover:bg-[#8B233C]/20 border border-[#8B233C]/30 text-[#8B233C] text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
                 >
                   <Briefcase size={15} className="text-[#8B233C] shrink-0" />
