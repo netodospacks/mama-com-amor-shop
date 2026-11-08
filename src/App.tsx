@@ -15,13 +15,13 @@ const Cart = lazy(() => import("./pages/Cart.tsx"));
 const Checkout = lazy(() => import("./pages/Checkout.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
-const Login = lazy(() => import("./pages/admin/Login.tsx"));
-const Dashboard = lazy(() => import("./pages/admin/Dashboard.tsx"));
+import Login from "./pages/admin/Login.tsx";
+import Dashboard from "./pages/admin/Dashboard.tsx";
 import { AdminRoute } from "./components/admin/AdminRoute";
 import { AdminLayout } from "./components/admin/AdminLayout";
-const Categories = lazy(() => import("./pages/admin/Categories.tsx"));
-const Products = lazy(() => import("./pages/admin/Products.tsx"));
-const Migration = lazy(() => import("./pages/admin/Migration.tsx"));
+import Categories from "./pages/admin/Categories.tsx";
+import Products from "./pages/admin/Products.tsx";
+import Migration from "./pages/admin/Migration.tsx";
 
 const RouteLoading = () => (
   <div className="min-h-[50vh] flex items-center justify-center py-20">

@@ -1571,11 +1571,11 @@ export default function Products() {
               {/* Mobile cards */}
               <div className="md:hidden divide-y divide-neutral-100 dark:divide-neutral-800">
                 {filtered.map(p => (
-                  <div key={p.id} className="p-4 flex gap-3 items-start">
+                  <div key={p.id} className="p-4 flex gap-3 items-start touch-manipulation">
                     {/* Image */}
                     <div
                       onClick={() => openEdit(p)}
-                      className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-800 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                      className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-800 shrink-0 cursor-pointer hover:opacity-80 transition-opacity touch-manipulation"
                       title="Clique para editar"
                     >
                       {p.image ? (
@@ -1593,7 +1593,7 @@ export default function Products() {
                         <button
                           type="button"
                           onClick={() => openEdit(p)}
-                          className="font-semibold text-sm leading-tight line-clamp-2 text-left hover:underline cursor-pointer"
+                          className="font-semibold text-sm leading-tight line-clamp-2 text-left hover:underline cursor-pointer touch-manipulation"
                           title="Clique para editar"
                         >
                           {p.name}
@@ -1630,7 +1630,7 @@ export default function Products() {
                       <div className="flex items-center gap-2 mt-2.5 flex-wrap">
                         <button
                           onClick={() => toggleActive(p)}
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium touch-manipulation ${
                             p.active
                               ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                               : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800'
@@ -1643,7 +1643,7 @@ export default function Products() {
                           type="button"
                           disabled={updatingFeaturedId === p.id}
                           onClick={() => toggleFeatured(p)}
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors touch-manipulation ${
                             p.is_featured
                               ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 hover:bg-amber-200'
                               : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200'
@@ -1662,13 +1662,13 @@ export default function Products() {
                         </button>
                         <button
                           onClick={() => openEdit(p)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 transition-colors touch-manipulation"
                         >
                           <Pencil size={11} /> Editar
                         </button>
                         <button
                           onClick={() => setDeleteTarget(p)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-600 hover:bg-red-100 transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-600 hover:bg-red-100 transition-colors touch-manipulation"
                         >
                           <Trash2 size={11} /> Excluir
                         </button>

@@ -11,11 +11,8 @@ import {
   LogOut, 
   Menu, 
   X,
-  ArrowLeft,
-  Store,
-  Gift
+  ArrowLeft
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const ADMIN_LINKS = [
   { label: 'Dashboard', path: '/admin', icon: LayoutDashboard },
@@ -24,6 +21,40 @@ const ADMIN_LINKS = [
   { label: 'Pedidos', path: '/admin/pedidos', icon: ShoppingCart },
   { label: 'Configurações', path: '/admin/configuracoes', icon: Settings },
 ];
+
+function AdminNavLinks({
+  currentPath,
+  onNavigate,
+}: {
+  currentPath: string;
+  onNavigate?: () => void;
+}) {
+  return (
+    <>
+      {ADMIN_LINKS.map((link) => {
+        const Icon = link.icon;
+        const isActive = currentPath === link.path;
+        return (
+          <Link
+            key={link.path}
+            to={link.path}
+            onClick={() => {
+              if (onNavigate) onNavigate();
+            }}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium text-sm select-none touch-manipulation ${
+              isActive 
+                ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' 
+                : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800'
+            }`}
+          >
+            <Icon size={18} />
+            {link.label}
+          </Link>
+        );
+      })}
+    </>
+  );
+}
 
 export function AdminLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -34,6 +65,18 @@ export function AdminLayout() {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
+
+  // Previne scroll do body quando o menu lateral mobile estiver aberto
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileMenuOpen]);
 
   // Fecha o menu lateral ao pressionar Escape
   useEffect(() => {
@@ -54,36 +97,8 @@ export function AdminLayout() {
     navigate('/admin/login');
   };
 
-  const NavLinks = ({ onClick }: { onClick?: () => void }) => (
-    <>
-      {ADMIN_LINKS.map((link) => {
-        const Icon = link.icon;
-        const isActive = location.pathname === link.path;
-        return (
-          <Link
-            key={link.path}
-            to={link.path}
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMobileMenuOpen(false);
-              if (onClick) onClick();
-            }}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${
-              isActive 
-                ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' 
-                : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800'
-            }`}
-          >
-            <Icon size={18} />
-            {link.label}
-          </Link>
-        );
-      })}
-    </>
-  );
-
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 flex font-sans">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 flex font-sans select-auto">
       
       {/* Sidebar Desktop */}
       <aside className="hidden lg:flex flex-col w-64 fixed inset-y-0 bg-white dark:bg-[#0A0A0A] border-r border-neutral-200 dark:border-neutral-800 z-40">
@@ -98,7 +113,7 @@ export function AdminLayout() {
         </div>
         
         <nav className="flex-1 px-4 py-6 flex flex-col gap-2 overflow-y-auto">
-          <NavLinks />
+          <AdminNavLinks currentPath={location.pathname} />
         </nav>
 
         <div className="p-4 border-t border-neutral-100 dark:border-neutral-800 space-y-1.5">
@@ -126,11 +141,8 @@ export function AdminLayout() {
           <div className="flex items-center gap-3 lg:hidden">
             <button 
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsMobileMenuOpen(prev => !prev);
-              }}
-              className="p-2 -ml-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 -ml-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 touch-manipulation cursor-pointer"
               aria-label="Abrir Menu Admin"
             >
               <Menu size={24} />
@@ -139,7 +151,6 @@ export function AdminLayout() {
           </div>
 
           <div className="hidden lg:block">
-            {/* Espaço para breadcrumbs ou título da página no desktop */}
             <span className="font-medium text-neutral-500">
               {ADMIN_LINKS.find(l => l.path === location.pathname)?.label || 'Painel'}
             </span>
@@ -165,70 +176,64 @@ export function AdminLayout() {
         </main>
       </div>
 
-      {/* Mobile Drawer */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsMobileMenuOpen(false);
-              }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden cursor-pointer"
-            />
-            <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              onClick={(e) => e.stopPropagation()}
-              className="fixed inset-y-0 left-0 w-[280px] bg-white dark:bg-[#0A0A0A] shadow-2xl z-50 flex flex-col lg:hidden"
-            >
-              <div className="p-6 flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800">
-                <span className="font-bold tracking-tight text-sm uppercase leading-tight">
-                  Virtual Store<br/><span className="font-light text-[10px] text-neutral-500 tracking-widest">Administração</span>
-                </span>
-                <button 
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                  aria-label="Fechar Menu Admin"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-              
-              <nav className="flex-1 px-4 py-6 flex flex-col gap-2 overflow-y-auto">
-                <NavLinks onClick={() => setIsMobileMenuOpen(false)} />
-              </nav>
+      {/* Mobile Drawer Backdrop (Transição CSS direta: zero travamento de tela) */}
+      <div
+        role="presentation"
+        onClick={() => setIsMobileMenuOpen(false)}
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden transition-opacity duration-200 ${
+          isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      />
 
-              <div className="p-4 border-t border-neutral-100 dark:border-neutral-800 space-y-1.5">
-                <Link
-                  to="/"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 w-full rounded-xl transition-all font-medium text-sm text-neutral-600 hover:text-black hover:bg-neutral-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800"
-                >
-                  <ArrowLeft size={18} />
-                  Voltar para o site
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-3 px-4 py-3 w-full rounded-xl transition-all font-medium text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-                >
-                  <LogOut size={18} />
-                  Sair do Painel
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {/* Mobile Drawer Panel (Transição CSS suave: sem oscilações, fechamento instantâneo) */}
+      <aside
+        aria-label="Menu Administrativo Mobile"
+        className={`fixed inset-y-0 left-0 w-[280px] max-w-[85vw] bg-white dark:bg-[#0A0A0A] shadow-2xl z-50 flex flex-col lg:hidden transition-transform duration-200 ease-out transform ${
+          isMobileMenuOpen ? 'translate-x-0 pointer-events-auto' : '-translate-x-full pointer-events-none'
+        }`}
+      >
+        <div className="p-6 flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800">
+          <span className="font-bold tracking-tight text-sm uppercase leading-tight">
+            Virtual Store<br/><span className="font-light text-[10px] text-neutral-500 tracking-widest">Administração</span>
+          </span>
+          <button 
+            type="button"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 touch-manipulation cursor-pointer"
+            aria-label="Fechar Menu Admin"
+          >
+            <X size={20} />
+          </button>
+        </div>
+        
+        <nav className="flex-1 px-4 py-6 flex flex-col gap-2 overflow-y-auto">
+          <AdminNavLinks 
+            currentPath={location.pathname} 
+            onNavigate={() => setIsMobileMenuOpen(false)} 
+          />
+        </nav>
+
+        <div className="p-4 border-t border-neutral-100 dark:border-neutral-800 space-y-1.5">
+          <Link
+            to="/"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl transition-all font-medium text-sm text-neutral-600 hover:text-black hover:bg-neutral-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800"
+          >
+            <ArrowLeft size={18} />
+            Voltar para o site
+          </Link>
+          <button
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              handleLogout();
+            }}
+            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl transition-all font-medium text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+          >
+            <LogOut size={18} />
+            Sair do Painel
+          </button>
+        </div>
+      </aside>
 
     </div>
   );

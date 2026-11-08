@@ -264,6 +264,18 @@ export default function Index() {
   const { totalItems, setIsCartOpen } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Previne scroll do body quando o menu lateral mobile estiver aberto
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
   // Fechar menu lateral com tecla Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
