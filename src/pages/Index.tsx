@@ -1474,7 +1474,7 @@ export default function Index() {
               
               {/* 1. SEÇÃO PRINCIPAL: CESTAS (Visual integrado e padronizado com suporte a carrossel e grid) */}
               {catalogStructure.cestaSubsections.length > 0 && (
-                <div id="section-cestas" className="space-y-6">
+                <div id="section-cestas" className="relative z-10 space-y-6">
                   
                   {/* Cabeçalho Padronizado da Seção Cestas */}
                   <BoutiqueSectionHeader
@@ -1553,7 +1553,7 @@ export default function Index() {
                 const countBadge = `${section.products.length} ${section.products.length === 1 ? 'presente disponível' : 'presentes disponíveis'}`;
 
                 return (
-                  <div key={section.category.id} id={`section-${section.category.slug}`} className="space-y-6">
+                  <div key={section.category.id} id={`section-${section.category.slug}`} className="relative z-10 space-y-6">
                     
                     {/* Cabeçalho Padronizado de Categoria da Boutique */}
                     <BoutiqueSectionHeader

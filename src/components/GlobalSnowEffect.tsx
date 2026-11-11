@@ -121,7 +121,7 @@ export function GlobalSnowEffect() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="fixed inset-0 pointer-events-none z-0 w-screen h-screen overflow-hidden"
+      className="fixed inset-0 pointer-events-none z-[1] w-screen h-screen overflow-hidden"
     />
   );
 }
