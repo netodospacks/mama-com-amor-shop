@@ -484,7 +484,7 @@ export default function Index() {
           shortDescription: 'Caixote Madeira Pinus, Mini Arranjo de Astromélias Naturais, Varal de Fotos Polaroid com Imã, waffle, geleia e delícias artesanais.',
           detailedDescription: 'Caixote Madeira Pinus, Mini Arranjo de Astromélias Naturais, Varal de Fotos Polaroid com Imã, waffle, geleia e delícias artesanais.',
           specifications: ['Caixote Madeira Pinus', 'Mini Arranjo de Astromélias Naturais', 'Varal de Fotos Polaroid com Imã'],
-          observations: 'Serve 1 pessoa.',
+          observations: '',
           isBestSeller: true,
           displayOrder: 1,
           collection: 'natal'
@@ -498,7 +498,7 @@ export default function Index() {
           shortDescription: 'Um café da manhã sofisticado e equilibrado, ideal para começar o dia com sabor, biscoito artesanal decorado e elegância.',
           detailedDescription: 'Um café da manhã sofisticado e equilibrado, ideal para começar o dia com sabor, biscoito artesanal decorado e elegância.',
           specifications: ['Caixote Pinus', 'Biscoito Decorado', 'Suco e Delícias'],
-          observations: 'Serve 1 pessoa.',
+          observations: '',
           isBestSeller: false,
           displayOrder: 2,
           collection: 'natal'
@@ -512,7 +512,7 @@ export default function Index() {
           shortDescription: 'Composição nobre em formato de coração com croissant, suco de uva integral, frutas frescas, pães de queijo e doces finos.',
           detailedDescription: 'Composição nobre em formato de coração com croissant, suco de uva integral, frutas frescas, pães de queijo e doces finos.',
           specifications: ['Formato Coração', 'Croissant', 'Suco Integral'],
-          observations: 'Serve 1 pessoa.',
+          observations: '',
           isBestSeller: false,
           displayOrder: 3,
           collection: 'natal'
@@ -1259,11 +1259,13 @@ export default function Index() {
                           </h3>
                         </Link>
 
-                        {/* Tag de capacidade / detalhes sutis */}
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] sm:text-[11px] font-medium mt-1.5 w-fit">
-                          <span className="text-[12px]">👤</span>
-                          <span>{product.observations || 'Serve 1 pessoa'}</span>
-                        </div>
+                        {/* Tag de capacidade / detalhes sutis (apenas se preenchido e não vazio) */}
+                        {product.observations && product.observations.trim() !== '' && (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] sm:text-[11px] font-medium mt-1.5 w-fit">
+                            <span className="text-[12px]">👤</span>
+                            <span>{product.observations}</span>
+                          </div>
+                        )}
 
                         {/* Descrição breve */}
                         {product.shortDescription && (
